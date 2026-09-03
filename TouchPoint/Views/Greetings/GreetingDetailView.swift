@@ -85,6 +85,22 @@ struct GreetingDetailView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(16)
                         }
+
+                        if let sourceTemplateID = event.sourceTemplateID,
+                           let sourceTemplate = store.templates.first(where: { $0.id == sourceTemplateID }) {
+                            let revision = event.sourceTemplateRevision ?? sourceTemplate.revisionNumber
+                            Label {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Based on \(sourceTemplate.title), version \(revision)")
+                                    Text("Scheduled text won't change when this template is updated.")
+                                }
+                            } icon: {
+                                Image(systemName: "info.circle")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 4)
+                        }
                     }
 
                     if ![.completed, .skipped].contains(store.status(for: event)) {
@@ -230,6 +246,7 @@ struct GreetingDetailView: View {
                 composerError = "Messages is not available on this device. Try again on an iPhone with messaging configured."
                 return
             }
+            store.recordComposerOpened(eventID: event.id)
             composerRequest = ComposerRequest(
                 kind: .message,
                 recipient: person.phone,
@@ -245,6 +262,7 @@ struct GreetingDetailView: View {
                 composerError = "Mail is not configured on this device. Add a Mail account and try again."
                 return
             }
+            store.recordComposerOpened(eventID: event.id)
             composerRequest = ComposerRequest(
                 kind: .email,
                 recipient: person.email,

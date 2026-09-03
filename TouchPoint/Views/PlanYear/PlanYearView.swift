@@ -11,6 +11,9 @@ struct PlanYearView: View {
     @State private var contactMethod: ContactMethod = .sms
     @State private var usePreferredContactMethods = true
     @State private var templateIDsByOccasion: [Occasion: UUID] = [:]
+    /// Sparse recipient exceptions. Automatic resolution remains the default for everyone else.
+    @State private var templateIDsByPersonAndOccasion: [UUID: [Occasion: UUID]] = [:]
+    @State private var showingRecipientOverrides = false
     @State private var step = 0
     @State private var scheduledCount: Int?
 
@@ -73,6 +76,9 @@ struct PlanYearView: View {
                 guard !didSetInitialFilter else { return }
                 relationshipFilter = preferences.focus == .all ? nil : preferences.focus.defaultRelationship
                 didSetInitialFilter = true
+            }
+            .sheet(isPresented: $showingRecipientOverrides) {
+                recipientOverridesSheet
             }
         }
     }
@@ -241,6 +247,34 @@ struct PlanYearView: View {
                     }
                 }
 
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeading(title: "Recipient exceptions")
+                    SurfaceCard {
+                        Button {
+                            showingRecipientOverrides = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                IconTile(systemImage: "person.crop.circle.badge.exclamationmark", tint: .accentColor)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Customize specific people")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text(recipientOverrideSummary)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(TouchPointMetric.cardPadding)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
                 Label {
                     Text(actionExplanation)
                 } icon: {
@@ -296,6 +330,11 @@ struct PlanYearView: View {
                                         Text(templateTitle(for: occasion))
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
+                                        if let overrideSummary = recipientOverrideSummary(for: occasion) {
+                                            Text(overrideSummary)
+                                                .font(.caption2)
+                                                .foregroundStyle(.tertiary)
+                                        }
                                         if let preview = templatePreview(for: occasion) {
                                             Text(preview)
                                                 .font(.caption2)
@@ -333,6 +372,51 @@ struct PlanYearView: View {
         preferences.focus.occasionPriority.filter { selectedOccasions.contains($0) }
     }
 
+    private var selectedPeopleInOrder: [Person] {
+        store.people
+            .filter { selectedPeople.contains($0.id) }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    private var recipientOverrideCount: Int {
+        templateIDsByPersonAndOccasion.reduce(0) { count, entry in
+            guard selectedPeople.contains(entry.key) else { return count }
+            return count + entry.value.filter { occasion, templateID in
+                selectedOccasions.contains(occasion)
+                    && isValidRecipientOverride(templateID, occasion: occasion)
+            }.count
+        }
+    }
+
+    private var recipientOverrideSummary: String {
+        if recipientOverrideCount == 0 {
+            return "Automatic recommendations for everyone"
+        }
+        let peopleCount = templateIDsByPersonAndOccasion.filter { personID, overrides in
+            selectedPeople.contains(personID) &&
+            overrides.contains { occasion, templateID in
+                selectedOccasions.contains(occasion)
+                    && isValidRecipientOverride(templateID, occasion: occasion)
+            }
+        }.count
+        let overrides = recipientOverrideCount == 1 ? "1 override" : "\(recipientOverrideCount) overrides"
+        let people = peopleCount == 1 ? "1 person" : "\(peopleCount) people"
+        return "\(overrides) for \(people) · Automatic for everyone else"
+    }
+
+    private func recipientOverrideSummary(for occasion: Occasion) -> String? {
+        let names = selectedPeopleInOrder.compactMap { person -> String? in
+            guard let templateID = templateIDsByPersonAndOccasion[person.id]?[occasion],
+                  isValidRecipientOverride(templateID, occasion: occasion) else { return nil }
+            return person.name
+        }
+        guard !names.isEmpty else { return nil }
+        if names.count <= 2 {
+            return "Overrides: \(names.joined(separator: ", "))"
+        }
+        return "Overrides: \(names.prefix(2).joined(separator: ", ")) + \(names.count - 2) more"
+    }
+
     private func matchingTemplates(for occasion: Occasion) -> [GreetingTemplate] {
         store.templates
             .filter {
@@ -350,22 +434,197 @@ struct PlanYearView: View {
             }
     }
 
+    private func matchingTemplates(for occasion: Occasion, person: Person) -> [GreetingTemplate] {
+        let method = usePreferredContactMethods ? person.preferredContactMethod : contactMethod
+        let language = person.preferredLanguage.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return store.templates
+            .filter { template in
+                guard !template.isArchived, template.occasions.contains(occasion) else { return false }
+                let relationshipMatches = template.relationships.isEmpty || template.relationships.contains(person.relationship)
+                let channelMatches = template.channels.isEmpty || template.channels.contains(method)
+                let languageMatches = language.isEmpty || template.languages.isEmpty
+                    || template.languages.contains { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == language }
+                return relationshipMatches && channelMatches && languageMatches
+            }
+            .sorted {
+                if $0.isDefault != $1.isDefault { return $0.isDefault }
+                if $0.isFavorite != $1.isFavorite { return $0.isFavorite }
+                return $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            }
+    }
+
     private func templateTitle(for occasion: Occasion) -> String {
-        guard let templateID = templateIDsByOccasion[occasion],
-              let template = store.templates.first(where: { $0.id == templateID }) else {
+        guard let template = occasionOverrideTemplate(for: occasion) else {
             return "Automatic recommendation"
         }
         return template.title
     }
 
+    private func occasionOverrideTemplate(for occasion: Occasion) -> GreetingTemplate? {
+        guard let templateID = templateIDsByOccasion[occasion] else { return nil }
+        return store.templates.first {
+            $0.id == templateID && !$0.isArchived && $0.occasions.contains(occasion)
+        }
+    }
+
     private func templatePreview(for occasion: Occasion) -> String? {
-        guard let personID = selectedPeople.first,
-              let person = store.people.first(where: { $0.id == personID }) else { return nil }
+        guard let person = selectedPeopleInOrder.first else { return nil }
         let method = usePreferredContactMethods ? person.preferredContactMethod : contactMethod
-        let template = templateIDsByOccasion[occasion]
+        let template = templateIDsByPersonAndOccasion[person.id]?[occasion]
             .flatMap { id in store.templates.first(where: { $0.id == id }) }
+            ?? occasionOverrideTemplate(for: occasion)
             ?? store.resolveTemplate(for: person, occasion: occasion, channel: method)
         return store.renderedBody(for: template, person: person, occasion: occasion)
+    }
+
+    private func recipientTemplateTitle(for person: Person, occasion: Occasion) -> String {
+        if let templateID = templateIDsByPersonAndOccasion[person.id]?[occasion],
+           let template = store.templates.first(where: {
+               $0.id == templateID && !$0.isArchived && $0.occasions.contains(occasion)
+           }) {
+            return template.title
+        }
+        if let template = occasionOverrideTemplate(for: occasion) {
+            return "Occasion setting · \(template.title)"
+        }
+        return "Automatic recommendation"
+    }
+
+    private func setRecipientTemplate(_ templateID: UUID?, personID: UUID, occasion: Occasion) {
+        var overrides = templateIDsByPersonAndOccasion[personID] ?? [:]
+        if let templateID {
+            overrides[occasion] = templateID
+        } else {
+            overrides.removeValue(forKey: occasion)
+        }
+        if overrides.isEmpty {
+            templateIDsByPersonAndOccasion.removeValue(forKey: personID)
+        } else {
+            templateIDsByPersonAndOccasion[personID] = overrides
+        }
+    }
+
+    private func recipientOverrideMenu(for person: Person, occasion: Occasion) -> some View {
+        Menu {
+            Button {
+                setRecipientTemplate(nil, personID: person.id, occasion: occasion)
+            } label: {
+                if templateIDsByPersonAndOccasion[person.id]?[occasion] == nil {
+                    if let occasionTemplate = occasionOverrideTemplate(for: occasion) {
+                        Label("Occasion setting · \(occasionTemplate.title)", systemImage: "checkmark")
+                    } else {
+                        Label("Automatic recommendation", systemImage: "checkmark")
+                    }
+                } else {
+                    Text(occasionOverrideTemplate(for: occasion).map { "Occasion setting · \($0.title)" } ?? "Automatic recommendation")
+                }
+            }
+
+            let templates = matchingTemplates(for: occasion, person: person)
+            if !templates.isEmpty { Divider() }
+            ForEach(templates) { template in
+                Button {
+                    setRecipientTemplate(template.id, personID: person.id, occasion: occasion)
+                } label: {
+                    if templateIDsByPersonAndOccasion[person.id]?[occasion] == template.id {
+                        Label(template.title, systemImage: "checkmark")
+                    } else {
+                        Text(template.title)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                IconTile(systemImage: occasion.icon, tint: occasion.tint)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(occasion.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text(recipientTemplateTitle(for: person, occasion: occasion))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(TouchPointMetric.cardPadding)
+            .contentShape(Rectangle())
+        }
+    }
+
+    private var recipientOverridesSheet: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Automatic recommendations use each recipient's relationship, preferred contact method, and language. Choose a template only for people who need an exception.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Selected people") {
+                    ForEach(selectedPeopleInOrder) { person in
+                        NavigationLink {
+                            recipientOverrideDetail(for: person)
+                        } label: {
+                            HStack(spacing: 12) {
+                                PersonAvatar(person: person)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(person.name)
+                                        .font(.subheadline.weight(.semibold))
+                                    Text(recipientDetailSubtitle(for: person))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("Recipient exceptions")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showingRecipientOverrides = false }
+                }
+            }
+        }
+    }
+
+    private func recipientDetailSubtitle(for person: Person) -> String {
+        let count = templateIDsByPersonAndOccasion[person.id]?.filter { occasion, templateID in
+            selectedOccasions.contains(occasion)
+                && isValidRecipientOverride(templateID, occasion: occasion)
+        }.count ?? 0
+        if count == 0 { return "Automatic recommendations" }
+        return count == 1 ? "1 custom template" : "\(count) custom templates"
+    }
+
+    private func isValidRecipientOverride(_ templateID: UUID, occasion: Occasion) -> Bool {
+        store.templates.contains {
+            $0.id == templateID && !$0.isArchived && $0.occasions.contains(occasion)
+        }
+    }
+
+    private func recipientOverrideDetail(for person: Person) -> some View {
+        List {
+            Section {
+                Text("Choose a template for this person and occasion. Automatic uses the best channel and language match.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Section("Occasions") {
+                ForEach(orderedSelectedOccasions) { occasion in
+                    recipientOverrideMenu(for: person, occasion: occasion)
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle(person.name)
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func templateMenu(for occasion: Occasion) -> some View {
@@ -453,6 +712,7 @@ struct PlanYearView: View {
                         occasions: selectedOccasions,
                         method: contactMethod,
                         templateIDsByOccasion: templateIDsByOccasion,
+                        templateIDsByPersonAndOccasion: templateIDsByPersonAndOccasion,
                         usePreferredContactMethods: usePreferredContactMethods
                     )
                 }

@@ -243,6 +243,9 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
     var status: GreetingStatus
     var message: String
     var subject: String?
+    /// The template snapshot used when this greeting was planned. Optional for legacy events.
+    var sourceTemplateID: UUID?
+    var sourceTemplateRevision: Int?
 
     init(
         id: UUID = UUID(),
@@ -252,7 +255,9 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         method: ContactMethod,
         status: GreetingStatus,
         message: String = "",
-        subject: String? = nil
+        subject: String? = nil,
+        sourceTemplateID: UUID? = nil,
+        sourceTemplateRevision: Int? = nil
     ) {
         self.id = id
         self.personID = personID
@@ -262,6 +267,8 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         self.status = status
         self.message = message
         self.subject = subject
+        self.sourceTemplateID = sourceTemplateID
+        self.sourceTemplateRevision = sourceTemplateRevision
     }
 }
 
@@ -335,6 +342,12 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
     var updatedAt: Date
     var usageCount: Int
     var lastUsedAt: Date?
+    /// Monotonically increasing local content revision. Starts at one for legacy templates.
+    var revisionNumber: Int
+    /// Approval and locking are local, single-user library controls, not team permissions.
+    var isApproved: Bool
+    var approvedAt: Date?
+    var isLocked: Bool
 
     /// The legacy single-occasion API used by the existing views.
     var occasion: Occasion {
@@ -415,7 +428,11 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         createdAt: Date = .now,
         updatedAt: Date = .now,
         usageCount: Int = 0,
-        lastUsedAt: Date? = nil
+        lastUsedAt: Date? = nil,
+        revisionNumber: Int = 1,
+        isApproved: Bool? = nil,
+        approvedAt: Date? = nil,
+        isLocked: Bool? = nil
     ) {
         var normalizedOccasions: [Occasion] = []
         for occasion in occasions where !normalizedOccasions.contains(occasion) {
@@ -442,6 +459,10 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         self.updatedAt = updatedAt
         self.usageCount = max(0, usageCount)
         self.lastUsedAt = lastUsedAt
+        self.revisionNumber = max(1, revisionNumber)
+        self.isApproved = isApproved ?? isBuiltIn
+        self.approvedAt = approvedAt ?? (isBuiltIn ? createdAt : nil)
+        self.isLocked = isLocked ?? isBuiltIn
     }
 
     /// The supported interpolation tokens, without braces.
@@ -480,6 +501,7 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         case iconSemantic, iconID, icon, colorToken, groupID
         case relationships, relationshipAudiences, channels, channelAudiences, languages
         case emailSubject, isDefault, isBuiltIn, isArchived, createdAt, updatedAt, usageCount, lastUsedAt
+        case revisionNumber, isApproved, approvedAt, isLocked
     }
 
     init(from decoder: Decoder) throws {
@@ -517,6 +539,11 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
         usageCount = max(0, try container.decodeIfPresent(Int.self, forKey: .usageCount) ?? 0)
         lastUsedAt = try container.decodeIfPresent(Date.self, forKey: .lastUsedAt)
+        revisionNumber = max(1, try container.decodeIfPresent(Int.self, forKey: .revisionNumber) ?? 1)
+        isApproved = try container.decodeIfPresent(Bool.self, forKey: .isApproved) ?? isBuiltIn
+        approvedAt = try container.decodeIfPresent(Date.self, forKey: .approvedAt)
+            ?? (isApproved && isBuiltIn ? createdAt : nil)
+        isLocked = try container.decodeIfPresent(Bool.self, forKey: .isLocked) ?? isBuiltIn
     }
 
     func encode(to encoder: Encoder) throws {
@@ -544,6 +571,103 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         try container.encode(updatedAt, forKey: .updatedAt)
         try container.encode(usageCount, forKey: .usageCount)
         try container.encodeIfPresent(lastUsedAt, forKey: .lastUsedAt)
+        try container.encode(revisionNumber, forKey: .revisionNumber)
+        try container.encode(isApproved, forKey: .isApproved)
+        try container.encodeIfPresent(approvedAt, forKey: .approvedAt)
+        try container.encode(isLocked, forKey: .isLocked)
+    }
+}
+
+/// The user-editable portion of a template, kept separate from usage and governance state.
+struct TemplateContentSnapshot: Codable, Hashable {
+    var title: String
+    var occasions: [Occasion]
+    var body: String
+    var iconSemantic: String
+    var iconID: String
+    var colorToken: String
+    var groupID: UUID?
+    var relationships: [Relationship]
+    var channels: [ContactMethod]
+    var languages: [String]
+    var emailSubject: String?
+
+    init(template: GreetingTemplate) {
+        title = template.title
+        occasions = template.occasions
+        body = template.body
+        iconSemantic = template.iconSemantic
+        iconID = template.iconID
+        colorToken = template.colorToken
+        groupID = template.groupID
+        relationships = template.relationships
+        channels = template.channels
+        languages = template.languages
+        emailSubject = template.emailSubject
+    }
+}
+
+struct TemplateRevision: Identifiable, Codable, Hashable {
+    let id: UUID
+    let templateID: UUID
+    let number: Int
+    let createdAt: Date
+    let snapshot: TemplateContentSnapshot
+
+    init(
+        id: UUID = UUID(),
+        templateID: UUID,
+        number: Int,
+        createdAt: Date = .now,
+        snapshot: TemplateContentSnapshot
+    ) {
+        self.id = id
+        self.templateID = templateID
+        self.number = max(1, number)
+        self.createdAt = createdAt
+        self.snapshot = snapshot
+    }
+}
+
+enum TemplateUsageKind: String, CaseIterable, Codable, Hashable, Identifiable {
+    case scheduled
+    case composerOpened
+    case completed
+    case skipped
+    case messageEdited
+
+    var id: Self { self }
+}
+
+/// Metadata-only usage event. Deliberately contains no person or message content.
+struct TemplateUsageRecord: Identifiable, Codable, Hashable {
+    let id: UUID
+    let templateID: UUID
+    let templateRevision: Int?
+    let eventID: UUID?
+    let occurredAt: Date
+    let kind: TemplateUsageKind
+    let occasion: Occasion?
+    let channel: ContactMethod?
+
+    init(
+        id: UUID = UUID(),
+        templateID: UUID,
+        templateRevision: Int? = nil,
+        eventID: UUID? = nil,
+        occurredAt: Date = .now,
+        kind: TemplateUsageKind,
+        occasion: Occasion? = nil,
+        channel: ContactMethod? = nil
+    ) {
+        self.id = id
+        self.templateID = templateID
+        self.templateRevision = templateRevision
+        self.eventID = eventID
+        self.occurredAt = occurredAt
+        self.kind = kind
+        self.occasion = occasion
+        self.channel = channel
     }
 }
 

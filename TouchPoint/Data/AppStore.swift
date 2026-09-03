@@ -3,12 +3,16 @@ import Observation
 
 @Observable
 final class AppStore {
-    private static let currentPersistenceVersion = 4
+    private static let currentPersistenceVersion = 5
 
     var people: [Person]
     var events: [GreetingEvent]
     var templates: [GreetingTemplate]
     var templateGroups: [TemplateGroup]
+    /// Previous content snapshots, kept outside templates so the active library stays small.
+    var templateRevisions: [TemplateRevision]
+    /// Metadata-only usage events; no message text or person identifiers are stored here.
+    var templateUsage: [TemplateUsageRecord]
     /// Short alias for clients that refer to groups simply as `groups`.
     var groups: [TemplateGroup] {
         get { templateGroups }
@@ -22,6 +26,8 @@ final class AppStore {
         events: [GreetingEvent],
         templates: [GreetingTemplate],
         templateGroups: [TemplateGroup] = [],
+        templateRevisions: [TemplateRevision] = [],
+        templateUsage: [TemplateUsageRecord] = [],
         persistenceURL: URL? = nil,
         persistenceError: String? = nil
     ) {
@@ -29,6 +35,8 @@ final class AppStore {
         self.events = events
         self.templates = templates
         self.templateGroups = templateGroups
+        self.templateRevisions = templateRevisions
+        self.templateUsage = templateUsage
         self.persistenceURL = persistenceURL
         self.persistenceError = persistenceError
     }
@@ -49,16 +57,67 @@ final class AppStore {
     }
 
     func addTemplate(_ template: GreetingTemplate) {
-        templates.append(template)
+        var inserted = template
+        if inserted.isBuiltIn {
+            inserted.isApproved = true
+            inserted.approvedAt = inserted.approvedAt ?? inserted.createdAt
+            inserted.isLocked = true
+        }
+        inserted.revisionNumber = max(1, inserted.revisionNumber)
+        templates.append(inserted)
         save()
     }
 
-    func updateTemplate(_ template: GreetingTemplate) {
-        guard let index = templates.firstIndex(where: { $0.id == template.id }) else { return }
+    @discardableResult
+    func updateTemplate(_ template: GreetingTemplate) -> Bool {
+        updateTemplateResult(template)
+    }
+
+    /// Updates a template while preserving source compatibility with the original void API.
+    /// Returns false when the template is locked/built-in and its content was changed.
+    @discardableResult
+    func updateTemplateResult(_ template: GreetingTemplate) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == template.id }) else { return false }
+        let current = templates[index]
+        let currentContent = TemplateContentSnapshot(template: current)
+        let incomingContent = TemplateContentSnapshot(template: template)
+        let contentChanged = currentContent != incomingContent
+
+        guard !contentChanged || (!current.isLocked && !current.isBuiltIn) else { return false }
+
         var updated = template
-        updated.updatedAt = .now
+        // These fields are owned by the store and must not be overwritten by a stale editor draft.
+        updated.isBuiltIn = current.isBuiltIn
+        updated.usageCount = current.usageCount
+        updated.lastUsedAt = current.lastUsedAt
+        updated.revisionNumber = current.revisionNumber
+        updated.isApproved = current.isApproved
+        updated.approvedAt = current.approvedAt
+        updated.isLocked = current.isLocked
+        if contentChanged {
+            templateRevisions.append(
+                TemplateRevision(
+                    templateID: current.id,
+                    number: current.revisionNumber,
+                    snapshot: currentContent
+                )
+            )
+            retainTemplateRevisionLimit(for: current.id)
+            updated.revisionNumber = current.revisionNumber + 1
+            updated.isApproved = false
+            updated.approvedAt = nil
+        }
+        if current.isBuiltIn {
+            // Shipped templates are immutable starter content, even if an old editor draft
+            // or a hand-written JSON payload tries to clear their protection flags.
+            updated.isApproved = true
+            updated.approvedAt = current.approvedAt ?? current.createdAt
+            updated.isLocked = true
+        }
+        updated.updatedAt = contentChanged ? .now : current.updatedAt
         templates[index] = updated
         save()
+        return true
     }
 
     @discardableResult
@@ -78,7 +137,10 @@ final class AppStore {
             languages: source.languages,
             emailSubject: source.emailSubject,
             isDefault: false,
-            isBuiltIn: false
+            isBuiltIn: false,
+            isApproved: false,
+            approvedAt: nil,
+            isLocked: false
         )
         copy.updatedAt = copy.createdAt
         templates.append(copy)
@@ -93,10 +155,14 @@ final class AppStore {
 
     @discardableResult
     func deleteTemplate(id: UUID) -> Bool {
-        guard let index = templates.firstIndex(where: { $0.id == id }), !templates[index].isBuiltIn else {
+        guard let index = templates.firstIndex(where: { $0.id == id }),
+              !templates[index].isBuiltIn,
+              !templates[index].isLocked else {
             return false
         }
         templates.remove(at: index)
+        templateRevisions.removeAll { $0.templateID == id }
+        templateUsage.removeAll { $0.templateID == id }
         save()
         return true
     }
@@ -123,6 +189,71 @@ final class AppStore {
     func toggleTemplateFavorite(id: UUID) -> Bool {
         guard let template = templates.first(where: { $0.id == id }) else { return false }
         return setTemplateFavorite(id: id, isFavorite: !template.isFavorite)
+    }
+
+    /// Approves or clears approval for this local library. Approval is not a team/server claim.
+    @discardableResult
+    func setTemplateApproval(id: UUID, approved: Bool, at date: Date = .now) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
+        if templates[index].isBuiltIn && !approved { return false }
+        templates[index].isApproved = approved
+        templates[index].approvedAt = approved ? date : nil
+        templates[index].updatedAt = date
+        save()
+        return true
+    }
+
+    /// Locks or unlocks local editing. Built-in templates remain immutable and locked.
+    @discardableResult
+    func setTemplateLock(id: UUID, locked: Bool) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
+        if templates[index].isBuiltIn && !locked { return false }
+        templates[index].isLocked = locked
+        templates[index].updatedAt = .now
+        save()
+        return true
+    }
+
+    func templateRevisions(for templateID: UUID) -> [TemplateRevision] {
+        templateRevisions
+            .filter { $0.templateID == templateID }
+            .sorted { lhs, rhs in
+                if lhs.number != rhs.number { return lhs.number > rhs.number }
+                return lhs.createdAt > rhs.createdAt
+            }
+    }
+
+    func usageRecords(for templateID: UUID) -> [TemplateUsageRecord] {
+        templateUsage
+            .filter { $0.templateID == templateID }
+            .sorted { $0.occurredAt > $1.occurredAt }
+    }
+
+    /// Restoring is additive: it creates a new revision and leaves the old revision intact.
+    @discardableResult
+    func restoreTemplateRevision(templateID: UUID, revisionID: UUID) -> Bool {
+        guard let revision = templateRevisions.first(where: {
+            $0.id == revisionID && $0.templateID == templateID
+        }),
+        let current = templates.first(where: { $0.id == templateID }) else {
+            return false
+        }
+        var restored = current
+        let snapshot = revision.snapshot
+        restored.title = snapshot.title
+        restored.occasions = snapshot.occasions
+        restored.body = snapshot.body
+        restored.iconSemantic = snapshot.iconSemantic
+        restored.iconID = snapshot.iconID
+        restored.colorToken = snapshot.colorToken
+        restored.groupID = snapshot.groupID.flatMap { groupID in
+            templateGroups.contains(where: { $0.id == groupID }) ? groupID : nil
+        }
+        restored.relationships = snapshot.relationships
+        restored.channels = snapshot.channels
+        restored.languages = snapshot.languages
+        restored.emailSubject = snapshot.emailSubject
+        return updateTemplateResult(restored)
     }
 
     @discardableResult
@@ -208,6 +339,17 @@ final class AppStore {
     private func normalizeGroupOrder() {
         templateGroups.sort { $0.sortOrder == $1.sortOrder ? $0.createdAt < $1.createdAt : $0.sortOrder < $1.sortOrder }
         for index in templateGroups.indices { templateGroups[index].sortOrder = index }
+    }
+
+    private func retainTemplateRevisionLimit(for templateID: UUID) {
+        let revisions = templateRevisions
+            .filter { $0.templateID == templateID }
+            .sorted {
+                if $0.number != $1.number { return $0.number > $1.number }
+                return $0.createdAt > $1.createdAt
+            }
+        let retainedIDs = Set(revisions.prefix(50).map(\.id))
+        templateRevisions.removeAll { $0.templateID == templateID && !retainedIDs.contains($0.id) }
     }
 
     // MARK: Resolution and rendering
@@ -308,40 +450,142 @@ final class AppStore {
 
     @discardableResult
     func recordTemplateUsage(id: UUID, at date: Date = .now) -> Bool {
-        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
-        templates[index].usageCount += 1
-        templates[index].lastUsedAt = date
-        templates[index].updatedAt = date
+        guard templates.contains(where: { $0.id == id }) else { return false }
+        recordUsage(
+            templateID: id,
+            revision: templates.first(where: { $0.id == id })?.revisionNumber,
+            eventID: nil,
+            kind: .scheduled,
+            occasion: nil,
+            channel: nil,
+            at: date,
+            incrementSummary: true
+        )
         save()
         return true
+    }
+
+    /// Records that a composer was opened for a scheduled event. This is intentionally
+    /// separate from completion because opening a composer is not evidence of delivery.
+    @discardableResult
+    func recordComposerOpened(eventID: UUID, at date: Date = .now) -> Bool {
+        guard let event = events.first(where: { $0.id == eventID }),
+              let templateID = event.sourceTemplateID else { return false }
+        recordUsage(
+            templateID: templateID,
+            revision: event.sourceTemplateRevision,
+            eventID: eventID,
+            kind: .composerOpened,
+            occasion: event.occasion,
+            channel: event.method,
+            at: date,
+            incrementSummary: false
+        )
+        save()
+        return true
+    }
+
+    private func recordUsage(
+        templateID: UUID,
+        revision: Int?,
+        eventID: UUID?,
+        kind: TemplateUsageKind,
+        occasion: Occasion?,
+        channel: ContactMethod?,
+        at date: Date,
+        incrementSummary: Bool
+    ) {
+        templateUsage.append(
+            TemplateUsageRecord(
+                templateID: templateID,
+                templateRevision: revision,
+                eventID: eventID,
+                occurredAt: date,
+                kind: kind,
+                occasion: occasion,
+                channel: channel
+            )
+        )
+        if incrementSummary,
+           let index = templates.firstIndex(where: { $0.id == templateID }) {
+            templates[index].usageCount += 1
+            templates[index].lastUsedAt = date
+        }
     }
 
     func event(id: UUID) -> GreetingEvent? {
         events.first { $0.id == id }
     }
 
-    func completeGreeting(id: UUID) {
-        guard let index = events.firstIndex(where: { $0.id == id }) else { return }
+    @discardableResult
+    func completeGreeting(id: UUID) -> Bool {
+        guard let index = events.firstIndex(where: { $0.id == id }) else { return false }
+        guard events[index].status != .completed else { return true }
         events[index].status = .completed
+        if let templateID = events[index].sourceTemplateID {
+            recordUsage(
+                templateID: templateID,
+                revision: events[index].sourceTemplateRevision,
+                eventID: id,
+                kind: .completed,
+                occasion: events[index].occasion,
+                channel: events[index].method,
+                at: .now,
+                incrementSummary: false
+            )
+        }
         save()
+        return true
     }
 
-    func skipGreeting(id: UUID) {
-        guard let index = events.firstIndex(where: { $0.id == id }) else { return }
+    @discardableResult
+    func skipGreeting(id: UUID) -> Bool {
+        guard let index = events.firstIndex(where: { $0.id == id }) else { return false }
+        guard events[index].status != .skipped else { return true }
         events[index].status = .skipped
+        if let templateID = events[index].sourceTemplateID {
+            recordUsage(
+                templateID: templateID,
+                revision: events[index].sourceTemplateRevision,
+                eventID: id,
+                kind: .skipped,
+                occasion: events[index].occasion,
+                channel: events[index].method,
+                at: .now,
+                incrementSummary: false
+            )
+        }
         save()
+        return true
     }
 
-    func restoreGreeting(id: UUID) {
-        guard let index = events.firstIndex(where: { $0.id == id }), events[index].status == .skipped else { return }
+    @discardableResult
+    func restoreGreeting(id: UUID) -> Bool {
+        guard let index = events.firstIndex(where: { $0.id == id }), events[index].status == .skipped else { return false }
         events[index].status = .planned
         save()
+        return true
     }
 
-    func updateGreetingMessage(id: UUID, message: String) {
-        guard let index = events.firstIndex(where: { $0.id == id }) else { return }
+    @discardableResult
+    func updateGreetingMessage(id: UUID, message: String) -> Bool {
+        guard let index = events.firstIndex(where: { $0.id == id }) else { return false }
+        guard events[index].message != message else { return true }
         events[index].message = message
+        if let templateID = events[index].sourceTemplateID {
+            recordUsage(
+                templateID: templateID,
+                revision: events[index].sourceTemplateRevision,
+                eventID: id,
+                kind: .messageEdited,
+                occasion: events[index].occasion,
+                channel: events[index].method,
+                at: .now,
+                incrementSummary: false
+            )
+        }
         save()
+        return true
     }
 
     func status(for event: GreetingEvent) -> GreetingStatus {
@@ -357,6 +601,7 @@ final class AppStore {
         occasions: Set<Occasion>,
         method: ContactMethod,
         templateIDsByOccasion: [Occasion: UUID] = [:],
+        templateIDsByPersonAndOccasion: [UUID: [Occasion: UUID]] = [:],
         usePreferredContactMethods: Bool = false
     ) -> Int {
         let referenceDate = Date.now
@@ -379,17 +624,25 @@ final class AppStore {
                 }
 
                 let resolvedMethod = usePreferredContactMethods ? person.preferredContactMethod : method
-                let explicitTemplate = templateIDsByOccasion[occasion].flatMap { templateID in
-                    templates.first { $0.id == templateID }
+                // A recipient exception is the most specific choice. If one is not set,
+                // preserve the occasion-wide override, then fall back to contextual resolution.
+                let recipientTemplate = templateIDsByPersonAndOccasion[person.id]?[occasion].flatMap { templateID in
+                    templates.first { $0.id == templateID && !$0.isArchived && $0.occasions.contains(occasion) }
                 }
+                let occasionTemplate = templateIDsByOccasion[occasion].flatMap { templateID in
+                    templates.first { $0.id == templateID && !$0.isArchived && $0.occasions.contains(occasion) }
+                }
+                let explicitTemplate = recipientTemplate ?? occasionTemplate
                 let template = explicitTemplate ?? resolveTemplate(
                     for: person,
                     occasion: occasion,
                     channel: resolvedMethod
                 )
 
+                let eventID = UUID()
                 events.append(
                     GreetingEvent(
+                        id: eventID,
                         personID: person.id,
                         occasion: occasion,
                         date: date,
@@ -398,12 +651,22 @@ final class AppStore {
                         message: renderedBody(for: template, person: person, occasion: occasion, date: date),
                         subject: template.flatMap {
                             renderedEmailSubject(for: $0, person: person, occasion: occasion, date: date)
-                        }
+                        },
+                        sourceTemplateID: template?.id,
+                        sourceTemplateRevision: template?.revisionNumber
                     )
                 )
-                if let template, let index = templates.firstIndex(where: { $0.id == template.id }) {
-                    templates[index].usageCount += 1
-                    templates[index].lastUsedAt = referenceDate
+                if let template {
+                    recordUsage(
+                        templateID: template.id,
+                        revision: template.revisionNumber,
+                        eventID: eventID,
+                        kind: .scheduled,
+                        occasion: occasion,
+                        channel: resolvedMethod,
+                        at: referenceDate,
+                        incrementSummary: true
+                    )
                 }
                 created += 1
             }
@@ -569,7 +832,9 @@ final class AppStore {
                 people: people,
                 events: events,
                 templates: templates,
-                templateGroups: templateGroups
+                templateGroups: templateGroups,
+                templateRevisions: templateRevisions,
+                templateUsage: templateUsage
             )
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
@@ -635,6 +900,11 @@ final class AppStore {
             } else {
                 templates.append(builtIn)
             }
+        }
+        for index in templates.indices where templates[index].isBuiltIn {
+            templates[index].isApproved = true
+            templates[index].approvedAt = templates[index].approvedAt ?? templates[index].createdAt
+            templates[index].isLocked = true
         }
         normalizeGroupOrder()
     }
@@ -777,6 +1047,8 @@ extension AppStore {
                 events: snapshot.events,
                 templates: snapshot.templates,
                 templateGroups: snapshot.templateGroups,
+                templateRevisions: snapshot.templateRevisions,
+                templateUsage: snapshot.templateUsage,
                 persistenceURL: url
             )
             if snapshot.version < Self.currentPersistenceVersion {
@@ -841,19 +1113,25 @@ private struct StoredAppData: Codable {
     let events: [GreetingEvent]
     let templates: [GreetingTemplate]
     let templateGroups: [TemplateGroup]
+    let templateRevisions: [TemplateRevision]
+    let templateUsage: [TemplateUsageRecord]
 
     init(
         version: Int,
         people: [Person],
         events: [GreetingEvent],
         templates: [GreetingTemplate],
-        templateGroups: [TemplateGroup] = []
+        templateGroups: [TemplateGroup] = [],
+        templateRevisions: [TemplateRevision] = [],
+        templateUsage: [TemplateUsageRecord] = []
     ) {
         self.version = version
         self.people = people
         self.events = events
         self.templates = templates
         self.templateGroups = templateGroups
+        self.templateRevisions = templateRevisions
+        self.templateUsage = templateUsage
     }
 
     init(from decoder: Decoder) throws {
@@ -863,10 +1141,12 @@ private struct StoredAppData: Codable {
         events = try container.decodeIfPresent([GreetingEvent].self, forKey: .events) ?? []
         templates = try container.decodeIfPresent([GreetingTemplate].self, forKey: .templates) ?? []
         templateGroups = try container.decodeIfPresent([TemplateGroup].self, forKey: .templateGroups) ?? []
+        templateRevisions = try container.decodeIfPresent([TemplateRevision].self, forKey: .templateRevisions) ?? []
+        templateUsage = try container.decodeIfPresent([TemplateUsageRecord].self, forKey: .templateUsage) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, people, events, templates, templateGroups
+        case version, people, events, templates, templateGroups, templateRevisions, templateUsage
     }
 }
 

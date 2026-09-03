@@ -6,6 +6,11 @@ struct TemplatesView: View {
     @Environment(AppPreferences.self) private var preferences
     @State private var query = ""
     @State private var scope: TemplateScope = .all
+    @State private var occasionFilter: Occasion?
+    @State private var relationshipFilter: Relationship?
+    @State private var channelFilter: ContactMethod?
+    @State private var languageFilter: String?
+    @State private var sort: TemplateSort = .recommended
     @State private var editingTemplate: GreetingTemplate?
     @State private var showingNewTemplate = false
     @State private var showingGroups = false
@@ -15,7 +20,7 @@ struct TemplatesView: View {
     @State private var transferError: String?
     @State private var templatePendingDeletion: GreetingTemplate?
 
-    private var visibleTemplates: [GreetingTemplate] {
+    private var collectionTemplates: [GreetingTemplate] {
         store.templates
             .filter { template in
                 switch scope {
@@ -25,8 +30,14 @@ struct TemplatesView: View {
                 case .ungrouped: !template.isArchived && template.groupID == nil
                 case .archived: template.isArchived
                 case .group(let id): !template.isArchived && template.groupID == id
+                case .mostUsed: !template.isArchived && template.usageCount > 0
+                case .missingDefault: !template.isArchived && isMissingDefault(template)
                 }
             }
+    }
+
+    private var visibleTemplates: [GreetingTemplate] {
+        collectionTemplates
             .filter { template in
                 guard !query.isEmpty else { return true }
                 let searchable = [
@@ -38,7 +49,33 @@ struct TemplatesView: View {
                 ].joined(separator: " ")
                 return searchable.localizedCaseInsensitiveContains(query)
             }
+            .filter { template in
+                guard let occasionFilter else { return true }
+                return template.occasions.contains(occasionFilter)
+            }
+            .filter { template in
+                guard let relationshipFilter else { return true }
+                return template.relationships.isEmpty || template.relationships.contains(relationshipFilter)
+            }
+            .filter { template in
+                guard let channelFilter else { return true }
+                return template.channels.isEmpty || template.channels.contains(channelFilter)
+            }
+            .filter { template in
+                guard let languageFilter, !languageFilter.isEmpty else { return true }
+                return template.languages.isEmpty || template.languages.contains {
+                    $0.localizedCaseInsensitiveCompare(languageFilter) == .orderedSame
+                }
+            }
             .sorted(by: templateSort)
+    }
+
+    private var hasActiveFilters: Bool {
+        !query.isEmpty || occasionFilter != nil || relationshipFilter != nil || channelFilter != nil || languageFilter != nil
+    }
+
+    private var hasMetadataFilters: Bool {
+        occasionFilter != nil || relationshipFilter != nil || channelFilter != nil || languageFilter != nil
     }
 
     var body: some View {
@@ -53,6 +90,12 @@ struct TemplatesView: View {
                 }
 
                 Section { collectionMenu }
+
+                Section {
+                    filterControls
+                } header: {
+                    Text("Filter templates")
+                }
 
                 if !visibleTemplates.isEmpty {
                     Section(scope.title(in: store)) {
@@ -85,21 +128,50 @@ struct TemplatesView: View {
                                         .tint(.accentColor)
 
                                         Button(role: .destructive) {
-                                            if template.isBuiltIn {
+                                            if template.isBuiltIn || template.isLocked {
                                                 store.archiveTemplate(id: template.id)
                                             } else {
                                                 templatePendingDeletion = template
                                             }
                                         } label: {
-                                            Label(template.isBuiltIn ? "Archive" : "Delete", systemImage: template.isBuiltIn ? "archivebox" : "trash")
+                                            let archivesInsteadOfDeleting = template.isBuiltIn || template.isLocked
+                                            Label(
+                                                archivesInsteadOfDeleting ? "Archive" : "Delete",
+                                                systemImage: archivesInsteadOfDeleting ? "archivebox" : "trash"
+                                            )
                                         }
                                     }
                                 }
                                 .contextMenu {
-                                    Button { editingTemplate = template } label: { Label("Edit", systemImage: "pencil") }
+                                    Button { editingTemplate = template } label: {
+                                        Label(template.isLocked ? "View details" : "Edit", systemImage: template.isLocked ? "doc.text.magnifyingglass" : "pencil")
+                                    }
                                     Button { _ = store.duplicateTemplate(template) } label: { Label("Duplicate", systemImage: "plus.square.on.square") }
                                     Button { store.toggleTemplateFavorite(id: template.id) } label: {
                                         Label(template.isFavorite ? "Unfavorite" : "Favorite", systemImage: "star")
+                                    }
+                                    Divider()
+                                    if template.isApproved {
+                                        if !template.isBuiltIn {
+                                            Button { _ = store.setTemplateApproval(id: template.id, approved: false) } label: {
+                                                Label("Remove approval", systemImage: "checkmark.seal.slash")
+                                            }
+                                        }
+                                    } else {
+                                        Button { _ = store.setTemplateApproval(id: template.id, approved: true) } label: {
+                                            Label("Approve", systemImage: "checkmark.seal")
+                                        }
+                                    }
+                                    if template.isLocked {
+                                        if !template.isBuiltIn {
+                                            Button { _ = store.setTemplateLock(id: template.id, locked: false) } label: {
+                                                Label("Unlock", systemImage: "lock.open")
+                                            }
+                                        }
+                                    } else {
+                                        Button { _ = store.setTemplateLock(id: template.id, locked: true) } label: {
+                                            Label("Lock", systemImage: "lock")
+                                        }
                                     }
                                 }
                         }
@@ -109,20 +181,36 @@ struct TemplatesView: View {
             .overlay {
                 if visibleTemplates.isEmpty && store.persistenceError == nil {
                     ContentUnavailableView {
-                        Label(query.isEmpty ? "No templates here" : "No matching templates", systemImage: "rectangle.stack.badge.plus")
+                        Label(emptyStateTitle, systemImage: "rectangle.stack.badge.plus")
                     } description: {
-                        Text(query.isEmpty ? "Create a reusable message or choose another collection." : "Try another search or collection.")
+                        Text(emptyStateDescription)
                     } actions: {
-                        if query.isEmpty && scope != .archived {
+                        if hasActiveFilters {
+                            Button("Clear filters") { clearFilters() }
+                                .buttonStyle(.bordered)
+                        } else if scope != .archived && scope != .mostUsed {
                             Button("Create template") { showingNewTemplate = true }
                                 .buttonStyle(.borderedProminent)
                         }
                     }
                 }
             }
-            .searchable(text: $query, prompt: "Name, message, audience, or language")
+            .searchable(text: $query, prompt: "Name, message, occasion, audience, channel, or language")
             .navigationTitle("Templates")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Picker("Sort templates", selection: $sort) {
+                            ForEach(TemplateSort.allCases) { option in
+                                Text(option.title).tag(option)
+                            }
+                        }
+                    } label: {
+                        Label(sort.title, systemImage: "arrow.up.arrow.down")
+                    }
+                    .accessibilityLabel("Sort templates")
+                    .accessibilityValue(sort.title)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button { showingNewTemplate = true } label: { Label("New template", systemImage: "doc.badge.plus") }
@@ -193,6 +281,10 @@ struct TemplatesView: View {
             Button { scope = .recent } label: { menuLabel("Recently used", selected: scope == .recent) }
             Button { scope = .ungrouped } label: { menuLabel("Ungrouped", selected: scope == .ungrouped) }
             Button { scope = .archived } label: { menuLabel("Archived", selected: scope == .archived) }
+            Divider()
+            Text("Smart scopes")
+            Button { scope = .mostUsed } label: { menuLabel("Most used", selected: scope == .mostUsed) }
+            Button { scope = .missingDefault } label: { menuLabel("Missing default", selected: scope == .missingDefault) }
             if !activeGroups.isEmpty {
                 Divider()
                 ForEach(activeGroups) { group in
@@ -206,6 +298,147 @@ struct TemplatesView: View {
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.tertiary)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Template collection")
+            .accessibilityValue(scope.title(in: store))
+        }
+    }
+
+    private var filterControls: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            filterMenu(
+                title: "Occasion",
+                value: occasionFilter?.title ?? "Any occasion",
+                icon: "calendar"
+            ) {
+                Button { occasionFilter = nil } label: { menuLabel("Any occasion", selected: occasionFilter == nil) }
+                Divider()
+                ForEach(Occasion.allCases) { occasion in
+                    Button { occasionFilter = occasion } label: {
+                        menuLabel(occasion.title, selected: occasionFilter == occasion)
+                    }
+                }
+            }
+
+            filterMenu(
+                title: "Audience",
+                value: relationshipFilter?.title ?? "Any relationship",
+                icon: "person.2"
+            ) {
+                Button { relationshipFilter = nil } label: {
+                    menuLabel("Any relationship", selected: relationshipFilter == nil)
+                }
+                Divider()
+                ForEach(Relationship.allCases) { relationship in
+                    Button { relationshipFilter = relationship } label: {
+                        menuLabel(relationship.title, selected: relationshipFilter == relationship)
+                    }
+                }
+            }
+
+            filterMenu(
+                title: "Channel",
+                value: channelFilter?.title ?? "Any channel",
+                icon: "arrow.up.right"
+            ) {
+                Button { channelFilter = nil } label: {
+                    menuLabel("Any channel", selected: channelFilter == nil)
+                }
+                Divider()
+                ForEach(ContactMethod.allCases) { channel in
+                    Button { channelFilter = channel } label: {
+                        menuLabel(channel.title, selected: channelFilter == channel)
+                    }
+                }
+            }
+
+            filterMenu(
+                title: "Language",
+                value: languageFilter ?? "Any language",
+                icon: "character.book.closed"
+            ) {
+                Button { languageFilter = nil } label: {
+                    menuLabel("Any language", selected: languageFilter == nil)
+                }
+                Divider()
+                ForEach(TemplateAppearance.languages, id: \.self) { language in
+                    Button { languageFilter = language } label: {
+                        menuLabel(language, selected: languageFilter == language)
+                    }
+                }
+            }
+
+            if hasMetadataFilters || !query.isEmpty {
+                Button("Clear filters", action: clearFilters)
+                    .font(.subheadline.weight(.semibold))
+                    .accessibilityHint("Removes the search and all template filters")
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder
+    private func filterMenu<Content: View>(
+        title: String,
+        value: String,
+        icon: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        LabeledContent {
+            Menu {
+                content()
+            } label: {
+                Text(value)
+                    .lineLimit(1)
+                    .multilineTextAlignment(.trailing)
+            }
+            .accessibilityLabel(title)
+            .accessibilityValue(value)
+        } label: {
+            Label(title, systemImage: icon)
+        }
+    }
+
+    private var emptyStateTitle: String {
+        if hasActiveFilters { return "No matching templates" }
+        switch scope {
+        case .mostUsed: return "No used templates yet"
+        case .missingDefault: return "Every context has a default"
+        default: return "No templates here"
+        }
+    }
+
+    private var emptyStateDescription: String {
+        if hasActiveFilters { return "Try removing a filter or changing your search." }
+        switch scope {
+        case .mostUsed: return "Templates will appear here after you use them."
+        case .missingDefault: return "Every active template context has at least one default."
+        default: return "Create a reusable message or choose another collection."
+        }
+    }
+
+    private func clearFilters() {
+        query = ""
+        occasionFilter = nil
+        relationshipFilter = nil
+        channelFilter = nil
+        languageFilter = nil
+    }
+
+    private func isMissingDefault(_ template: GreetingTemplate) -> Bool {
+        let relationships = Set(template.relationships)
+        let channels = Set(template.channels)
+        let languages = Set(template.languages.map { $0.lowercased() })
+
+        return template.occasions.contains { occasion in
+            !store.templates.contains { candidate in
+                !candidate.isArchived
+                    && candidate.isDefault
+                    && candidate.occasions.contains(occasion)
+                    && Set(candidate.relationships) == relationships
+                    && Set(candidate.channels) == channels
+                    && Set(candidate.languages.map { $0.lowercased() }) == languages
             }
         }
     }
@@ -225,12 +458,31 @@ struct TemplatesView: View {
     }
 
     private func templateSort(_ lhs: GreetingTemplate, _ rhs: GreetingTemplate) -> Bool {
-        if scope == .recent, lhs.lastUsedAt != rhs.lastUsedAt {
-            return (lhs.lastUsedAt ?? .distantPast) > (rhs.lastUsedAt ?? .distantPast)
+        switch sort {
+        case .recommended:
+            // Preserve the established Recently used ordering while making the
+            // smart Most used scope useful at a glance as well.
+            if scope == .recent, lhs.lastUsedAt != rhs.lastUsedAt {
+                return (lhs.lastUsedAt ?? .distantPast) > (rhs.lastUsedAt ?? .distantPast)
+            }
+            if scope == .mostUsed, lhs.usageCount != rhs.usageCount {
+                return lhs.usageCount > rhs.usageCount
+            }
+            if lhs.isDefault != rhs.isDefault { return lhs.isDefault }
+            if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite }
+            if lhs.usageCount != rhs.usageCount { return lhs.usageCount > rhs.usageCount }
+            if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
+        case .name:
+            let comparison = lhs.title.localizedStandardCompare(rhs.title)
+            if comparison != .orderedSame { return comparison == .orderedAscending }
+        case .mostUsed:
+            if lhs.usageCount != rhs.usageCount { return lhs.usageCount > rhs.usageCount }
+            if lhs.lastUsedAt != rhs.lastUsedAt {
+                return (lhs.lastUsedAt ?? .distantPast) > (rhs.lastUsedAt ?? .distantPast)
+            }
+        case .recentlyUpdated:
+            if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
         }
-        if lhs.isDefault != rhs.isDefault { return lhs.isDefault }
-        if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite }
-        if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
         return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
     }
 
@@ -280,7 +532,7 @@ struct TemplatesView: View {
 }
 
 private enum TemplateScope: Hashable {
-    case all, favorites, recent, ungrouped, archived
+    case all, favorites, recent, ungrouped, archived, mostUsed, missingDefault
     case group(UUID)
 
     func title(in store: AppStore) -> String {
@@ -291,6 +543,8 @@ private enum TemplateScope: Hashable {
         case .ungrouped: "Ungrouped"
         case .archived: "Archived"
         case .group(let id): store.templateGroups.first(where: { $0.id == id })?.name ?? "Collection"
+        case .mostUsed: "Most used"
+        case .missingDefault: "Missing default"
         }
     }
 
@@ -302,6 +556,26 @@ private enum TemplateScope: Hashable {
         case .ungrouped: "tray"
         case .archived: "archivebox"
         case .group(let id): store.templateGroups.first(where: { $0.id == id })?.iconID ?? "folder"
+        case .mostUsed: "chart.bar.fill"
+        case .missingDefault: "checkmark.shield"
+        }
+    }
+}
+
+private enum TemplateSort: String, CaseIterable, Identifiable {
+    case recommended
+    case name
+    case mostUsed
+    case recentlyUpdated
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .recommended: "Recommended"
+        case .name: "Name"
+        case .mostUsed: "Most used"
+        case .recentlyUpdated: "Recently updated"
         }
     }
 }
@@ -323,12 +597,23 @@ private struct TemplateRow: View {
                         Image(systemName: "star.fill").font(.caption).foregroundStyle(TouchPointColor.amber)
                     }
                 }
+                HStack(spacing: 5) {
+                    TemplateStatusBadge(title: "Version \(template.revisionNumber)", systemImage: "clock.arrow.circlepath")
+                    if template.isApproved {
+                        TemplateStatusBadge(title: "Approved", systemImage: "checkmark.seal.fill")
+                    }
+                    if template.isLocked {
+                        TemplateStatusBadge(title: "Locked", systemImage: "lock.fill")
+                    }
+                }
                 Text(template.body).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                 Text(metadata).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
             }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(template.isLocked ? "Double-tap to view this locked template" : "Double-tap to edit this template")
     }
 
     private var metadata: String {
@@ -340,23 +625,61 @@ private struct TemplateRow: View {
     }
 }
 
+private struct TemplateStatusBadge: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .accessibilityLabel(title)
+    }
+}
+
 private struct TemplateEditorView: View {
     @Environment(AppStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var draft: GreetingTemplate
     @State private var showingGenerator = false
+    @State private var showingApprovalWarning = false
+    @State private var showingSaveError = false
+    @State private var saveError: String?
+    @State private var duplicateForEditing: GreetingTemplate?
+    @State private var selectedRevision: TemplateRevision?
+    private let originalTemplate: GreetingTemplate?
     private let isEditing: Bool
 
     init(template: GreetingTemplate?, defaultOccasion: Occasion) {
         isEditing = template != nil
+        originalTemplate = template
         _draft = State(initialValue: template ?? GreetingTemplate(title: "", occasion: defaultOccasion, message: ""))
     }
 
     private var canSave: Bool { draft.validationErrors.isEmpty }
+    private var isReadOnly: Bool { isEditing && draft.isLocked }
+    private var hasContentChanges: Bool {
+        guard let originalTemplate else { return false }
+        return TemplateContentSnapshot(template: originalTemplate) != TemplateContentSnapshot(template: draft)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
+                if isReadOnly {
+                    Section {
+                        Label("This template is locked and read-only.", systemImage: "lock.fill")
+                            .foregroundStyle(.secondary)
+                        Button {
+                            duplicateForEditing = store.duplicateTemplate(draft)
+                        } label: {
+                            Label("Duplicate to edit", systemImage: "plus.square.on.square")
+                        }
+                    } footer: {
+                        Text("The duplicate is an unlocked copy. Approval and locking are local controls on this device.")
+                    }
+                }
+
                 Section("Template") {
                     TextField("Template name", text: $draft.title)
                     Picker("Collection", selection: $draft.groupID) {
@@ -381,6 +704,7 @@ private struct TemplateEditorView: View {
                         }
                     }
                 }
+                .disabled(isReadOnly)
 
                 Section("Context") {
                     multiValueMenu(title: "Occasions", summary: draft.occasions.map(\.title).joined(separator: ", ")) {
@@ -413,6 +737,7 @@ private struct TemplateEditorView: View {
                         ForEach(TemplateAppearance.languages, id: \.self) { Text($0).tag($0) }
                     }
                 }
+                .disabled(isReadOnly)
 
                 Section {
                     if draft.channels.isEmpty || draft.channels.contains(.email) {
@@ -436,6 +761,7 @@ private struct TemplateEditorView: View {
                 } footer: {
                     Text("Insert variables with the buttons above. Generation happens on device when Apple Intelligence is available.")
                 }
+                .disabled(isReadOnly)
 
                 Section("Preview") {
                     if let subject = previewSubject {
@@ -456,7 +782,13 @@ private struct TemplateEditorView: View {
                 Section("Library") {
                     Toggle("Favorite", isOn: $draft.isFavorite)
                     Toggle("Default for this context", isOn: $draft.isDefault)
-                    if draft.usageCount > 0 { LabeledContent("Used", value: draft.usageCount.formatted()) }
+                }
+                .disabled(isReadOnly)
+
+                if isEditing {
+                    governanceSection
+                    usageSection
+                    historySection
                 }
             }
             .navigationTitle(isEditing ? "Edit template" : "New template")
@@ -464,11 +796,30 @@ private struct TemplateEditorView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }.disabled(!canSave)
+                    Button("Save") { requestSave() }.disabled(!canSave || isReadOnly)
                 }
             }
             .sheet(isPresented: $showingGenerator) {
                 AppleGreetingGeneratorSheet(context: generationContext) { draft.body = $0 }
+            }
+            .sheet(item: $duplicateForEditing) { template in
+                TemplateEditorView(template: template, defaultOccasion: template.occasion)
+            }
+            .sheet(item: $selectedRevision) { revision in
+                TemplateRevisionPreviewView(template: draft, revision: revision) { restored in
+                    draft = restored
+                }
+            }
+            .alert("Could not save template", isPresented: $showingSaveError) {
+                Button("OK", role: .cancel) { showingSaveError = false }
+            } message: {
+                Text(saveError ?? "The template could not be saved. It remains open so you can try again.")
+            }
+            .confirmationDialog("Remove local approval?", isPresented: $showingApprovalWarning, titleVisibility: .visible) {
+                Button("Save and remove approval") { performSave() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Changing this approved template will remove its approval on this device and create a new version.")
             }
         }
     }
@@ -505,6 +856,138 @@ private struct TemplateEditorView: View {
     }
 
     @ViewBuilder
+    private var governanceSection: some View {
+        Section("Governance") {
+            Text("Approval and locking are local controls on this device, not team approval.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            LabeledContent("Approval", value: draft.isApproved ? "Approved" : "Not approved")
+            if draft.isApproved {
+                if draft.isBuiltIn {
+                    Label("Built-in approval cannot be removed.", systemImage: "checkmark.seal.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Button {
+                        setApproval(false)
+                    } label: {
+                        Label("Remove approval", systemImage: "checkmark.seal.slash")
+                    }
+                }
+            } else {
+                Button {
+                    setApproval(true)
+                } label: {
+                    Label("Approve on this device", systemImage: "checkmark.seal")
+                }
+            }
+
+            LabeledContent("Editing", value: draft.isLocked ? "Locked" : "Unlocked")
+            if draft.isLocked {
+                if draft.isBuiltIn {
+                    Label("Built-in templates cannot be unlocked.", systemImage: "lock.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Button {
+                        unlockForEditing()
+                    } label: {
+                        Label("Unlock to edit", systemImage: "lock.open")
+                    }
+                }
+            } else {
+                Button {
+                    lockTemplate()
+                } label: {
+                    Label("Lock template", systemImage: "lock")
+                }
+            }
+        }
+    }
+
+    private var usageSection: some View {
+        Section("Usage") {
+            LabeledContent("Lifetime schedules", value: draft.usageCount.formatted())
+            LabeledContent("Last used", value: lastUsedText)
+            ForEach(TemplateUsageKind.allCases) { kind in
+                LabeledContent(usageTitle(kind), value: usageCount(for: kind).formatted())
+            }
+        }
+    }
+
+    private var historySection: some View {
+        Section {
+            LabeledContent("Current version", value: "Version \(draft.revisionNumber)")
+            LabeledContent("Last updated", value: draft.updatedAt.formatted(date: .abbreviated, time: .shortened))
+
+            if revisions.isEmpty {
+                Text("No earlier versions yet.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(revisions) { revision in
+                    Button {
+                        selectedRevision = revision
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Version \(revision.number)")
+                                    .font(.subheadline.weight(.semibold))
+                                Text(revision.createdAt.formatted(date: .abbreviated, time: .shortened))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .accessibilityLabel("Version \(revision.number)")
+                    .accessibilityValue(revision.createdAt.formatted(date: .abbreviated, time: .shortened))
+                    .accessibilityHint("Double-tap to preview this version")
+                }
+            }
+        } header: {
+            Text("History")
+        } footer: {
+            Text("Restoring a version creates a new version and keeps the existing history.")
+        }
+    }
+
+    private var revisions: [TemplateRevision] {
+        guard isEditing else { return [] }
+        return store.templateRevisions(for: draft.id)
+    }
+
+    private var usageRecords: [TemplateUsageRecord] {
+        guard isEditing else { return [] }
+        return store.usageRecords(for: draft.id)
+    }
+
+    private var lastUsedText: String {
+        guard let lastUsedAt = draft.lastUsedAt else { return "Never" }
+        return lastUsedAt.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    private func usageCount(for kind: TemplateUsageKind) -> Int {
+        usageRecords.reduce(into: 0) { count, record in
+            if record.kind == kind { count += 1 }
+        }
+    }
+
+    private func usageTitle(_ kind: TemplateUsageKind) -> String {
+        switch kind {
+        case .scheduled: "Tracked schedules"
+        case .composerOpened: "Composer opened"
+        case .completed: "Completed"
+        case .skipped: "Skipped"
+        case .messageEdited: "Message edited"
+        }
+    }
+
+    @ViewBuilder
     private func multiValueMenu<Content: View>(title: String, summary: String, @ViewBuilder content: () -> Content) -> some View {
         LabeledContent(title) { Menu(summary, content: content).multilineTextAlignment(.trailing) }
     }
@@ -521,12 +1004,142 @@ private struct TemplateEditorView: View {
         if !draft.body.isEmpty && !draft.body.hasSuffix(" ") { draft.body.append(" ") }
         draft.body.append("{{\(token)}}")
     }
-    private func save() {
+    private func requestSave() {
         draft.title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
         draft.body = draft.body.trimmingCharacters(in: .whitespacesAndNewlines)
         draft.emailSubject = draft.emailSubject?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if isEditing { store.updateTemplate(draft) } else { store.addTemplate(draft) }
+        guard canSave else { return }
+        if isEditing && draft.isApproved && hasContentChanges {
+            showingApprovalWarning = true
+        } else {
+            performSave()
+        }
+    }
+
+    private func performSave() {
+        if isEditing {
+            guard store.updateTemplateResult(draft) else {
+                saveError = "This template could not be saved. It may be locked or no longer available."
+                showingSaveError = true
+                return
+            }
+        } else {
+            store.addTemplate(draft)
+        }
         if draft.isDefault { _ = store.setTemplateDefault(id: draft.id) }
+        dismiss()
+    }
+
+    private func setApproval(_ approved: Bool) {
+        guard store.setTemplateApproval(id: draft.id, approved: approved) else { return }
+        draft.isApproved = approved
+        draft.approvedAt = approved ? .now : nil
+    }
+
+    private func unlockForEditing() {
+        guard !draft.isBuiltIn else { return }
+        guard store.setTemplateLock(id: draft.id, locked: false) else {
+            saveError = "This template could not be unlocked."
+            showingSaveError = true
+            return
+        }
+        draft.isLocked = false
+    }
+
+    private func lockTemplate() {
+        guard store.setTemplateLock(id: draft.id, locked: true) else {
+            saveError = "This template could not be locked. It may no longer be available."
+            showingSaveError = true
+            return
+        }
+        draft.isLocked = true
+    }
+}
+
+private struct TemplateRevisionPreviewView: View {
+    @Environment(AppStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    let template: GreetingTemplate
+    let revision: TemplateRevision
+    let onRestored: (GreetingTemplate) -> Void
+    @State private var showingApprovalWarning = false
+    @State private var restoreError: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Version") {
+                    LabeledContent("Version", value: revision.number.formatted())
+                    LabeledContent("Created", value: revision.createdAt.formatted(date: .abbreviated, time: .shortened))
+                    LabeledContent("Title", value: revision.snapshot.title)
+                }
+
+                Section("Preview") {
+                    Text(revision.snapshot.body)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                    if !revision.snapshot.occasions.isEmpty {
+                        LabeledContent("Occasions", value: revision.snapshot.occasions.map(\.title).joined(separator: ", "))
+                    }
+                    if !revision.snapshot.languages.isEmpty {
+                        LabeledContent("Languages", value: revision.snapshot.languages.joined(separator: ", "))
+                    }
+                }
+
+                Section {
+                    if template.isLocked {
+                        Label("Unlock the template before restoring a version.", systemImage: "lock.fill")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Button("Restore this version") {
+                            requestRestore()
+                        }
+                    }
+                } footer: {
+                    Text("Restoring is additive: it creates a new current version and keeps this version in history.")
+                }
+            }
+            .navigationTitle("Version \(revision.number)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .confirmationDialog("Remove local approval?", isPresented: $showingApprovalWarning, titleVisibility: .visible) {
+                Button("Restore and remove approval") { performRestore() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Restoring this version changes the approved template and removes its approval on this device.")
+            }
+            .alert("Could not restore version", isPresented: Binding(
+                get: { restoreError != nil },
+                set: { if !$0 { restoreError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(restoreError ?? "The version could not be restored.")
+            }
+        }
+    }
+
+    private func requestRestore() {
+        guard !template.isLocked else { return }
+        if template.isApproved {
+            showingApprovalWarning = true
+        } else {
+            performRestore()
+        }
+    }
+
+    private func performRestore() {
+        guard store.restoreTemplateRevision(templateID: template.id, revisionID: revision.id),
+              let restored = store.templates.first(where: { $0.id == template.id }) else {
+            restoreError = "This version could not be restored. The template may be locked or no longer available."
+            return
+        }
+        onRestored(restored)
         dismiss()
     }
 }

@@ -131,6 +131,16 @@ Collection states are explicit:
 - Refresh failure: keep the last usable content and show the error inline.
 - Loaded: native list; do not add a redundant surrounding surface.
 
+### Template library
+
+- Search and filters are independent: occasion, relationship audience, channel, language, and collection can be combined.
+- Smart collections include Favorites, Recently used, Most used, Ungrouped, Archived, and contexts Missing default.
+- Recommended sorting prefers defaults and favorites; explicit Name, Most used, and Recently updated sorts remain available.
+- Automatic template resolution uses recipient relationship, preferred channel, and language. A per-recipient exception overrides an occasion-wide choice, which overrides automatic resolution.
+- Content edits create a local template revision. Favorite, default, archive, approval, lock, and usage changes do not create content revisions.
+- Approval and locking are local organization aids, not team permissions or a security boundary. Built-in templates are approved and locked; duplicate one to customize it.
+- Usage statistics describe TouchPoint actions such as scheduled, composer opened, completed, skipped, and message edited. Never reinterpret these as delivery or recipient-open analytics.
+
 ### Person editor
 
 `Person` is the shared relationship entity for clients, family, friends, and colleagues. Professional context enriches the entity but does not create a separate client model.
@@ -279,7 +289,7 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 - First-run focus offers `Work`, `Personal`, and preselected `All`.
 - Work annual planning defaults to `Client`; Personal defaults to `Family`; All begins with every relationship visible.
 - Focus and onboarding completion persist in `UserDefaults`; relationship data remains in the separate JSON snapshot.
-- The prototype saves a `v4` local JSON snapshot between launches and migrates readable `v1`–`v3` data in place.
+- The prototype saves a `v5` local JSON snapshot between launches and migrates readable `v1`–`v4` data in place.
 - Apple Intelligence message generation uses the on-device Foundation Models framework on iOS 26+ and never blocks manual editing.
 - Keep the minimum deployment target at iOS 18. Gate Foundation Models at runtime and explain device, settings, locale, and model-readiness limitations in context.
 
