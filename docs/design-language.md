@@ -12,12 +12,12 @@ This is the living visual and interaction contract for TouchPoint. It borrows th
 
 ## Audience strategy
 
-TouchPoint supports two equal starting experiences over one relationship model.
+TouchPoint uses one relationship model and one universal interface. An optional `Focus` changes what is shown first without asking the user to adopt a professional or personal identity.
 
-- `Professional` prioritizes clients, business relationships, upcoming workload, and repeatable outreach.
-- `Personal` prioritizes family, friends, warm reminders, and a less operational tone.
-- The mode changes information priority, initial filters, examples, and copy. It does not create separate data stores, hide relationship types, or remove capabilities.
-- Switching modes never migrates or deletes people, dates, templates, or plans.
+- `Work` focuses clients and colleagues.
+- `Personal` focuses family and friends.
+- `All` keeps every relationship visible and is the default for new users.
+- Changing focus never migrates or deletes people, dates, templates, or plans.
 - Keep `People` as the universal entity and `Client` as one relationship type. Do not force CRM terminology into shared surfaces.
 - Both experiences retain `Plan the Year`, native Messages/Mail handoff, manual completion, and the same trust contract.
 
@@ -88,29 +88,26 @@ The primary destinations are `Home`, `Calendar`, `People`, and `Templates`. Use 
 3. A visible entry to `Plan the Year`.
 4. A hint of the upcoming schedule.
 
-### First-run mode selection
+### First-run focus
 
-The first launch shows one onboarding page with a clear `Professional` / `Personal` choice.
+The first launch offers `Work`, `Personal`, and `All` as starting focuses.
 
-- Do not preselect a mode. Continue remains disabled until the user makes an explicit choice.
+- Preselect `All`; choosing a narrower focus is optional.
 - Explain each option through audience and workflow, not feature checklists or pricing language.
-- State that the mode can be changed later without losing data.
-- Persist `AppMode` and onboarding completion in platform preferences (`UserDefaults` on iOS, the corresponding preferences store on Android).
-- Store stable values `professional` and `personal`; user-facing labels remain localizable.
+- State that the focus can be changed later without losing data.
+- Persist `Focus` and onboarding completion in platform preferences. Migrate legacy `professional` and `personal` values without touching relationship data.
 
-### Mode-aware Home
+### Focus-aware Home
 
-- `Professional` shows weekly greeting volume, ready-to-send workload, `Next action`, client-oriented annual planning copy, and `Outreach schedule`.
-- `Personal` uses a relationship-focused summary, `Next up`, family/friend annual planning copy, and `Upcoming`.
-- Both modes show all relevant scheduled actions. Mode is a priority lens, not a data filter.
-- A settings gear in the Home toolbar opens mode settings. Changing the mode updates Home immediately.
+- Home uses one vocabulary and layout for every user.
+- The selected focus scopes the workload summary and upcoming actions; `All` shows the complete schedule.
+- A settings gear in the Home toolbar opens focus settings. Changing focus updates Home immediately.
 
-### Mode-aware defaults
+### Focus-aware defaults
 
-- Mode changes ordering and defaults, never availability. Every relationship and occasion remains reachable in both experiences.
-- `Professional` prioritizes `Client` then `Colleague`; a new person starts as `Client`.
-- `Personal` prioritizes `Family` then `Friend`; a new person starts as `Family`.
-- Templates and occasion pickers place the current mode's likely moments first while retaining the full shared collection.
+- Focus changes ordering and defaults, never capability. Every relationship and occasion remains reachable.
+- `Work` prioritizes `Client` then `Colleague`; `Personal` prioritizes `Family` then `Friend`; `All` is neutral.
+- Templates and occasion pickers place the current focus's likely moments first while retaining the full shared collection.
 - These defaults are presentation preferences only and must not be persisted into relationship records unless the user saves a draft.
 
 ### Editor and planning flows
@@ -140,7 +137,7 @@ Collection states are explicit:
 
 - Require a display name and at least one actionable contact value: phone or email.
 - Support optional organization, relationship, preferred contact method, preferred language, and IANA time-zone identifier.
-- Keep create and edit on the same component and draft contract. The mode changes the title and confirmation verb, not the field hierarchy.
+- Keep create and edit on the same component and draft contract. Focus may change a default title and confirmation verb, not the field hierarchy.
 - Stage important-date additions, edits, and removals inside the person draft. Persist them only with the main `Add` or `Save` action.
 - Show saved important dates separately from generated greeting plans. A source date is not a scheduled action.
 - Search people by name, email, and organization.
@@ -279,15 +276,17 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 - Sending is always manual. No SMS/email provider integration is planned.
 - Optional reminders use local device notifications and are enabled explicitly from Settings.
 - Source UI language for the prototype: English; localization architecture remains required.
-- First-run experience mode: explicit `Professional` or `Personal` selection.
-- Professional annual planning defaults to `Client`; Personal defaults to `Family`. Both can widen to any relationship or all people.
-- Experience mode and onboarding completion persist in `UserDefaults`; relationship data remains in the separate JSON snapshot.
-- The prototype saves a `v2` local JSON snapshot between launches and migrates readable `v1` data in place.
+- First-run focus offers `Work`, `Personal`, and preselected `All`.
+- Work annual planning defaults to `Client`; Personal defaults to `Family`; All begins with every relationship visible.
+- Focus and onboarding completion persist in `UserDefaults`; relationship data remains in the separate JSON snapshot.
+- The prototype saves a `v4` local JSON snapshot between launches and migrates readable `v1`–`v3` data in place.
+- Apple Intelligence message generation uses the on-device Foundation Models framework on iOS 26+ and never blocks manual editing.
+- Keep the minimum deployment target at iOS 18. Gate Foundation Models at runtime and explain device, settings, locale, and model-readiness limitations in context.
 
 ## Open product questions
 
 - Should the first release support both Messages and Mail composers, or prioritize Messages in onboarding while retaining Mail?
-- After a cancelled composer, should TouchPoint offer an explicit `Skip for this year` action?
+- Should skipped greetings automatically roll forward next year, or remain an explicit planning decision?
 - Which event types require a year as well as month/day?
 - Should one person support multiple household or business roles?
 - Will shared team accounts own people and templates at the workspace level?

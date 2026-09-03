@@ -9,6 +9,7 @@ struct PlanYearView: View {
     @State private var didSetInitialFilter = false
     @State private var selectedOccasions: Set<Occasion> = [.birthday]
     @State private var contactMethod: ContactMethod = .sms
+    @State private var usePreferredContactMethods = true
     @State private var templateIDsByOccasion: [Occasion: UUID] = [:]
     @State private var step = 0
     @State private var scheduledCount: Int?
@@ -70,7 +71,7 @@ struct PlanYearView: View {
             }
             .onAppear {
                 guard !didSetInitialFilter else { return }
-                relationshipFilter = preferences.mode.defaultRelationship
+                relationshipFilter = preferences.focus == .all ? nil : preferences.focus.defaultRelationship
                 didSetInitialFilter = true
             }
         }
@@ -161,7 +162,7 @@ struct PlanYearView: View {
     private var occasionsStep: some View {
         List {
             Section("Choose occasions") {
-                ForEach(preferences.mode.occasionPriority) { occasion in
+                ForEach(preferences.focus.occasionPriority) { occasion in
                     Button {
                         toggle(occasion, in: &selectedOccasions)
                     } label: {
@@ -191,27 +192,34 @@ struct PlanYearView: View {
                     SectionHeading(title: "How you will reach out")
                     SurfaceCard {
                         VStack(spacing: 0) {
-                            ForEach(Array(ContactMethod.allCases.enumerated()), id: \.element.id) { index, method in
-                                Button {
-                                    contactMethod = method
-                                } label: {
-                                    HStack(spacing: 12) {
-                                        IconTile(systemImage: method.icon, tint: .accentColor)
-                                        Text(method.title)
-                                            .font(.subheadline.weight(.semibold))
-                                            .foregroundStyle(.primary)
-                                        Spacer()
-                                        Image(systemName: contactMethod == method ? "checkmark.circle.fill" : "circle")
-                                            .font(.title3)
-                                            .foregroundStyle(contactMethod == method ? Color.accentColor : Color.secondary)
-                                    }
-                                    .padding(TouchPointMetric.cardPadding)
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
+                            Toggle("Use each person's preferred method", isOn: $usePreferredContactMethods)
+                                .font(.subheadline.weight(.semibold))
+                                .padding(TouchPointMetric.cardPadding)
 
-                                if index < ContactMethod.allCases.count - 1 {
-                                    Divider().padding(.leading, 52)
+                            if !usePreferredContactMethods {
+                                Divider()
+                                ForEach(Array(ContactMethod.allCases.enumerated()), id: \.element.id) { index, method in
+                                    Button {
+                                        contactMethod = method
+                                    } label: {
+                                        HStack(spacing: 12) {
+                                            IconTile(systemImage: method.icon, tint: .accentColor)
+                                            Text(method.title)
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                            Spacer()
+                                            Image(systemName: contactMethod == method ? "checkmark.circle.fill" : "circle")
+                                                .font(.title3)
+                                                .foregroundStyle(contactMethod == method ? Color.accentColor : Color.secondary)
+                                        }
+                                        .padding(TouchPointMetric.cardPadding)
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    if index < ContactMethod.allCases.count - 1 {
+                                        Divider().padding(.leading, 52)
+                                    }
                                 }
                             }
                         }
@@ -267,9 +275,9 @@ struct PlanYearView: View {
                             )
                             Divider().padding(.leading, 52)
                             reviewRow(
-                                icon: contactMethod.icon,
+                                icon: usePreferredContactMethods ? "person.crop.circle.badge.checkmark" : contactMethod.icon,
                                 title: "Action",
-                                value: contactMethod.title
+                                value: usePreferredContactMethods ? "Preferred methods" : contactMethod.title
                             )
                         }
                     }
@@ -288,6 +296,12 @@ struct PlanYearView: View {
                                         Text(templateTitle(for: occasion))
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
+                                        if let preview = templatePreview(for: occasion) {
+                                            Text(preview)
+                                                .font(.caption2)
+                                                .foregroundStyle(.tertiary)
+                                                .lineLimit(2)
+                                        }
                                     }
                                     Spacer()
                                 }
@@ -316,13 +330,19 @@ struct PlanYearView: View {
     }
 
     private var orderedSelectedOccasions: [Occasion] {
-        preferences.mode.occasionPriority.filter { selectedOccasions.contains($0) }
+        preferences.focus.occasionPriority.filter { selectedOccasions.contains($0) }
     }
 
     private func matchingTemplates(for occasion: Occasion) -> [GreetingTemplate] {
         store.templates
-            .filter { $0.occasion == occasion }
+            .filter {
+                !$0.isArchived && $0.occasions.contains(occasion)
+                    && (usePreferredContactMethods || $0.channels.isEmpty || $0.channels.contains(contactMethod))
+            }
             .sorted {
+                if $0.isDefault != $1.isDefault {
+                    return $0.isDefault
+                }
                 if $0.isFavorite != $1.isFavorite {
                     return $0.isFavorite
                 }
@@ -333,9 +353,19 @@ struct PlanYearView: View {
     private func templateTitle(for occasion: Occasion) -> String {
         guard let templateID = templateIDsByOccasion[occasion],
               let template = store.templates.first(where: { $0.id == templateID }) else {
-            return "Standard greeting"
+            return "Automatic recommendation"
         }
         return template.title
+    }
+
+    private func templatePreview(for occasion: Occasion) -> String? {
+        guard let personID = selectedPeople.first,
+              let person = store.people.first(where: { $0.id == personID }) else { return nil }
+        let method = usePreferredContactMethods ? person.preferredContactMethod : contactMethod
+        let template = templateIDsByOccasion[occasion]
+            .flatMap { id in store.templates.first(where: { $0.id == id }) }
+            ?? store.resolveTemplate(for: person, occasion: occasion, channel: method)
+        return store.renderedBody(for: template, person: person, occasion: occasion)
     }
 
     private func templateMenu(for occasion: Occasion) -> some View {
@@ -344,9 +374,9 @@ struct PlanYearView: View {
                 templateIDsByOccasion.removeValue(forKey: occasion)
             } label: {
                 if templateIDsByOccasion[occasion] == nil {
-                    Label("Standard greeting", systemImage: "checkmark")
+                    Label("Automatic recommendation", systemImage: "checkmark")
                 } else {
-                    Text("Standard greeting")
+                    Text("Automatic recommendation")
                 }
             }
 
@@ -416,16 +446,14 @@ struct PlanYearView: View {
 
             Button {
                 if step < stepTitles.count - 1 {
-                    if step == 1 {
-                        selectRecommendedTemplates()
-                    }
                     withAnimation(.snappy) { step += 1 }
                 } else {
                     scheduledCount = store.scheduleYear(
                         personIDs: selectedPeople,
                         occasions: selectedOccasions,
                         method: contactMethod,
-                        templateIDsByOccasion: templateIDsByOccasion
+                        templateIDsByOccasion: templateIDsByOccasion,
+                        usePreferredContactMethods: usePreferredContactMethods
                     )
                 }
             } label: {
@@ -477,22 +505,17 @@ struct PlanYearView: View {
         return "\(count) greetings were added to your calendar."
     }
 
-    private func selectRecommendedTemplates() {
-        for occasion in selectedOccasions where templateIDsByOccasion[occasion] == nil {
-            if let recommended = matchingTemplates(for: occasion).first {
-                templateIDsByOccasion[occasion] = recommended.id
-            }
-        }
-    }
-
     private var actionExplanation: String {
+        if usePreferredContactMethods {
+            return "Each greeting uses that person's preferred contact method. Touch Point prepares the message, but you always review and send it."
+        }
         switch contactMethod {
         case .sms:
-            "On the scheduled day, TouchPoint opens Messages with the recipient and greeting filled in. You tap Send."
+            return "On the scheduled day, TouchPoint opens Messages with the recipient and greeting filled in. You tap Send."
         case .email:
-            "On the scheduled day, TouchPoint opens Mail with the recipient, subject, and greeting filled in. You tap Send."
+            return "On the scheduled day, TouchPoint opens Mail with the recipient, subject, and greeting filled in. You tap Send."
         case .reminder:
-            "TouchPoint reminds you to reach out and lets you mark the greeting complete."
+            return "TouchPoint reminds you to reach out and lets you mark the greeting complete."
         }
     }
 

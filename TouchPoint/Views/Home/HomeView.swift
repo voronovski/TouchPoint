@@ -8,18 +8,26 @@ struct HomeView: View {
     @State private var showingSettings = false
     @State private var selectedEvent: GreetingEvent?
 
+    private var focusedEvents: [GreetingEvent] {
+        guard preferences.focus != .all else { return store.events }
+        return store.events.filter { event in
+            guard let person = store.person(for: event) else { return false }
+            return preferences.focus.includes(person.relationship)
+        }
+    }
+
     private var upcomingEvents: [GreetingEvent] {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: .now)
         let end = calendar.date(byAdding: .day, value: horizon.days, to: start) ?? start
 
-        return store.events
+        return focusedEvents
             .filter { $0.date >= start && $0.date < end }
             .sorted { $0.date < $1.date }
     }
 
     private var nextEvent: GreetingEvent? {
-        store.events
+        focusedEvents
             .filter { ![.completed, .skipped].contains(store.status(for: $0)) }
             .sorted {
                 if store.status(for: $0) == .ready && store.status(for: $1) != .ready { return true }
@@ -33,11 +41,11 @@ struct HomeView: View {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: .now)
         let end = calendar.date(byAdding: .day, value: 7, to: start) ?? start
-        return store.events.filter { $0.date >= start && $0.date < end }.count
+        return focusedEvents.filter { $0.date >= start && $0.date < end }.count
     }
 
     private var readyCount: Int {
-        store.events.filter { store.status(for: $0) == .ready }.count
+        focusedEvents.filter { store.status(for: $0) == .ready }.count
     }
 
     private var workloadSummary: String {
@@ -47,23 +55,19 @@ struct HomeView: View {
     }
 
     private var headerSummary: String {
-        switch preferences.mode {
-        case .professional: workloadSummary
-        case .personal: "Stay close to the people who matter"
+        switch preferences.focus {
+        case .all: workloadSummary
+        case .work: "Work focus · " + workloadSummary
+        case .personal: "Personal focus · " + workloadSummary
         }
     }
 
     private var planTitle: String {
-        preferences.mode == .professional ? "Plan client outreach" : "Plan your year"
+        "Plan greetings"
     }
 
     private var planDescription: String {
-        switch preferences.mode {
-        case .professional:
-            "Choose clients and occasions once. Touch Point will build your outreach schedule."
-        case .personal:
-            "Choose family, friends, and special moments once. Touch Point will remember the rest."
-        }
+        "Choose people and occasions once. Touch Point will build your schedule."
     }
 
     var body: some View {
@@ -132,7 +136,7 @@ struct HomeView: View {
     @ViewBuilder
     private var nextUpSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeading(title: preferences.mode == .professional ? "Next action" : "Next up")
+            SectionHeading(title: "Next action")
 
             if let nextEvent, let person = store.person(for: nextEvent) {
                 SurfaceCard {
@@ -203,7 +207,7 @@ struct HomeView: View {
                     showingPlanYear = true
                 } label: {
                     PrimaryButtonLabel(
-                        title: preferences.mode == .professional ? "Plan client greetings" : "Plan greetings",
+                        title: "Plan greetings",
                         systemImage: "wand.and.sparkles"
                     )
                 }
@@ -216,7 +220,7 @@ struct HomeView: View {
     private var scheduleSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(preferences.mode == .professional ? "Outreach schedule" : "Upcoming")
+                Text("Upcoming")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -242,7 +246,12 @@ struct HomeView: View {
                 SurfaceCard {
                     VStack(spacing: 0) {
                         ForEach(Array(upcomingEvents.enumerated()), id: \.element.id) { index, event in
-                            EventRow(event: event)
+                            Button {
+                                selectedEvent = event
+                            } label: {
+                                EventRow(event: event)
+                            }
+                            .buttonStyle(.plain)
                             if index < upcomingEvents.count - 1 {
                                 Divider().padding(.leading, 64)
                             }

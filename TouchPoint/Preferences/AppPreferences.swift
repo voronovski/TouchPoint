@@ -1,61 +1,82 @@
 import Foundation
 import Observation
 
-enum AppMode: String, CaseIterable, Identifiable {
-    case professional
+enum Focus: String, CaseIterable, Identifiable {
+    case work
     case personal
+    case all
 
     var id: Self { self }
 
     var title: String {
         switch self {
-        case .professional: "Professional"
+        case .work: "Work"
         case .personal: "Personal"
+        case .all: "All"
         }
     }
 
     var subtitle: String {
         switch self {
-        case .professional: "Clients and business relationships"
-        case .personal: "Family, friends, and people close to you"
+        case .work: "Clients and colleagues"
+        case .personal: "Family and friends"
+        case .all: "Every relationship"
         }
     }
 
     var detail: String {
         switch self {
-        case .professional: "Client-first planning, weekly workload, and repeatable outreach."
-        case .personal: "Warm reminders and simple planning for the moments that matter."
+        case .work: "Prioritize work relationships when reviewing upcoming greetings."
+        case .personal: "Prioritize personal relationships when reviewing upcoming greetings."
+        case .all: "Keep every relationship in view. You can change this focus anytime."
         }
     }
 
     var icon: String {
         switch self {
-        case .professional: "briefcase"
+        case .work: "briefcase"
         case .personal: "heart"
+        case .all: "person.2"
         }
     }
 
     var defaultRelationship: Relationship {
         switch self {
-        case .professional: .client
+        case .work: .client
         case .personal: .family
+        case .all: .friend
         }
     }
 
     var relationshipPriority: [Relationship] {
         switch self {
-        case .professional: [.client, .colleague, .friend, .family]
+        case .work: [.client, .colleague, .friend, .family]
         case .personal: [.family, .friend, .colleague, .client]
+        case .all: [.friend, .family, .client, .colleague]
         }
     }
 
     var occasionPriority: [Occasion] {
         switch self {
-        case .professional:
+        case .work:
             [.clientAppreciation, .homeAnniversary, .birthday, .christmas, .thanksgiving, .weddingAnniversary]
         case .personal:
             [.birthday, .weddingAnniversary, .christmas, .thanksgiving, .homeAnniversary, .clientAppreciation]
+        case .all:
+            [.birthday, .clientAppreciation, .weddingAnniversary, .homeAnniversary, .christmas, .thanksgiving]
         }
+    }
+
+    var relationships: Set<Relationship> {
+        switch self {
+        case .work: [.client, .colleague]
+        case .personal: [.family, .friend]
+        case .all: Set(Relationship.allCases)
+        }
+    }
+
+    func includes(_ relationship: Relationship) -> Bool {
+        relationships.contains(relationship)
     }
 
     func relationshipRank(_ relationship: Relationship) -> Int {
@@ -70,15 +91,16 @@ enum AppMode: String, CaseIterable, Identifiable {
 @Observable
 final class AppPreferences {
     private enum Key {
-        static let mode = "TouchPoint.AppMode"
+        static let focus = "TouchPoint.Focus"
+        static let legacyMode = "TouchPoint.AppMode"
         static let completedOnboarding = "TouchPoint.CompletedOnboarding"
     }
 
     private let defaults: UserDefaults
 
-    var mode: AppMode {
+    var focus: Focus {
         didSet {
-            defaults.set(mode.rawValue, forKey: Key.mode)
+            defaults.set(focus.rawValue, forKey: Key.focus)
         }
     }
 
@@ -90,12 +112,34 @@ final class AppPreferences {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        mode = defaults.string(forKey: Key.mode).flatMap(AppMode.init(rawValue:)) ?? .professional
+        let resolvedFocus: Focus
+        let shouldPersistMigration: Bool
+        if let savedFocus = defaults.string(forKey: Key.focus).flatMap(Focus.init(rawValue:)) {
+            resolvedFocus = savedFocus
+            shouldPersistMigration = false
+        } else if let legacyMode = defaults.string(forKey: Key.legacyMode) {
+            switch legacyMode {
+            case "professional":
+                resolvedFocus = .work
+            case "personal":
+                resolvedFocus = .personal
+            default:
+                resolvedFocus = .all
+            }
+            shouldPersistMigration = true
+        } else {
+            resolvedFocus = .all
+            shouldPersistMigration = false
+        }
+        focus = resolvedFocus
         hasCompletedOnboarding = defaults.bool(forKey: Key.completedOnboarding)
+        if shouldPersistMigration {
+            defaults.set(resolvedFocus.rawValue, forKey: Key.focus)
+        }
     }
 
-    func completeOnboarding(with mode: AppMode) {
-        self.mode = mode
+    func completeOnboarding(with focus: Focus) {
+        self.focus = focus
         hasCompletedOnboarding = true
     }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     @Environment(AppPreferences.self) private var preferences
-    @State private var selection: AppMode?
+    @State private var selection: Focus = .all
 
     var body: some View {
         VStack(spacing: 0) {
@@ -11,16 +11,16 @@ struct OnboardingView: View {
                     brandHeader
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("How will you use Touch Point?")
+                        Text("Choose a starting focus")
                             .font(.title2.bold())
-                        Text("Choose a starting experience. You can change it later without losing any people or plans.")
+                        Text("Pick what you want to see first, or keep All. This is a focus—not an identity—and you can change it later without losing any people or plans.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
 
                     VStack(spacing: 12) {
-                        ForEach(AppMode.allCases) { mode in
-                            modeButton(mode)
+                        ForEach(Focus.allCases) { focus in
+                            focusButton(focus)
                         }
                     }
                 }
@@ -30,14 +30,11 @@ struct OnboardingView: View {
             }
 
             Button {
-                guard let selection else { return }
                 preferences.completeOnboarding(with: selection)
             } label: {
                 PrimaryButtonLabel(title: "Continue", systemImage: "arrow.right")
             }
             .buttonStyle(TouchPointPrimaryButtonStyle())
-            .disabled(selection == nil)
-            .opacity(selection == nil ? 0.45 : 1)
             .padding(TouchPointMetric.screenPadding)
             .background(.bar)
         }
@@ -63,23 +60,23 @@ struct OnboardingView: View {
         }
     }
 
-    private func modeButton(_ mode: AppMode) -> some View {
-        let isSelected = selection == mode
+    private func focusButton(_ focus: Focus) -> some View {
+        let isSelected = selection == focus
 
         return Button {
-            selection = mode
+            selection = focus
         } label: {
             HStack(alignment: .top, spacing: 14) {
-                IconTile(systemImage: mode.icon, tint: isSelected ? .accentColor : .secondary)
+                IconTile(systemImage: focus.icon, tint: isSelected ? .accentColor : .secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(mode.title)
+                    Text(focus.title)
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text(mode.subtitle)
+                    Text(focus.subtitle)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.primary)
-                    Text(mode.detail)
+                    Text(focus.detail)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

@@ -7,15 +7,21 @@ struct PeopleView: View {
     @State private var showingNewPerson = false
 
     private var filteredPeople: [Person] {
-        let matches = query.isEmpty ? store.people : store.people.filter {
+        let focusMatches = store.people.filter {
+            preferences.focus.includes($0.relationship)
+        }
+        let matches = query.isEmpty ? focusMatches : focusMatches.filter {
             $0.name.localizedCaseInsensitiveContains(query)
                 || $0.email.localizedCaseInsensitiveContains(query)
                 || $0.organization.localizedCaseInsensitiveContains(query)
         }
 
         return matches.sorted {
-            let leftRank = preferences.mode.relationshipRank($0.relationship)
-            let rightRank = preferences.mode.relationshipRank($1.relationship)
+            if preferences.focus == .all {
+                return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+            }
+            let leftRank = preferences.focus.relationshipRank($0.relationship)
+            let rightRank = preferences.focus.relationshipRank($1.relationship)
             if leftRank != rightRank {
                 return leftRank < rightRank
             }
@@ -26,6 +32,19 @@ struct PeopleView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Picker("Focus", selection: focusBinding) {
+                        ForEach(Focus.allCases) { focus in
+                            Text(focus.title).tag(focus)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Label("Focus", systemImage: preferences.focus.icon)
+                } footer: {
+                    Text("Showing " + preferences.focus.title.lowercased() + " relationships. Choose All to see everyone.")
+                }
+
                 if let persistenceError = store.persistenceError {
                     Section {
                         Label(persistenceError, systemImage: "exclamationmark.triangle.fill")
@@ -61,10 +80,17 @@ struct PeopleView: View {
             .sheet(isPresented: $showingNewPerson) {
                 PersonEditorView(
                     person: nil,
-                    defaultRelationship: preferences.mode.defaultRelationship
+                    defaultRelationship: preferences.focus.defaultRelationship
                 )
             }
         }
+    }
+
+    private var focusBinding: Binding<Focus> {
+        Binding(
+            get: { preferences.focus },
+            set: { preferences.focus = $0 }
+        )
     }
 }
 
@@ -233,7 +259,7 @@ private struct PersonEditorView: View {
         if isEditing {
             return "Edit person"
         }
-        return preferences.mode == .professional && draft.relationship == .client
+        return preferences.focus == .work && draft.relationship == .client
             ? "New client"
             : "New person"
     }
@@ -242,7 +268,7 @@ private struct PersonEditorView: View {
         if isEditing {
             return "Save"
         }
-        return preferences.mode == .professional && draft.relationship == .client
+        return preferences.focus == .work && draft.relationship == .client
             ? "Add client"
             : "Add"
     }

@@ -242,6 +242,7 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
     var method: ContactMethod
     var status: GreetingStatus
     var message: String
+    var subject: String?
 
     init(
         id: UUID = UUID(),
@@ -250,7 +251,8 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         date: Date,
         method: ContactMethod,
         status: GreetingStatus,
-        message: String = ""
+        message: String = "",
+        subject: String? = nil
     ) {
         self.id = id
         self.personID = personID
@@ -259,22 +261,302 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         self.method = method
         self.status = status
         self.message = message
+        self.subject = subject
+    }
+}
+
+/// A user-manageable collection for organizing templates.
+struct TemplateGroup: Identifiable, Hashable, Codable {
+    let id: UUID
+    var name: String
+    var iconSemantic: String
+    var iconID: String
+    var colorToken: String
+    var sortOrder: Int
+    var isBuiltIn: Bool
+    var isArchived: Bool
+    let createdAt: Date
+    var updatedAt: Date
+
+    var title: String {
+        get { name }
+        set { name = newValue }
+    }
+
+    var icon: String {
+        get { iconID }
+        set { iconID = newValue }
+    }
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        iconSemantic: String = "folder",
+        iconID: String = "folder",
+        colorToken: String = "teal",
+        sortOrder: Int = 0,
+        isBuiltIn: Bool = false,
+        isArchived: Bool = false,
+        createdAt: Date = .now,
+        updatedAt: Date = .now
+    ) {
+        self.id = id
+        self.name = name
+        self.iconSemantic = iconSemantic
+        self.iconID = iconID
+        self.colorToken = colorToken
+        self.sortOrder = sortOrder
+        self.isBuiltIn = isBuiltIn
+        self.isArchived = isArchived
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }
 
 struct GreetingTemplate: Identifiable, Hashable, Codable {
     let id: UUID
     var title: String
-    var occasion: Occasion
-    var message: String
+    /// The occasions this template can be used for. `occasion` remains available for the current UI.
+    var occasions: [Occasion]
+    var body: String
     var isFavorite: Bool
+    var iconSemantic: String
+    var iconID: String
+    var colorToken: String
+    var groupID: UUID?
+    var relationships: [Relationship]
+    var channels: [ContactMethod]
+    var languages: [String]
+    var emailSubject: String?
+    var isDefault: Bool
+    var isBuiltIn: Bool
+    var isArchived: Bool
+    let createdAt: Date
+    var updatedAt: Date
+    var usageCount: Int
+    var lastUsedAt: Date?
 
-    init(id: UUID = UUID(), title: String, occasion: Occasion, message: String, isFavorite: Bool) {
+    /// The legacy single-occasion API used by the existing views.
+    var occasion: Occasion {
+        get { occasions.first ?? .birthday }
+        set {
+            occasions = [newValue] + occasions.filter { $0 != newValue }
+        }
+    }
+
+    /// The legacy message API used by the existing views and v1/v2 data.
+    var message: String {
+        get { body }
+        set { body = newValue }
+    }
+
+    var icon: String {
+        get { iconID }
+        set { iconID = newValue }
+    }
+
+    /// Descriptive aliases for clients that prefer the audience terminology.
+    var relationshipAudiences: [Relationship] {
+        get { relationships }
+        set { relationships = newValue }
+    }
+
+    var channelAudiences: [ContactMethod] {
+        get { channels }
+        set { channels = newValue }
+    }
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        occasion: Occasion,
+        message: String,
+        isFavorite: Bool = false
+    ) {
+        self.init(
+            id: id,
+            title: title,
+            occasions: [occasion],
+            body: message,
+            isFavorite: isFavorite,
+            iconSemantic: "occasion",
+            iconID: occasion.icon,
+            colorToken: occasion.defaultColorToken
+        )
+    }
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        occasion: Occasion,
+        body: String,
+        isFavorite: Bool = false
+    ) {
+        self.init(id: id, title: title, occasion: occasion, message: body, isFavorite: isFavorite)
+    }
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        occasions: [Occasion],
+        body: String,
+        isFavorite: Bool = false,
+        iconSemantic: String = "occasion",
+        iconID: String? = nil,
+        colorToken: String? = nil,
+        groupID: UUID? = nil,
+        relationships: [Relationship] = [],
+        channels: [ContactMethod] = [],
+        languages: [String] = [],
+        emailSubject: String? = nil,
+        isDefault: Bool = false,
+        isBuiltIn: Bool = false,
+        isArchived: Bool = false,
+        createdAt: Date = .now,
+        updatedAt: Date = .now,
+        usageCount: Int = 0,
+        lastUsedAt: Date? = nil
+    ) {
+        var normalizedOccasions: [Occasion] = []
+        for occasion in occasions where !normalizedOccasions.contains(occasion) {
+            normalizedOccasions.append(occasion)
+        }
+        if normalizedOccasions.isEmpty { normalizedOccasions = [.birthday] }
         self.id = id
         self.title = title
-        self.occasion = occasion
-        self.message = message
+        self.occasions = normalizedOccasions
+        self.body = body
         self.isFavorite = isFavorite
+        self.iconSemantic = iconSemantic
+        self.iconID = iconID ?? normalizedOccasions.first?.icon ?? "text.quote"
+        self.colorToken = colorToken ?? normalizedOccasions.first?.defaultColorToken ?? "teal"
+        self.groupID = groupID
+        self.relationships = relationships
+        self.channels = channels
+        self.languages = languages
+        self.emailSubject = emailSubject
+        self.isDefault = isDefault
+        self.isBuiltIn = isBuiltIn
+        self.isArchived = isArchived
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.usageCount = max(0, usageCount)
+        self.lastUsedAt = lastUsedAt
+    }
+
+    /// The supported interpolation tokens, without braces.
+    static let supportedTokens: Set<String> = ["first_name", "name", "organization", "occasion", "date"]
+
+    var validationErrors: [String] {
+        var errors: [String] = []
+        if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { errors.append("A title is required.") }
+        if body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { errors.append("A body is required.") }
+        if occasions.isEmpty { errors.append("At least one occasion is required.") }
+        let tokenPattern = #"\{\{([A-Za-z0-9_]+)\}\}"#
+        for source in [body, emailSubject ?? ""] where !source.isEmpty {
+            let openingCount = source.components(separatedBy: "{{").count - 1
+            let closingCount = source.components(separatedBy: "}}").count - 1
+            if openingCount != closingCount {
+                errors.append("A template variable has unmatched braces.")
+            }
+            if let regex = try? NSRegularExpression(pattern: tokenPattern) {
+                let range = NSRange(source.startIndex..., in: source)
+                for match in regex.matches(in: source, range: range) {
+                    guard let tokenRange = Range(match.range(at: 1), in: source) else { continue }
+                    let token = String(source[tokenRange])
+                    if !Self.supportedTokens.contains(token) {
+                        errors.append("Unsupported token: {{\(token)}}.")
+                    }
+                }
+            }
+        }
+        return Array(Set(errors)).sorted()
+    }
+
+    func validate() -> [String] { validationErrors }
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, occasion, occasions, body, message, isFavorite
+        case iconSemantic, iconID, icon, colorToken, groupID
+        case relationships, relationshipAudiences, channels, channelAudiences, languages
+        case emailSubject, isDefault, isBuiltIn, isArchived, createdAt, updatedAt, usageCount, lastUsedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? "Untitled template"
+        let legacyOccasion = try container.decodeIfPresent(Occasion.self, forKey: .occasion)
+        let decodedOccasions = try container.decodeIfPresent([Occasion].self, forKey: .occasions) ?? []
+        occasions = decodedOccasions.isEmpty ? [legacyOccasion ?? .birthday] : decodedOccasions
+        body = try container.decodeIfPresent(String.self, forKey: .body)
+            ?? container.decodeIfPresent(String.self, forKey: .message)
+            ?? ""
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        iconSemantic = try container.decodeIfPresent(String.self, forKey: .iconSemantic) ?? "occasion"
+        iconID = try container.decodeIfPresent(String.self, forKey: .iconID)
+            ?? container.decodeIfPresent(String.self, forKey: .icon)
+            ?? occasions.first?.icon
+            ?? "text.quote"
+        colorToken = try container.decodeIfPresent(String.self, forKey: .colorToken)
+            ?? occasions.first?.defaultColorToken
+            ?? "teal"
+        groupID = try container.decodeIfPresent(UUID.self, forKey: .groupID)
+        relationships = try container.decodeIfPresent([Relationship].self, forKey: .relationships)
+            ?? container.decodeIfPresent([Relationship].self, forKey: .relationshipAudiences)
+            ?? []
+        channels = try container.decodeIfPresent([ContactMethod].self, forKey: .channels)
+            ?? container.decodeIfPresent([ContactMethod].self, forKey: .channelAudiences)
+            ?? []
+        languages = try container.decodeIfPresent([String].self, forKey: .languages) ?? []
+        emailSubject = try container.decodeIfPresent(String.self, forKey: .emailSubject)
+        isDefault = try container.decodeIfPresent(Bool.self, forKey: .isDefault) ?? false
+        isBuiltIn = try container.decodeIfPresent(Bool.self, forKey: .isBuiltIn) ?? false
+        isArchived = try container.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
+        updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
+        usageCount = max(0, try container.decodeIfPresent(Int.self, forKey: .usageCount) ?? 0)
+        lastUsedAt = try container.decodeIfPresent(Date.self, forKey: .lastUsedAt)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(occasion, forKey: .occasion)
+        try container.encode(occasions, forKey: .occasions)
+        try container.encode(body, forKey: .body)
+        // Keep writing `message` so an older build can still read newly saved data.
+        try container.encode(body, forKey: .message)
+        try container.encode(isFavorite, forKey: .isFavorite)
+        try container.encode(iconSemantic, forKey: .iconSemantic)
+        try container.encode(iconID, forKey: .iconID)
+        try container.encode(colorToken, forKey: .colorToken)
+        try container.encodeIfPresent(groupID, forKey: .groupID)
+        try container.encode(relationships, forKey: .relationships)
+        try container.encode(channels, forKey: .channels)
+        try container.encode(languages, forKey: .languages)
+        try container.encodeIfPresent(emailSubject, forKey: .emailSubject)
+        try container.encode(isDefault, forKey: .isDefault)
+        try container.encode(isBuiltIn, forKey: .isBuiltIn)
+        try container.encode(isArchived, forKey: .isArchived)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(updatedAt, forKey: .updatedAt)
+        try container.encode(usageCount, forKey: .usageCount)
+        try container.encodeIfPresent(lastUsedAt, forKey: .lastUsedAt)
+    }
+}
+
+extension Occasion {
+    var defaultColorToken: String {
+        switch self {
+        case .birthday: "coral"
+        case .homeAnniversary: "blue"
+        case .weddingAnniversary: "rose"
+        case .thanksgiving: "amber"
+        case .christmas: "forest"
+        case .clientAppreciation: "teal"
+        }
     }
 }
 

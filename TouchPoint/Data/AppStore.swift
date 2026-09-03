@@ -3,11 +3,17 @@ import Observation
 
 @Observable
 final class AppStore {
-    private static let currentPersistenceVersion = 2
+    private static let currentPersistenceVersion = 4
 
     var people: [Person]
     var events: [GreetingEvent]
     var templates: [GreetingTemplate]
+    var templateGroups: [TemplateGroup]
+    /// Short alias for clients that refer to groups simply as `groups`.
+    var groups: [TemplateGroup] {
+        get { templateGroups }
+        set { templateGroups = newValue }
+    }
     var persistenceError: String?
     private let persistenceURL: URL?
 
@@ -15,12 +21,14 @@ final class AppStore {
         people: [Person],
         events: [GreetingEvent],
         templates: [GreetingTemplate],
+        templateGroups: [TemplateGroup] = [],
         persistenceURL: URL? = nil,
         persistenceError: String? = nil
     ) {
         self.people = people
         self.events = events
         self.templates = templates
+        self.templateGroups = templateGroups
         self.persistenceURL = persistenceURL
         self.persistenceError = persistenceError
     }
@@ -45,6 +53,269 @@ final class AppStore {
         save()
     }
 
+    func updateTemplate(_ template: GreetingTemplate) {
+        guard let index = templates.firstIndex(where: { $0.id == template.id }) else { return }
+        var updated = template
+        updated.updatedAt = .now
+        templates[index] = updated
+        save()
+    }
+
+    @discardableResult
+    func duplicateTemplate(id: UUID, title: String? = nil) -> GreetingTemplate? {
+        guard let source = templates.first(where: { $0.id == id }) else { return nil }
+        var copy = GreetingTemplate(
+            title: title ?? "\(source.title) copy",
+            occasions: source.occasions,
+            body: source.body,
+            isFavorite: false,
+            iconSemantic: source.iconSemantic,
+            iconID: source.iconID,
+            colorToken: source.colorToken,
+            groupID: source.groupID,
+            relationships: source.relationships,
+            channels: source.channels,
+            languages: source.languages,
+            emailSubject: source.emailSubject,
+            isDefault: false,
+            isBuiltIn: false
+        )
+        copy.updatedAt = copy.createdAt
+        templates.append(copy)
+        save()
+        return copy
+    }
+
+    @discardableResult
+    func duplicateTemplate(_ template: GreetingTemplate, title: String? = nil) -> GreetingTemplate? {
+        duplicateTemplate(id: template.id, title: title)
+    }
+
+    @discardableResult
+    func deleteTemplate(id: UUID) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }), !templates[index].isBuiltIn else {
+            return false
+        }
+        templates.remove(at: index)
+        save()
+        return true
+    }
+
+    @discardableResult
+    func archiveTemplate(id: UUID, archived: Bool = true) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
+        templates[index].isArchived = archived
+        templates[index].updatedAt = .now
+        save()
+        return true
+    }
+
+    @discardableResult
+    func setTemplateFavorite(id: UUID, isFavorite: Bool) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
+        templates[index].isFavorite = isFavorite
+        templates[index].updatedAt = .now
+        save()
+        return true
+    }
+
+    @discardableResult
+    func toggleTemplateFavorite(id: UUID) -> Bool {
+        guard let template = templates.first(where: { $0.id == id }) else { return false }
+        return setTemplateFavorite(id: id, isFavorite: !template.isFavorite)
+    }
+
+    @discardableResult
+    func setTemplateDefault(id: UUID, isDefault: Bool = true) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
+        let occasions = Set(templates[index].occasions)
+        let relationships = Set(templates[index].relationships)
+        let channels = Set(templates[index].channels)
+        let languages = Set(templates[index].languages.map { $0.lowercased() })
+        for otherIndex in templates.indices where
+            otherIndex != index
+                && !occasions.isDisjoint(with: templates[otherIndex].occasions)
+                && relationships == Set(templates[otherIndex].relationships)
+                && channels == Set(templates[otherIndex].channels)
+                && languages == Set(templates[otherIndex].languages.map { $0.lowercased() }) {
+            templates[otherIndex].isDefault = false
+        }
+        templates[index].isDefault = isDefault
+        templates[index].updatedAt = .now
+        save()
+        return true
+    }
+
+    // MARK: Template groups
+
+    func addTemplateGroup(_ group: TemplateGroup) {
+        templateGroups.append(group)
+        normalizeGroupOrder()
+        save()
+    }
+
+    func addGroup(_ group: TemplateGroup) { addTemplateGroup(group) }
+
+    func updateTemplateGroup(_ group: TemplateGroup) {
+        guard let index = templateGroups.firstIndex(where: { $0.id == group.id }) else { return }
+        var updated = group
+        updated.updatedAt = .now
+        templateGroups[index] = updated
+        save()
+    }
+
+    func updateGroup(_ group: TemplateGroup) { updateTemplateGroup(group) }
+
+    @discardableResult
+    func deleteTemplateGroup(id: UUID) -> Bool {
+        guard let index = templateGroups.firstIndex(where: { $0.id == id }), !templateGroups[index].isBuiltIn else {
+            return false
+        }
+        templateGroups.remove(at: index)
+        for templateIndex in templates.indices where templates[templateIndex].groupID == id {
+            templates[templateIndex].groupID = nil
+            templates[templateIndex].updatedAt = .now
+        }
+        normalizeGroupOrder()
+        save()
+        return true
+    }
+
+    @discardableResult
+    func deleteGroup(id: UUID) -> Bool { deleteTemplateGroup(id: id) }
+
+    @discardableResult
+    func reorderTemplateGroups(ids: [UUID]) -> Bool {
+        let currentIDs = Set(templateGroups.map(\.id))
+        guard currentIDs == Set(ids), ids.count == templateGroups.count else { return false }
+        for (order, id) in ids.enumerated() {
+            guard let index = templateGroups.firstIndex(where: { $0.id == id }) else { continue }
+            templateGroups[index].sortOrder = order
+            templateGroups[index].updatedAt = .now
+        }
+        templateGroups.sort { $0.sortOrder < $1.sortOrder }
+        save()
+        return true
+    }
+
+    @discardableResult
+    func reorderGroups(ids: [UUID]) -> Bool { reorderTemplateGroups(ids: ids) }
+
+    func templates(in groupID: UUID) -> [GreetingTemplate] {
+        templates.filter { $0.groupID == groupID && !$0.isArchived }
+    }
+
+    private func normalizeGroupOrder() {
+        templateGroups.sort { $0.sortOrder == $1.sortOrder ? $0.createdAt < $1.createdAt : $0.sortOrder < $1.sortOrder }
+        for index in templateGroups.indices { templateGroups[index].sortOrder = index }
+    }
+
+    // MARK: Resolution and rendering
+
+    /// Finds the best active template. Empty audiences are generic fallbacks; a non-empty
+    /// audience is only eligible when it contains the requested value.
+    func resolveTemplate(
+        occasion: Occasion,
+        relationship: Relationship? = nil,
+        channel: ContactMethod? = nil,
+        language: String? = nil
+    ) -> GreetingTemplate? {
+        let requestedLanguage = language?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return templates
+            .filter { !$0.isArchived && $0.occasions.contains(occasion) }
+            .filter { template in
+                relationship == nil || template.relationships.isEmpty || template.relationships.contains(relationship!)
+            }
+            .filter { template in
+                channel == nil || template.channels.isEmpty || template.channels.contains(channel!)
+            }
+            .filter { template in
+                guard let requestedLanguage, !requestedLanguage.isEmpty, !template.languages.isEmpty else { return true }
+                return template.languages.contains { $0.lowercased() == requestedLanguage }
+            }
+            .sorted { lhs, rhs in
+                let left = resolutionScore(lhs, relationship: relationship, channel: channel, language: requestedLanguage)
+                let right = resolutionScore(rhs, relationship: relationship, channel: channel, language: requestedLanguage)
+                if left != right { return left > right }
+                if lhs.usageCount != rhs.usageCount { return lhs.usageCount > rhs.usageCount }
+                if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
+                return lhs.id.uuidString < rhs.id.uuidString
+            }
+            .first
+    }
+
+    func resolveTemplate(
+        for person: Person,
+        occasion: Occasion,
+        channel: ContactMethod? = nil,
+        language: String? = nil
+    ) -> GreetingTemplate? {
+        resolveTemplate(
+            occasion: occasion,
+            relationship: person.relationship,
+            channel: channel ?? person.preferredContactMethod,
+            language: language ?? person.preferredLanguage
+        )
+    }
+
+    private func resolutionScore(
+        _ template: GreetingTemplate,
+        relationship: Relationship?,
+        channel: ContactMethod?,
+        language: String?
+    ) -> Int {
+        var score = 0
+        if relationship != nil && !template.relationships.isEmpty { score += 16 }
+        if channel != nil && !template.channels.isEmpty { score += 8 }
+        if let language, !language.isEmpty, template.languages.contains(where: { $0.lowercased() == language }) { score += 8 }
+        if template.isDefault { score += 4 }
+        if template.isFavorite { score += 2 }
+        if template.isBuiltIn { score += 1 }
+        return score
+    }
+
+    func renderedBody(
+        for template: GreetingTemplate?,
+        person: Person,
+        occasion: Occasion,
+        date: Date? = nil
+    ) -> String {
+        let source = template?.body
+            ?? "Wishing you a wonderful \(occasion.title.lowercased()), {{first_name}}!"
+        return renderTokens(source, person: person, occasion: occasion, date: date)
+    }
+
+    func renderedEmailSubject(
+        for template: GreetingTemplate,
+        person: Person,
+        occasion: Occasion,
+        date: Date? = nil
+    ) -> String? {
+        guard let subject = template.emailSubject, !subject.isEmpty else { return nil }
+        return renderTokens(subject, person: person, occasion: occasion, date: date)
+    }
+
+    private func renderTokens(_ source: String, person: Person, occasion: Occasion, date: Date?) -> String {
+        let firstName = person.name.split(separator: " ").first.map(String.init) ?? person.name
+        let dateText = (date ?? .now).formatted(date: .long, time: .omitted)
+        return source
+            .replacingOccurrences(of: "{{first_name}}", with: firstName)
+            .replacingOccurrences(of: "{{name}}", with: person.name)
+            .replacingOccurrences(of: "{{organization}}", with: person.organization)
+            .replacingOccurrences(of: "{{occasion}}", with: occasion.title)
+            .replacingOccurrences(of: "{{date}}", with: dateText)
+    }
+
+    @discardableResult
+    func recordTemplateUsage(id: UUID, at date: Date = .now) -> Bool {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
+        templates[index].usageCount += 1
+        templates[index].lastUsedAt = date
+        templates[index].updatedAt = date
+        save()
+        return true
+    }
+
     func event(id: UUID) -> GreetingEvent? {
         events.first { $0.id == id }
     }
@@ -52,6 +323,18 @@ final class AppStore {
     func completeGreeting(id: UUID) {
         guard let index = events.firstIndex(where: { $0.id == id }) else { return }
         events[index].status = .completed
+        save()
+    }
+
+    func skipGreeting(id: UUID) {
+        guard let index = events.firstIndex(where: { $0.id == id }) else { return }
+        events[index].status = .skipped
+        save()
+    }
+
+    func restoreGreeting(id: UUID) {
+        guard let index = events.firstIndex(where: { $0.id == id }), events[index].status == .skipped else { return }
+        events[index].status = .planned
         save()
     }
 
@@ -73,7 +356,8 @@ final class AppStore {
         personIDs: Set<UUID>,
         occasions: Set<Occasion>,
         method: ContactMethod,
-        templateIDsByOccasion: [Occasion: UUID] = [:]
+        templateIDsByOccasion: [Occasion: UUID] = [:],
+        usePreferredContactMethods: Bool = false
     ) -> Int {
         let referenceDate = Date.now
         let selectedPeople = people.filter { personIDs.contains($0.id) }
@@ -94,20 +378,33 @@ final class AppStore {
                     continue
                 }
 
-                let template = templateIDsByOccasion[occasion].flatMap { templateID in
+                let resolvedMethod = usePreferredContactMethods ? person.preferredContactMethod : method
+                let explicitTemplate = templateIDsByOccasion[occasion].flatMap { templateID in
                     templates.first { $0.id == templateID }
                 }
+                let template = explicitTemplate ?? resolveTemplate(
+                    for: person,
+                    occasion: occasion,
+                    channel: resolvedMethod
+                )
 
                 events.append(
                     GreetingEvent(
                         personID: person.id,
                         occasion: occasion,
                         date: date,
-                        method: method,
+                        method: resolvedMethod,
                         status: .planned,
-                        message: renderedMessage(template: template, for: person, occasion: occasion)
+                        message: renderedBody(for: template, person: person, occasion: occasion, date: date),
+                        subject: template.flatMap {
+                            renderedEmailSubject(for: $0, person: person, occasion: occasion, date: date)
+                        }
                     )
                 )
+                if let template, let index = templates.firstIndex(where: { $0.id == template.id }) {
+                    templates[index].usageCount += 1
+                    templates[index].lastUsedAt = referenceDate
+                }
                 created += 1
             }
         }
@@ -159,20 +456,6 @@ final class AppStore {
                 && $0.occasion == occasion
                 && calendar.isDate($0.date, inSameDayAs: date)
         }
-    }
-
-    private func renderedMessage(
-        template: GreetingTemplate?,
-        for person: Person,
-        occasion: Occasion
-    ) -> String {
-        let firstName = person.name.split(separator: " ").first.map(String.init) ?? person.name
-        let source = template?.message
-            ?? "Wishing you a wonderful \(occasion.title.lowercased()), {{first_name}}!"
-
-        return source
-            .replacingOccurrences(of: "{{first_name}}", with: firstName)
-            .replacingOccurrences(of: "{{name}}", with: person.name)
     }
 
     private func nextDate(
@@ -285,7 +568,8 @@ final class AppStore {
                 version: Self.currentPersistenceVersion,
                 people: people,
                 events: events,
-                templates: templates
+                templates: templates,
+                templateGroups: templateGroups
             )
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
@@ -295,6 +579,157 @@ final class AppStore {
         } catch {
             persistenceError = "Changes could not be saved on this device. \(error.localizedDescription)"
         }
+    }
+
+    private func upgradeTemplateLibraryIfNeeded() {
+        func group(named name: String, icon: String, color: String) -> TemplateGroup {
+            if let existing = templateGroups.first(where: { $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame }) {
+                return existing
+            }
+            let group = TemplateGroup(
+                name: name,
+                iconSemantic: name.lowercased(),
+                iconID: icon,
+                colorToken: color,
+                sortOrder: templateGroups.count
+            )
+            templateGroups.append(group)
+            return group
+        }
+
+        let personal = group(named: "Personal", icon: "heart", color: "rose")
+        let work = group(named: "Work", icon: "briefcase", color: "teal")
+        let seasonal = group(named: "Seasonal", icon: "gift", color: "forest")
+
+        for index in templates.indices where templates[index].groupID == nil {
+            if templates[index].occasions.contains(.clientAppreciation) {
+                templates[index].groupID = work.id
+            } else if templates[index].occasions.contains(.christmas) || templates[index].occasions.contains(.thanksgiving) {
+                templates[index].groupID = seasonal.id
+            } else {
+                templates[index].groupID = personal.id
+            }
+        }
+
+        let builtIns = Self.builtInTemplates(
+            personalGroupID: personal.id,
+            workGroupID: work.id,
+            seasonalGroupID: seasonal.id
+        )
+        for builtIn in builtIns {
+            if let index = templates.firstIndex(where: {
+                $0.title.localizedCaseInsensitiveCompare(builtIn.title) == .orderedSame
+            }) {
+                // v1/v2 shipped these texts without library metadata. Preserve the text itself,
+                // but promote the known starter entries into the richer built-in library.
+                templates[index].isBuiltIn = true
+                templates[index].groupID = builtIn.groupID
+                templates[index].iconSemantic = builtIn.iconSemantic
+                templates[index].iconID = builtIn.iconID
+                templates[index].colorToken = builtIn.colorToken
+                if templates[index].relationships.isEmpty { templates[index].relationships = builtIn.relationships }
+                if templates[index].channels.isEmpty { templates[index].channels = builtIn.channels }
+                if templates[index].languages.isEmpty { templates[index].languages = builtIn.languages }
+                if templates[index].emailSubject == nil { templates[index].emailSubject = builtIn.emailSubject }
+                templates[index].isDefault = builtIn.isDefault
+            } else {
+                templates.append(builtIn)
+            }
+        }
+        normalizeGroupOrder()
+    }
+
+    private static func builtInTemplates(
+        personalGroupID: UUID,
+        workGroupID: UUID,
+        seasonalGroupID: UUID
+    ) -> [GreetingTemplate] {
+        [
+            GreetingTemplate(
+                title: "Warm and simple", occasions: [.birthday],
+                body: "Happy birthday, {{first_name}}! Wishing you a wonderful day and a bright year ahead.",
+                isFavorite: true, iconID: "birthday.cake", colorToken: "coral", groupID: personalGroupID,
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Birthday note", occasions: [.birthday],
+                body: "Happy birthday, {{first_name}}! I hope the year ahead brings plenty of reasons to celebrate.",
+                iconID: "envelope", colorToken: "coral", groupID: personalGroupID,
+                relationships: [.family, .friend], channels: [.email], languages: ["English"],
+                emailSubject: "Happy birthday, {{first_name}}", isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Un cumpleaños especial", occasions: [.birthday],
+                body: "¡Feliz cumpleaños, {{first_name}}! Que tengas un día maravilloso y un año lleno de alegrías.",
+                iconID: "birthday.cake", colorToken: "coral", groupID: personalGroupID,
+                relationships: [.family, .friend], channels: [.sms, .email], languages: ["Spanish"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "A year at home", occasions: [.homeAnniversary],
+                body: "Happy home anniversary, {{first_name}}! I hope your home is still your favorite place to be.",
+                isFavorite: true, iconID: "house", colorToken: "blue", groupID: personalGroupID,
+                relationships: [.family, .friend], languages: ["English"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Celebrate together", occasions: [.weddingAnniversary],
+                body: "Happy anniversary! Wishing you both another year full of great memories.",
+                iconID: "heart", colorToken: "rose", groupID: personalGroupID,
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Anniversary letter", occasions: [.weddingAnniversary],
+                body: "Warm wishes on your anniversary. May the next chapter bring even more joy to you both.",
+                iconID: "envelope", colorToken: "rose", groupID: personalGroupID,
+                relationships: [.family, .friend], channels: [.email], languages: ["English"],
+                emailSubject: "Warm anniversary wishes", isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Professional birthday", occasions: [.birthday],
+                body: "Happy birthday, {{first_name}}! Wishing you continued success and a wonderful year ahead.",
+                iconID: "briefcase", colorToken: "teal", groupID: workGroupID,
+                relationships: [.client, .colleague], channels: [.email, .sms], languages: ["English"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Client thank you", occasions: [.clientAppreciation],
+                body: "Thinking of you today, {{first_name}}. Thank you for trusting me to be part of your journey.",
+                iconID: "hands.sparkles", colorToken: "teal", groupID: workGroupID,
+                relationships: [.client], channels: [.email, .sms], languages: ["English"],
+                emailSubject: "Thank you, {{first_name}}", isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "A client home milestone", occasions: [.homeAnniversary],
+                body: "Happy home anniversary, {{first_name}}! I hope this milestone still brings you plenty of joy.",
+                iconID: "house", colorToken: "teal", groupID: workGroupID,
+                relationships: [.client], channels: [.email], languages: ["English"],
+                emailSubject: "Happy home anniversary", isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Grateful for you", occasions: [.thanksgiving],
+                body: "Happy Thanksgiving, {{first_name}}! I am grateful to have you in my life.",
+                iconID: "leaf", colorToken: "amber", groupID: seasonalGroupID,
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Thanksgiving appreciation", occasions: [.thanksgiving],
+                body: "This Thanksgiving, I wanted to say how much I appreciate our relationship. Warm wishes to you, {{first_name}}.",
+                iconID: "leaf", colorToken: "amber", groupID: seasonalGroupID,
+                relationships: [.client, .colleague], channels: [.email], languages: ["English"],
+                emailSubject: "With appreciation this Thanksgiving", isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Merry and bright", occasions: [.christmas],
+                body: "Merry Christmas, {{first_name}}! Wishing you a joyful day and a bright holiday season.",
+                iconID: "gift", colorToken: "forest", groupID: seasonalGroupID,
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+            ),
+            GreetingTemplate(
+                title: "Holiday appreciation", occasions: [.christmas],
+                body: "Warm holiday wishes, {{first_name}}. Thank you for being an important part of this year.",
+                iconID: "gift", colorToken: "forest", groupID: seasonalGroupID,
+                relationships: [.client, .colleague], channels: [.email], languages: ["English"],
+                emailSubject: "Warm holiday wishes", isDefault: true, isBuiltIn: true
+            )
+        ]
     }
 }
 
@@ -309,6 +744,7 @@ extension AppStore {
                 people: seed.people,
                 events: seed.events,
                 templates: seed.templates,
+                templateGroups: seed.templateGroups,
                 persistenceError: "Local storage is unavailable on this device."
             )
         }
@@ -322,6 +758,7 @@ extension AppStore {
                 people: seed.people,
                 events: seed.events,
                 templates: seed.templates,
+                templateGroups: seed.templateGroups,
                 persistenceURL: url
             )
             store.save()
@@ -339,9 +776,11 @@ extension AppStore {
                 people: snapshot.people,
                 events: snapshot.events,
                 templates: snapshot.templates,
+                templateGroups: snapshot.templateGroups,
                 persistenceURL: url
             )
             if snapshot.version < Self.currentPersistenceVersion {
+                store.upgradeTemplateLibraryIfNeeded()
                 store.save()
             }
             return store
@@ -350,6 +789,7 @@ extension AppStore {
                 people: seed.people,
                 events: seed.events,
                 templates: seed.templates,
+                templateGroups: seed.templateGroups,
                 persistenceError: "Saved data could not be loaded. The sample workspace is shown, and changes will not be saved."
             )
         }
@@ -380,14 +820,18 @@ extension AppStore {
             GreetingEvent(personID: people[1].id, occasion: .birthday, date: date(-2), method: .sms, status: .completed)
         ]
 
-        let templates = [
-            GreetingTemplate(title: "Warm and simple", occasion: .birthday, message: "Happy birthday, {{first_name}}! Wishing you a wonderful day and a bright year ahead.", isFavorite: true),
-            GreetingTemplate(title: "A year at home", occasion: .homeAnniversary, message: "Happy home anniversary, {{first_name}}! I hope your home is still your favorite place to be.", isFavorite: true),
-            GreetingTemplate(title: "Client thank you", occasion: .clientAppreciation, message: "Thinking of you today, {{first_name}}. Thank you for trusting me to be part of your journey.", isFavorite: false),
-            GreetingTemplate(title: "Celebrate together", occasion: .weddingAnniversary, message: "Happy anniversary! Wishing you both another year full of great memories.", isFavorite: false)
-        ]
+        let personalGroup = TemplateGroup(name: "Personal", iconSemantic: "personal", iconID: "heart", colorToken: "rose", sortOrder: 0)
+        let workGroup = TemplateGroup(name: "Work", iconSemantic: "work", iconID: "briefcase", colorToken: "teal", sortOrder: 1)
+        let seasonalGroup = TemplateGroup(name: "Seasonal", iconSemantic: "seasonal", iconID: "gift", colorToken: "forest", sortOrder: 2)
+        let templateGroups = [personalGroup, workGroup, seasonalGroup]
 
-        return AppStore(people: people, events: events, templates: templates)
+        let templates = builtInTemplates(
+            personalGroupID: personalGroup.id,
+            workGroupID: workGroup.id,
+            seasonalGroupID: seasonalGroup.id
+        )
+
+        return AppStore(people: people, events: events, templates: templates, templateGroups: templateGroups)
     }
 }
 
@@ -396,6 +840,34 @@ private struct StoredAppData: Codable {
     let people: [Person]
     let events: [GreetingEvent]
     let templates: [GreetingTemplate]
+    let templateGroups: [TemplateGroup]
+
+    init(
+        version: Int,
+        people: [Person],
+        events: [GreetingEvent],
+        templates: [GreetingTemplate],
+        templateGroups: [TemplateGroup] = []
+    ) {
+        self.version = version
+        self.people = people
+        self.events = events
+        self.templates = templates
+        self.templateGroups = templateGroups
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decodeIfPresent(Int.self, forKey: .version) ?? 1
+        people = try container.decodeIfPresent([Person].self, forKey: .people) ?? []
+        events = try container.decodeIfPresent([GreetingEvent].self, forKey: .events) ?? []
+        templates = try container.decodeIfPresent([GreetingTemplate].self, forKey: .templates) ?? []
+        templateGroups = try container.decodeIfPresent([TemplateGroup].self, forKey: .templateGroups) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case version, people, events, templates, templateGroups
+    }
 }
 
 private enum AppPersistenceError: LocalizedError {

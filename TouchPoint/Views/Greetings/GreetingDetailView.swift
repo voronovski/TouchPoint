@@ -9,6 +9,7 @@ struct GreetingDetailView: View {
     @State private var composerRequest: ComposerRequest?
     @State private var composerError: String?
     @State private var messageEditorRequest: MessageEditorRequest?
+    @State private var showingSkipConfirmation = false
 
     private var event: GreetingEvent? {
         store.event(id: eventID)
@@ -69,7 +70,12 @@ struct GreetingDetailView: View {
                         SectionHeading(title: "Message", actionTitle: "Edit") {
                             messageEditorRequest = MessageEditorRequest(
                                 id: event.id,
-                                message: event.message
+                                message: event.message,
+                                personName: person.name,
+                                relationship: person.relationship,
+                                occasion: event.occasion,
+                                method: event.method,
+                                language: person.preferredLanguage
                             )
                         }
                         SurfaceCard {
@@ -88,6 +94,21 @@ struct GreetingDetailView: View {
                             PrimaryButtonLabel(title: actionTitle(for: event.method), systemImage: event.method.icon)
                         }
                         .buttonStyle(TouchPointPrimaryButtonStyle())
+
+                        Button(role: .destructive) {
+                            showingSkipConfirmation = true
+                        } label: {
+                            Label("Skip this greeting", systemImage: "forward.end")
+                                .frame(maxWidth: .infinity)
+                        }
+                    } else if store.status(for: event) == .skipped {
+                        Button {
+                            store.restoreGreeting(id: event.id)
+                        } label: {
+                            Label("Restore greeting", systemImage: "arrow.uturn.backward")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
                     }
                 }
                 .padding(.horizontal, TouchPointMetric.screenPadding)
@@ -129,10 +150,34 @@ struct GreetingDetailView: View {
             }
         }
         .sheet(item: $messageEditorRequest) { request in
-            GreetingMessageEditor(message: request.message) { message in
-                store.updateGreetingMessage(id: request.id, message: message)
-                messageEditorRequest = nil
-            }
+            GreetingMessageEditor(
+                message: request.message,
+                context: GreetingGenerationContext(
+                    occasion: request.occasion.title,
+                    relationship: request.relationship.title,
+                    channel: request.method.title,
+                    language: request.language,
+                    recipientName: request.personName.split(separator: " ").first.map(String.init),
+                    usesNamePlaceholder: false
+                ),
+                onSave: { message in
+                    store.updateGreetingMessage(id: request.id, message: message)
+                    messageEditorRequest = nil
+                },
+                onSaveAsTemplate: { message in
+                    store.addTemplate(GreetingTemplate(
+                        title: "\(request.occasion.title) message",
+                        occasions: [request.occasion],
+                        body: message,
+                        iconSemantic: "occasion",
+                        iconID: request.occasion.icon,
+                        colorToken: request.occasion.defaultColorToken,
+                        relationships: [request.relationship],
+                        channels: [request.method],
+                        languages: [request.language]
+                    ))
+                }
+            )
         }
         .alert("Cannot open composer", isPresented: Binding(
             get: { composerError != nil },
@@ -141,6 +186,14 @@ struct GreetingDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(composerError ?? "")
+        }
+        .confirmationDialog("Skip this greeting?", isPresented: $showingSkipConfirmation, titleVisibility: .visible) {
+            Button("Skip greeting", role: .destructive) {
+                store.skipGreeting(id: eventID)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("It will remain in Calendar and can be restored later.")
         }
     }
 
@@ -195,7 +248,7 @@ struct GreetingDetailView: View {
             composerRequest = ComposerRequest(
                 kind: .email,
                 recipient: person.email,
-                subject: event.occasion.title,
+                subject: event.subject ?? event.occasion.title,
                 body: event.message
             )
         case .reminder:
@@ -207,16 +260,32 @@ struct GreetingDetailView: View {
 private struct MessageEditorRequest: Identifiable {
     let id: UUID
     let message: String
+    let personName: String
+    let relationship: Relationship
+    let occasion: Occasion
+    let method: ContactMethod
+    let language: String
 }
 
 private struct GreetingMessageEditor: View {
     @Environment(\.dismiss) private var dismiss
     @State private var message: String
+    @State private var showingGenerator = false
+    @State private var didSaveTemplate = false
+    let context: GreetingGenerationContext
     let onSave: (String) -> Void
+    let onSaveAsTemplate: (String) -> Void
 
-    init(message: String, onSave: @escaping (String) -> Void) {
+    init(
+        message: String,
+        context: GreetingGenerationContext,
+        onSave: @escaping (String) -> Void,
+        onSaveAsTemplate: @escaping (String) -> Void
+    ) {
         _message = State(initialValue: message)
+        self.context = context
         self.onSave = onSave
+        self.onSaveAsTemplate = onSaveAsTemplate
     }
 
     private var trimmedMessage: String {
@@ -234,6 +303,19 @@ private struct GreetingMessageEditor: View {
                 } footer: {
                     Text("This is the exact text TouchPoint will place in Messages or Mail.")
                 }
+
+                Section {
+                    Button { showingGenerator = true } label: {
+                        Label("Generate with Apple Intelligence", systemImage: "apple.intelligence")
+                    }
+                    Button {
+                        onSaveAsTemplate(trimmedMessage)
+                        didSaveTemplate = true
+                    } label: {
+                        Label(didSaveTemplate ? "Saved to templates" : "Save as template", systemImage: didSaveTemplate ? "checkmark" : "rectangle.stack.badge.plus")
+                    }
+                    .disabled(trimmedMessage.isEmpty || didSaveTemplate)
+                }
             }
             .navigationTitle("Edit message")
             .navigationBarTitleDisplayMode(.inline)
@@ -245,6 +327,9 @@ private struct GreetingMessageEditor: View {
                     Button("Save") { onSave(trimmedMessage) }
                         .disabled(trimmedMessage.isEmpty)
                 }
+            }
+            .sheet(isPresented: $showingGenerator) {
+                AppleGreetingGeneratorSheet(context: context) { message = $0 }
             }
         }
     }

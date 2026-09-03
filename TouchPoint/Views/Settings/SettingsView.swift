@@ -15,25 +15,25 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(AppMode.allCases) { mode in
+                    ForEach(Focus.allCases) { focus in
                         Button {
-                            preferences.mode = mode
+                            preferences.focus = focus
                         } label: {
                             HStack(alignment: .top, spacing: 12) {
                                 IconTile(
-                                    systemImage: mode.icon,
-                                    tint: preferences.mode == mode ? .accentColor : .secondary
+                                    systemImage: focus.icon,
+                                    tint: preferences.focus == focus ? .accentColor : .secondary
                                 )
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(mode.title)
+                                    Text(focus.title)
                                         .font(.subheadline.weight(.semibold))
                                         .foregroundStyle(.primary)
-                                    Text(mode.subtitle)
+                                    Text(focus.subtitle)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if preferences.mode == mode {
+                                if preferences.focus == focus {
                                     Image(systemName: "checkmark")
                                         .font(.subheadline.weight(.bold))
                                         .foregroundStyle(.accent)
@@ -44,9 +44,9 @@ struct SettingsView: View {
                         .buttonStyle(.plain)
                     }
                 } header: {
-                    Text("Experience")
+                    Text("Focus")
                 } footer: {
-                    Text("Changing the experience adjusts priorities and wording. Your people, dates, templates, and plans stay unchanged.")
+                    Text("Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged.")
                 }
 
                 Section {
