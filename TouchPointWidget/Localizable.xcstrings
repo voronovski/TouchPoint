@@ -2,53 +2,108 @@
   "sourceLanguage" : "en",
   "strings" : {
     "A contact" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Контакт" } }
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Контакт"
+          }
+        }
       }
     },
     "Birthday" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "День рождения" } }
-      }
-    },
-    "Greeting" : {
-      "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Поздравление" } }
-      }
-    },
-    "Next greeting" : {
-      "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ближайшее поздравление" } }
-      }
-    },
-    "No upcoming greetings" : {
-      "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Нет ближайших поздравлений" } }
-      }
-    },
-    "Planned" : {
-      "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Запланировано" } }
-      }
-    },
-    "See the nearest planned greeting from Touch Point." : {
-      "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Показывает ближайшее запланированное поздравление из Touch Point." } }
-      }
-    },
-    "You’re all caught up." : {
-      "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "На ближайшее время всё готово." } }
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День рождения"
+          }
+        }
       }
     },
     "for %@" : {
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "для %@" } }
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "для %@"
+          }
+        }
       }
     },
     "for your contact" : {
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "для вашего контакта" } }
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "для вашего контакта"
+          }
+        }
+      }
+    },
+    "Greeting" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поздравление"
+          }
+        }
+      }
+    },
+    "Next greeting" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ближайшее поздравление"
+          }
+        }
+      }
+    },
+    "No upcoming greetings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет ближайших поздравлений"
+          }
+        }
+      }
+    },
+    "Planned" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запланировано"
+          }
+        }
+      }
+    },
+    "See the nearest planned greeting from Touch Point." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывает ближайшее запланированное поздравление из Touch Point."
+          }
+        }
+      }
+    },
+    "You’re all caught up." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На ближайшее время всё готово."
+          }
+        }
       }
     }
   },

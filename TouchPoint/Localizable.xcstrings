@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "{{%@}}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "{{%@}}"
+          }
+        }
+      }
+    },
     "A custom occasion needs a name." : {
       "localizations" : {
         "ru" : {
@@ -298,6 +308,7 @@
       }
     },
     "Before scheduling" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -318,6 +329,7 @@
       }
     },
     "Brief" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -638,6 +650,7 @@
       }
     },
     "Continue" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -747,16 +760,6 @@
         }
       }
     },
-    "DEFAULT" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ПО УМОЛЧАНИЮ"
-          }
-        }
-      }
-    },
     "Date and time" : {
       "localizations" : {
         "ru" : {
@@ -783,6 +786,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "День"
+          }
+        }
+      }
+    },
+    "DEFAULT" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ПО УМОЛЧАНИЮ"
           }
         }
       }
@@ -968,6 +981,7 @@
       }
     },
     "Edit person" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1048,6 +1062,7 @@
       }
     },
     "English" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1188,6 +1203,7 @@
       }
     },
     "French" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1208,6 +1224,7 @@
       }
     },
     "Friendly" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1318,6 +1335,7 @@
       }
     },
     "Greeting templates" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1348,6 +1366,7 @@
       }
     },
     "Heartfelt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1393,6 +1412,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Годовщина дома"
+          }
+        }
+      }
+    },
+    "iCloud sync issue" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проблема синхронизации iCloud"
+          }
+        }
+      }
+    },
+    "iCloud unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud недоступен"
           }
         }
       }
@@ -1638,6 +1677,7 @@
       }
     },
     "Messages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1738,6 +1778,7 @@
       }
     },
     "Next action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1827,16 +1868,6 @@
         }
       }
     },
-    "OK" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ОК"
-          }
-        }
-      }
-    },
     "Occasion" : {
       "localizations" : {
         "ru" : {
@@ -1863,6 +1894,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Поводы"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ОК"
           }
         }
       }
@@ -1897,6 +1938,16 @@
         }
       }
     },
+    "Open greeting plan" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть план поздравлений"
+          }
+        }
+      }
+    },
     "Open Mail" : {
       "localizations" : {
         "ru" : {
@@ -1917,42 +1968,22 @@
         }
       }
     },
-    "Open System Settings" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открыть системные настройки"
-          }
-        }
-      }
-    },
-    "Open Touch Point's form for adding a person." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открывает форму Touch Point для добавления человека."
-          }
-        }
-      }
-    },
-    "Open greeting plan" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открыть план поздравлений"
-          }
-        }
-      }
-    },
     "Open next greeting" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открыть следующее поздравление"
+          }
+        }
+      }
+    },
+    "Open System Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть системные настройки"
           }
         }
       }
@@ -1973,6 +2004,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открывает следующее запланированное поздравление в Touch Point."
+          }
+        }
+      }
+    },
+    "Open Touch Point's form for adding a person." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает форму Touch Point для добавления человека."
           }
         }
       }
@@ -2248,6 +2289,7 @@
       }
     },
     "Professional" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -2518,6 +2560,7 @@
       }
     },
     "Review plan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -2608,6 +2651,7 @@
       }
     },
     "Search" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -2718,6 +2762,7 @@
       }
     },
     "Spanish" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -2974,6 +3019,7 @@
       }
     },
     "Today" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -3174,6 +3220,7 @@
       }
     },
     "Warm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -3234,41 +3281,12 @@
       }
     },
     "Your time" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваше время"
-          }
-        }
-      }
-    },
-    "iCloud sync issue" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проблема синхронизации iCloud"
-          }
-        }
-      }
-    },
-    "iCloud unavailable" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iCloud недоступен"
-          }
-        }
-      }
-    },
-    "{{%@}}" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "{{%@}}"
           }
         }
       }
