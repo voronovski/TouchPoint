@@ -43,7 +43,7 @@ enum Occasion: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-enum DeliveryMethod: String, CaseIterable, Identifiable, Codable {
+enum ContactMethod: String, CaseIterable, Identifiable, Codable {
     case sms = "Text message"
     case email = "Email"
     case reminder = "Reminder only"
@@ -60,11 +60,10 @@ enum DeliveryMethod: String, CaseIterable, Identifiable, Codable {
 }
 
 enum GreetingStatus: String, CaseIterable, Identifiable, Codable {
-    case scheduled = "Scheduled"
-    case approval = "Needs approval"
-    case sent = "Sent"
-    case opened = "Opened"
-    case failed = "Failed"
+    case planned = "Planned"
+    case ready = "Ready"
+    case completed = "Completed"
+    case skipped = "Skipped"
 
     var id: Self { self }
 }
@@ -128,7 +127,7 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
     var personID: UUID
     var occasion: Occasion
     var date: Date
-    var delivery: DeliveryMethod
+    var method: ContactMethod
     var status: GreetingStatus
     var message: String
 
@@ -137,7 +136,7 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         personID: UUID,
         occasion: Occasion,
         date: Date,
-        delivery: DeliveryMethod,
+        method: ContactMethod,
         status: GreetingStatus,
         message: String = ""
     ) {
@@ -145,7 +144,7 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         self.personID = personID
         self.occasion = occasion
         self.date = date
-        self.delivery = delivery
+        self.method = method
         self.status = status
         self.message = message
     }

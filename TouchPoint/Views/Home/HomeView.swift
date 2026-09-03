@@ -18,8 +18,12 @@ struct HomeView: View {
 
     private var nextEvent: GreetingEvent? {
         store.events
-            .filter { $0.date >= Calendar.current.startOfDay(for: .now) }
-            .sorted { $0.date < $1.date }
+            .filter { ![.completed, .skipped].contains(store.status(for: $0)) }
+            .sorted {
+                if store.status(for: $0) == .ready && store.status(for: $1) != .ready { return true }
+                if store.status(for: $1) == .ready && store.status(for: $0) != .ready { return false }
+                return $0.date < $1.date
+            }
             .first
     }
 
@@ -30,14 +34,14 @@ struct HomeView: View {
         return store.events.filter { $0.date >= start && $0.date < end }.count
     }
 
-    private var approvalCount: Int {
-        store.events.filter { $0.status == .approval }.count
+    private var readyCount: Int {
+        store.events.filter { store.status(for: $0) == .ready }.count
     }
 
     private var workloadSummary: String {
         let greetings = weekEventCount == 1 ? "1 greeting" : "\(weekEventCount) greetings"
-        let approvals = approvalCount == 1 ? "1 needs approval" : "\(approvalCount) need approval"
-        return "\(greetings) this week · \(approvals)"
+        let ready = readyCount == 1 ? "1 ready to send" : "\(readyCount) ready to send"
+        return "\(greetings) this week · \(ready)"
     }
 
     var body: some View {
@@ -110,7 +114,7 @@ struct HomeView: View {
                             }
 
                             Spacer()
-                            StatusPill(status: nextEvent.status)
+                            StatusPill(status: store.status(for: nextEvent))
                         }
 
                         Divider()
@@ -127,8 +131,8 @@ struct HomeView: View {
                             selectedEvent = nextEvent
                         } label: {
                             PrimaryButtonLabel(
-                                title: nextEvent.status == .approval ? "Review greeting" : "View greeting",
-                                systemImage: nextEvent.status == .approval ? "checkmark.message" : "arrow.right"
+                                title: store.status(for: nextEvent) == .ready ? "Prepare greeting" : "View greeting",
+                                systemImage: store.status(for: nextEvent) == .ready ? nextEvent.method.icon : "arrow.right"
                             )
                         }
                         .buttonStyle(TouchPointPrimaryButtonStyle())
@@ -228,7 +232,7 @@ struct EventRow: View {
                 VStack(alignment: .trailing, spacing: 3) {
                     Text(event.date.touchPointDay)
                         .font(.caption.weight(.semibold))
-                    Label(event.delivery.rawValue, systemImage: event.delivery.icon)
+                    Label(event.method.rawValue, systemImage: event.method.icon)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

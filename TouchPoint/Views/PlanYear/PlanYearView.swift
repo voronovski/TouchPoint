@@ -6,12 +6,11 @@ struct PlanYearView: View {
     @State private var selectedPeople: Set<UUID> = []
     @State private var relationshipFilter: Relationship? = .client
     @State private var selectedOccasions: Set<Occasion> = [.birthday]
-    @State private var delivery: DeliveryMethod = .sms
-    @State private var requiresApproval = true
+    @State private var contactMethod: ContactMethod = .sms
     @State private var step = 0
     @State private var scheduledCount: Int?
 
-    private let stepTitles = ["People", "Occasions", "Delivery"]
+    private let stepTitles = ["People", "Occasions", "Action"]
 
     private var visiblePeople: [Person] {
         guard let relationshipFilter else { return store.people }
@@ -31,7 +30,7 @@ struct PlanYearView: View {
                     switch step {
                     case 0: peopleStep
                     case 1: occasionsStep
-                    default: deliveryStep
+                    default: actionStep
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -165,16 +164,16 @@ struct PlanYearView: View {
         .listStyle(.insetGrouped)
     }
 
-    private var deliveryStep: some View {
+    private var actionStep: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
                 VStack(alignment: .leading, spacing: 10) {
-                    SectionHeading(title: "Delivery method")
+                    SectionHeading(title: "How you will reach out")
                     SurfaceCard {
                         VStack(spacing: 0) {
-                            ForEach(Array(DeliveryMethod.allCases.enumerated()), id: \.element.id) { index, method in
+                            ForEach(Array(ContactMethod.allCases.enumerated()), id: \.element.id) { index, method in
                                 Button {
-                                    delivery = method
+                                    contactMethod = method
                                 } label: {
                                     HStack(spacing: 12) {
                                         IconTile(systemImage: method.icon, tint: .accentColor)
@@ -182,16 +181,16 @@ struct PlanYearView: View {
                                             .font(.subheadline.weight(.semibold))
                                             .foregroundStyle(.primary)
                                         Spacer()
-                                        Image(systemName: delivery == method ? "checkmark.circle.fill" : "circle")
+                                        Image(systemName: contactMethod == method ? "checkmark.circle.fill" : "circle")
                                             .font(.title3)
-                                            .foregroundStyle(delivery == method ? Color.accentColor : Color.secondary)
+                                            .foregroundStyle(contactMethod == method ? Color.accentColor : Color.secondary)
                                     }
                                     .padding(TouchPointMetric.cardPadding)
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
 
-                                if index < DeliveryMethod.allCases.count - 1 {
+                                if index < ContactMethod.allCases.count - 1 {
                                     Divider().padding(.leading, 52)
                                 }
                             }
@@ -199,27 +198,12 @@ struct PlanYearView: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 10) {
-                    SectionHeading(title: "Approval")
-                    SurfaceCard {
-                        HStack(spacing: 12) {
-                            IconTile(systemImage: "checkmark.message", tint: TouchPointColor.amber)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Review before sending")
-                                    .font(.subheadline.weight(.semibold))
-                                Text(requiresApproval ? "You stay in control" : "Send automatically")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Toggle("Review before sending", isOn: $requiresApproval)
-                                .labelsHidden()
-                        }
-                        .padding(TouchPointMetric.cardPadding)
-                    }
+                Label {
+                    Text(actionExplanation)
+                } icon: {
+                    Image(systemName: "hand.tap")
+                        .foregroundStyle(.accent)
                 }
-
-                Text("Messages are scheduled in each recipient's time zone. SMS delivery will require a verified sender before launch.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -249,8 +233,7 @@ struct PlanYearView: View {
                     scheduledCount = store.scheduleYear(
                         personIDs: selectedPeople,
                         occasions: selectedOccasions,
-                        delivery: delivery,
-                        requiresApproval: requiresApproval
+                        method: contactMethod
                     )
                 }
             } label: {
@@ -265,6 +248,17 @@ struct PlanYearView: View {
         }
         .padding(TouchPointMetric.screenPadding)
         .background(.bar)
+    }
+
+    private var actionExplanation: String {
+        switch contactMethod {
+        case .sms:
+            "On the scheduled day, TouchPoint opens Messages with the recipient and greeting filled in. You tap Send."
+        case .email:
+            "On the scheduled day, TouchPoint opens Mail with the recipient, subject, and greeting filled in. You tap Send."
+        case .reminder:
+            "TouchPoint reminds you to reach out and lets you mark the greeting complete."
+        }
     }
 
     private func toggle<T: Hashable>(_ value: T, in set: inout Set<T>) {

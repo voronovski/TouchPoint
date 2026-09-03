@@ -29,17 +29,23 @@ final class AppStore {
         events.first { $0.id == id }
     }
 
-    func approveGreeting(id: UUID) {
+    func completeGreeting(id: UUID) {
         guard let index = events.firstIndex(where: { $0.id == id }) else { return }
-        events[index].status = .scheduled
+        events[index].status = .completed
+    }
+
+    func status(for event: GreetingEvent) -> GreetingStatus {
+        if event.status == .planned && event.date <= .now {
+            return .ready
+        }
+        return event.status
     }
 
     @discardableResult
     func scheduleYear(
         personIDs: Set<UUID>,
         occasions: Set<Occasion>,
-        delivery: DeliveryMethod,
-        requiresApproval: Bool
+        method: ContactMethod
     ) -> Int {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: .now)
@@ -61,8 +67,8 @@ final class AppStore {
                         personID: person.id,
                         occasion: occasion,
                         date: date,
-                        delivery: delivery,
-                        status: requiresApproval ? .approval : .scheduled,
+                        method: method,
+                        status: .planned,
                         message: "Wishing you a wonderful \(occasion.rawValue.lowercased()), \(person.name.split(separator: " ").first.map(String.init) ?? person.name)!"
                     )
                 )
@@ -144,12 +150,12 @@ extension AppStore {
         }
 
         let events = [
-            GreetingEvent(personID: people[0].id, occasion: .birthday, date: date(0, hour: 8), delivery: .sms, status: .approval, message: "Happy birthday, Anna! Wishing you a bright year ahead."),
-            GreetingEvent(personID: people[1].id, occasion: .homeAnniversary, date: date(2), delivery: .sms, status: .scheduled, message: "One year already. Hope your home is still your favorite place."),
-            GreetingEvent(personID: people[2].id, occasion: .birthday, date: date(5, hour: 10), delivery: .email, status: .scheduled, message: "Feliz cumpleanos, Sofia!"),
-            GreetingEvent(personID: people[3].id, occasion: .clientAppreciation, date: date(9), delivery: .reminder, status: .scheduled),
-            GreetingEvent(personID: people[4].id, occasion: .weddingAnniversary, date: date(18), delivery: .sms, status: .scheduled),
-            GreetingEvent(personID: people[1].id, occasion: .birthday, date: date(-2), delivery: .sms, status: .opened)
+            GreetingEvent(personID: people[0].id, occasion: .birthday, date: date(0, hour: 8), method: .sms, status: .planned, message: "Happy birthday, Anna! Wishing you a bright year ahead."),
+            GreetingEvent(personID: people[1].id, occasion: .homeAnniversary, date: date(2), method: .sms, status: .planned, message: "One year already. Hope your home is still your favorite place."),
+            GreetingEvent(personID: people[2].id, occasion: .birthday, date: date(5, hour: 10), method: .email, status: .planned, message: "Feliz cumpleanos, Sofia!"),
+            GreetingEvent(personID: people[3].id, occasion: .clientAppreciation, date: date(9), method: .reminder, status: .planned),
+            GreetingEvent(personID: people[4].id, occasion: .weddingAnniversary, date: date(18), method: .sms, status: .planned),
+            GreetingEvent(personID: people[1].id, occasion: .birthday, date: date(-2), method: .sms, status: .completed)
         ]
 
         let templates = [

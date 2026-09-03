@@ -95,10 +95,10 @@ struct StatusPill: View {
 
     private var tint: Color {
         switch status {
-        case .scheduled: .accentColor
-        case .approval: TouchPointColor.amber
-        case .sent, .opened: TouchPointColor.forest
-        case .failed: .red
+        case .planned: .accentColor
+        case .ready: TouchPointColor.amber
+        case .completed: TouchPointColor.forest
+        case .skipped: .secondary
         }
     }
 

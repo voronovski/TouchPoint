@@ -6,7 +6,7 @@ struct RelationshipCalendarView: View {
 
     private var visibleEvents: [GreetingEvent] {
         store.events
-            .filter { status == nil || $0.status == status }
+            .filter { status == nil || store.status(for: $0) == status }
             .sorted { $0.date < $1.date }
     }
 
