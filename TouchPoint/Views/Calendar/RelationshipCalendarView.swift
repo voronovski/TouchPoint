@@ -48,9 +48,9 @@ struct RelationshipCalendarView: View {
                                 status = option
                             } label: {
                                 if status == option {
-                                    Label(option.rawValue, systemImage: "checkmark")
+                                    Label(option.title, systemImage: "checkmark")
                                 } else {
-                                    Text(option.rawValue)
+                                    Text(option.title)
                                 }
                             }
                         }

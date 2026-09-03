@@ -8,6 +8,7 @@ struct GreetingDetailView: View {
     var showsDoneButton = false
     @State private var composerRequest: ComposerRequest?
     @State private var composerError: String?
+    @State private var messageEditorRequest: MessageEditorRequest?
 
     private var event: GreetingEvent? {
         store.event(id: eventID)
@@ -23,7 +24,7 @@ struct GreetingDetailView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(person.name)
                                     .font(.headline)
-                                Label(event.occasion.rawValue, systemImage: event.occasion.icon)
+                                Label(event.occasion.title, systemImage: event.occasion.icon)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -37,19 +38,40 @@ struct GreetingDetailView: View {
                         SectionHeading(title: "Schedule")
                         SurfaceCard {
                             VStack(spacing: 0) {
-                                detailRow(icon: "calendar", title: "Date", value: event.date.touchPointDay)
+                                detailRow(
+                                    icon: "calendar",
+                                    title: "Recipient date",
+                                    value: event.date.touchPointDay(in: person.timeZoneIdentifier)
+                                )
                                 Divider().padding(.leading, 52)
-                                detailRow(icon: "clock", title: "Time", value: event.date.touchPointTime)
+                                detailRow(
+                                    icon: "clock",
+                                    title: "Recipient time",
+                                    value: event.date.touchPointTime(in: person.timeZoneIdentifier)
+                                )
                                 Divider().padding(.leading, 52)
-                                detailRow(icon: event.method.icon, title: "Action", value: event.method.rawValue)
+                                detailRow(icon: event.method.icon, title: "Action", value: event.method.title)
                                 Divider().padding(.leading, 52)
                                 detailRow(icon: "globe", title: "Time zone", value: person.timeZoneIdentifier.replacingOccurrences(of: "_", with: " "))
+                                if person.timeZoneIdentifier != TimeZone.current.identifier {
+                                    Divider().padding(.leading, 52)
+                                    detailRow(
+                                        icon: "clock.arrow.circlepath",
+                                        title: "Your time",
+                                        value: "\(event.date.touchPointDay), \(event.date.touchPointTime)"
+                                    )
+                                }
                             }
                         }
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
-                        SectionHeading(title: "Message")
+                        SectionHeading(title: "Message", actionTitle: "Edit") {
+                            messageEditorRequest = MessageEditorRequest(
+                                id: event.id,
+                                message: event.message
+                            )
+                        }
                         SurfaceCard {
                             Text(event.message.isEmpty ? "No message has been added yet." : event.message)
                                 .font(.body)
@@ -91,6 +113,8 @@ struct GreetingDetailView: View {
                     composerRequest = nil
                     if result == .sent {
                         store.completeGreeting(id: eventID)
+                    } else if result == .failed {
+                        composerError = "Messages could not prepare the text. Please try again."
                     }
                 }
             case .email:
@@ -102,6 +126,12 @@ struct GreetingDetailView: View {
                         composerError = error?.localizedDescription ?? "Mail could not prepare the message."
                     }
                 }
+            }
+        }
+        .sheet(item: $messageEditorRequest) { request in
+            GreetingMessageEditor(message: request.message) { message in
+                store.updateGreetingMessage(id: request.id, message: message)
+                messageEditorRequest = nil
             }
         }
         .alert("Cannot open composer", isPresented: Binding(
@@ -165,11 +195,57 @@ struct GreetingDetailView: View {
             composerRequest = ComposerRequest(
                 kind: .email,
                 recipient: person.email,
-                subject: event.occasion.rawValue,
+                subject: event.occasion.title,
                 body: event.message
             )
         case .reminder:
             store.completeGreeting(id: event.id)
+        }
+    }
+}
+
+private struct MessageEditorRequest: Identifiable {
+    let id: UUID
+    let message: String
+}
+
+private struct GreetingMessageEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var message: String
+    let onSave: (String) -> Void
+
+    init(message: String, onSave: @escaping (String) -> Void) {
+        _message = State(initialValue: message)
+        self.onSave = onSave
+    }
+
+    private var trimmedMessage: String {
+        message.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextEditor(text: $message)
+                        .frame(minHeight: 180)
+                } header: {
+                    Text("Personal message")
+                } footer: {
+                    Text("This is the exact text TouchPoint will place in Messages or Mail.")
+                }
+            }
+            .navigationTitle("Edit message")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { onSave(trimmedMessage) }
+                        .disabled(trimmedMessage.isEmpty)
+                }
+            }
         }
     }
 }

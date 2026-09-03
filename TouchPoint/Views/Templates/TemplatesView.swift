@@ -2,13 +2,28 @@ import SwiftUI
 
 struct TemplatesView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @State private var selectedTemplate: GreetingTemplate?
     @State private var showingNewTemplate = false
+
+    private var sortedTemplates: [GreetingTemplate] {
+        store.templates.sorted {
+            let leftRank = preferences.mode.occasionRank($0.occasion)
+            let rightRank = preferences.mode.occasionRank($1.occasion)
+            if leftRank != rightRank {
+                return leftRank < rightRank
+            }
+            if $0.isFavorite != $1.isFavorite {
+                return $0.isFavorite
+            }
+            return $0.title.localizedStandardCompare($1.title) == .orderedAscending
+        }
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(store.templates) { template in
+                ForEach(sortedTemplates) { template in
                     Button {
                         selectedTemplate = template
                     } label: {
@@ -47,7 +62,7 @@ struct TemplatesView: View {
                 }
             }
             .sheet(isPresented: $showingNewTemplate) {
-                NewTemplateView()
+                NewTemplateView(defaultOccasion: preferences.mode.occasionPriority[0])
             }
             .sheet(item: $selectedTemplate) { template in
                 NavigationStack {
@@ -56,7 +71,7 @@ struct TemplatesView: View {
                             IconTile(systemImage: template.occasion.icon, tint: template.occasion.tint)
                             Text(template.title)
                                 .font(.title2.bold())
-                            Text(template.occasion.rawValue)
+                            Text(template.occasion.title)
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.secondary)
                             SurfaceCard {
@@ -87,8 +102,12 @@ private struct NewTemplateView: View {
     @Environment(AppStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
-    @State private var occasion: Occasion = .birthday
+    @State private var occasion: Occasion
     @State private var message = ""
+
+    init(defaultOccasion: Occasion) {
+        _occasion = State(initialValue: defaultOccasion)
+    }
 
     private var canAdd: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -102,7 +121,7 @@ private struct NewTemplateView: View {
                     TextField("Template name", text: $title)
                     Picker("Occasion", selection: $occasion) {
                         ForEach(Occasion.allCases) { item in
-                            Text(item.rawValue).tag(item)
+                            Text(item.title).tag(item)
                         }
                     }
                 }

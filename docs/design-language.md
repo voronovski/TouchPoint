@@ -12,15 +12,14 @@ This is the living visual and interaction contract for TouchPoint. It borrows th
 
 ## Audience strategy
 
-TouchPoint is professional-first and relationship-inclusive.
+TouchPoint supports two equal starting experiences over one relationship model.
 
-- The first paid product is optimized for relationship-based professionals: Realtors, lenders, insurance agents, financial advisors, attorneys, and comparable client-facing businesses.
-- The primary value proposition is reliable relationship follow-up at scale, not access to greeting-card content.
-- Dashboard priorities are upcoming workload, greetings ready to send, completed actions, and exceptions.
-- `Plan the Year`, bulk selection, contact import, business branding, and fast system-composer handoff take precedence over decorative greeting features.
-- A professional account may also contain family, friends, and colleagues. These people use the same respectful core model and are not treated as second-class records.
-- Do not force CRM terminology into every surface. Use `People` as the universal entity and `Client` as a relationship type.
-- Personal use remains possible, but the first paid tier, onboarding examples, and roadmap must have a clear professional return on investment.
+- `Professional` prioritizes clients, business relationships, upcoming workload, and repeatable outreach.
+- `Personal` prioritizes family, friends, warm reminders, and a less operational tone.
+- The mode changes information priority, initial filters, examples, and copy. It does not create separate data stores, hide relationship types, or remove capabilities.
+- Switching modes never migrates or deletes people, dates, templates, or plans.
+- Keep `People` as the universal entity and `Client` as one relationship type. Do not force CRM terminology into shared surfaces.
+- Both experiences retain `Plan the Year`, native Messages/Mail handoff, manual completion, and the same trust contract.
 
 ## Cross-platform contract
 
@@ -28,6 +27,7 @@ TouchPoint will have native iOS and Android clients. Share product semantics and
 
 - Use the platform's native navigation, lists, sheets, dialogs, menus, date pickers, toggles, search, typography scaling, and accessibility behavior.
 - Keep domain models platform-neutral: `Person`, `ImportantDate`, `GreetingPlan`, `ContactMethod`, `Template`, and `GreetingStatus`.
+- Persist enum identifiers independently from localized labels. Current stable IDs include `client`, `family`, `home_anniversary`, `client_appreciation`, `sms`, `email`, `reminder`, `planned`, and `completed`.
 - Component names describe intent rather than framework types: `PersonRow`, `EventRow`, `StatusPill`, `SelectionRow`, `PrimaryAction`, and `EmptyState`.
 - Values in this document are logical points on iOS and density-independent pixels on Android unless a platform guideline requires an adjustment.
 - SF Symbols are iOS implementations, not shared identifiers. Android maps the same semantic role to a Material Symbol.
@@ -88,6 +88,31 @@ The primary destinations are `Home`, `Calendar`, `People`, and `Templates`. Use 
 3. A visible entry to `Plan the Year`.
 4. A hint of the upcoming schedule.
 
+### First-run mode selection
+
+The first launch shows one onboarding page with a clear `Professional` / `Personal` choice.
+
+- Do not preselect a mode. Continue remains disabled until the user makes an explicit choice.
+- Explain each option through audience and workflow, not feature checklists or pricing language.
+- State that the mode can be changed later without losing data.
+- Persist `AppMode` and onboarding completion in platform preferences (`UserDefaults` on iOS, the corresponding preferences store on Android).
+- Store stable values `professional` and `personal`; user-facing labels remain localizable.
+
+### Mode-aware Home
+
+- `Professional` shows weekly greeting volume, ready-to-send workload, `Next action`, client-oriented annual planning copy, and `Outreach schedule`.
+- `Personal` uses a relationship-focused summary, `Next up`, family/friend annual planning copy, and `Upcoming`.
+- Both modes show all relevant scheduled actions. Mode is a priority lens, not a data filter.
+- A settings gear in the Home toolbar opens mode settings. Changing the mode updates Home immediately.
+
+### Mode-aware defaults
+
+- Mode changes ordering and defaults, never availability. Every relationship and occasion remains reachable in both experiences.
+- `Professional` prioritizes `Client` then `Colleague`; a new person starts as `Client`.
+- `Personal` prioritizes `Family` then `Friend`; a new person starts as `Family`.
+- Templates and occasion pickers place the current mode's likely moments first while retaining the full shared collection.
+- These defaults are presentation preferences only and must not be persisted into relationship records unless the user saves a draft.
+
 ### Editor and planning flows
 
 - Present focused creation flows in a native sheet with a navigation container.
@@ -108,6 +133,25 @@ Collection states are explicit:
 - Initial error: focused retry state.
 - Refresh failure: keep the last usable content and show the error inline.
 - Loaded: native list; do not add a redundant surrounding surface.
+
+### Person editor
+
+`Person` is the shared relationship entity for clients, family, friends, and colleagues. Professional context enriches the entity but does not create a separate client model.
+
+- Require a display name and at least one actionable contact value: phone or email.
+- Support optional organization, relationship, preferred contact method, preferred language, and IANA time-zone identifier.
+- Keep create and edit on the same component and draft contract. The mode changes the title and confirmation verb, not the field hierarchy.
+- Stage important-date additions, edits, and removals inside the person draft. Persist them only with the main `Add` or `Save` action.
+- Show saved important dates separately from generated greeting plans. A source date is not a scheduled action.
+- Search people by name, email, and organization.
+- Do not add SMS consent or provider fields. TouchPoint opens the user's system composer and never acts as the sender.
+
+### Important dates
+
+- Birthdays, home anniversaries, wedding anniversaries, and similar annual events store `month` and `day`, never a midnight timestamp.
+- The editor uses explicit month/day controls and does not show or persist a fake year.
+- Validate the day against the selected month. February 29 is valid; in non-leap years its annual action resolves to February 28 in the recipient's time zone.
+- Global holidays such as Christmas and Thanksgiving are calendar rules, not duplicated person-level dates.
 
 ## Components
 
@@ -155,9 +199,10 @@ This is TouchPoint's signature workflow and must stay faster than scheduling gre
 
 1. Select people, with `Select all` available.
 2. Select one or more occasions.
-3. Choose how the user will reach out: Messages, Mail, or a reminder-only action.
-4. Review the number of plans, recipients, and time-zone behavior.
-5. Schedule once, then allow individual exceptions from Calendar or a person's detail screen.
+3. Choose how the user will reach out and select one greeting template per occasion. A neutral standard greeting remains available.
+4. Review recipients, the exact number of greetings that can be created, action, and template choices before saving.
+
+Schedule once, then allow individual message edits from Calendar or a person's detail screen. People without the selected date and greetings already planned for the same person, occasion, and day are excluded from the review count.
 
 Selection is staged locally until final confirmation. Do not mutate the calendar when moving between steps. The first release supports `Text message`, `Email`, and `Reminder only`. These are user actions, not delivery channels controlled by TouchPoint.
 
@@ -174,11 +219,34 @@ TouchPoint never sends an SMS or email automatically and never connects to a thi
 - TouchPoint does not claim or expose `Delivered`, `Opened`, `Clicked`, provider-level `Failed`, unsubscribe, sender verification, or delivery analytics.
 - If Messages or Mail is unavailable, explain which device capability or account is missing. Do not silently fall back to a web service or third-party provider.
 
+## Local reminder contract
+
+TouchPoint may schedule on-device notifications for future greeting actions. These reminders are distinct from message delivery and require no SMS/email provider.
+
+- Ask for notification permission only after an explicit `Enable reminders` action in Settings. Do not show the system prompt during first-run onboarding.
+- Schedule each reminder for the stored UTC action instant, which was derived from `09:00` in the recipient's time zone.
+- Reconcile pending notifications when events or people change and whenever the app becomes active. Completed and skipped actions must not retain pending reminders.
+- Notification copy says the greeting is ready and asks the user to open TouchPoint. It must not imply that a message was or will be sent automatically.
+- Store only the greeting UUID in notification metadata. Do not place phone numbers, email addresses, or message bodies in the notification payload.
+- Android should preserve these semantics with a platform notification scheduled for the same action instant and an explicit permission flow where required.
+
+## Local data
+
+The current prototype persists a versioned JSON snapshot in the app's Application Support directory. Schema `v2` separates stable cross-platform identifiers from English display labels.
+
+- Persist people, important dates, greeting plans, templates, contact methods, and completion state.
+- Write atomically so an interrupted save does not leave a partially written snapshot.
+- Keep stored values platform-neutral: UUIDs, enums with stable raw values, ISO-8601 instants, month/day pairs, and IANA time-zone identifiers.
+- Decode the legacy `v1` English enum values, then atomically rewrite the successfully loaded snapshot as `v2`. Never discard a readable older snapshot merely because labels were separated from identifiers.
+- Surface load or save failure inline while preserving usable in-memory content.
+- Treat this file as prototype storage, not the permanent synchronization architecture. A future account/team backend must define migrations and conflict behavior explicitly.
+
 ## Content and trust
 
 - Lead with concrete dates and names, not celebratory slogans.
 - Use warm but restrained language. Avoid guilt-inducing copy such as `You forgot` or `Overdue` for personal moments.
 - A scheduled message preview must show variable substitutions such as the recipient's name before opening the system composer.
+- Template variables are resolved when a plan is created. `{{first_name}}` and `{{name}}` must not reach the system composer as literal text.
 - Clearly distinguish `Save draft`, `Schedule`, `Open Messages/Mail`, and `Completed`.
 - Never imply that TouchPoint delivered a message. The app can only record that the user completed the system compose flow.
 
@@ -195,7 +263,9 @@ TouchPoint never sends an SMS or email automatically and never connects to a thi
 - All user-facing strings belong in localization resources before production release.
 - Store instants in UTC and store the recipient IANA time-zone identifier separately.
 - Birthdays and anniversaries are date-only values. Never shift them by converting midnight across time zones.
-- Calculate the ready-to-send reminder time in the recipient's zone and show the zone in planning and detail screens.
+- Create the action instant at `09:00` in the recipient's IANA time zone, then persist that instant in UTC. Planning an occasion later on the same recipient-local day keeps it due today instead of moving it to the next year.
+- Show recipient date, recipient time, and zone in greeting detail. When the recipient zone differs from the device zone, also show the equivalent local `Your time` value.
+- Compact Home and Calendar rows show the occasion date in the recipient's zone; grouping may remain based on the device-local action day because that is when the owner must act.
 - Format dates, names, phone numbers, pluralization, and week starts with platform locale APIs.
 - Templates declare their language. Automatic translation or AI rewriting requires an explicit preview and approval.
 
@@ -207,9 +277,12 @@ TouchPoint never sends an SMS or email automatically and never connects to a thi
 - Home combines the next action, annual planning entry, and a filterable near-term schedule.
 - Default annual-plan action: text message opened in the system Messages composer.
 - Sending is always manual. No SMS/email provider integration is planned.
+- Optional reminders use local device notifications and are enabled explicitly from Settings.
 - Source UI language for the prototype: English; localization architecture remains required.
-- First paid audience: relationship-based professionals, while preserving family, friend, and colleague relationships.
-- Annual planning defaults to the `Client` filter and can be widened to any relationship or all people.
+- First-run experience mode: explicit `Professional` or `Personal` selection.
+- Professional annual planning defaults to `Client`; Personal defaults to `Family`. Both can widen to any relationship or all people.
+- Experience mode and onboarding completion persist in `UserDefaults`; relationship data remains in the separate JSON snapshot.
+- The prototype saves a `v2` local JSON snapshot between launches and migrates readable `v1` data in place.
 
 ## Open product questions
 

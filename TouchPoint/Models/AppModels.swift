@@ -1,24 +1,90 @@
 import Foundation
 import SwiftUI
 
-enum Relationship: String, CaseIterable, Identifiable, Codable {
-    case client = "Client"
-    case family = "Family"
-    case friend = "Friend"
-    case colleague = "Colleague"
-
-    var id: Self { self }
+protocol StableStringCodable: RawRepresentable, Codable where RawValue == String {
+    static var legacyRawValues: [String: Self] { get }
 }
 
-enum Occasion: String, CaseIterable, Identifiable, Codable {
-    case birthday = "Birthday"
-    case homeAnniversary = "Home anniversary"
-    case weddingAnniversary = "Wedding anniversary"
-    case thanksgiving = "Thanksgiving"
-    case christmas = "Christmas"
-    case clientAppreciation = "Client appreciation"
+extension StableStringCodable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        guard let decoded = Self(rawValue: value) ?? Self.legacyRawValues[value] else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unsupported \(Self.self) value: \(value)"
+            )
+        }
+        self = decoded
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+}
+
+enum Relationship: String, CaseIterable, Identifiable, StableStringCodable {
+    case client
+    case family
+    case friend
+    case colleague
 
     var id: Self { self }
+
+    static let legacyRawValues: [String: Relationship] = [
+        "Client": .client,
+        "Family": .family,
+        "Friend": .friend,
+        "Colleague": .colleague
+    ]
+
+    var title: String {
+        switch self {
+        case .client: "Client"
+        case .family: "Family"
+        case .friend: "Friend"
+        case .colleague: "Colleague"
+        }
+    }
+}
+
+enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
+    case birthday
+    case homeAnniversary = "home_anniversary"
+    case weddingAnniversary = "wedding_anniversary"
+    case thanksgiving
+    case christmas
+    case clientAppreciation = "client_appreciation"
+
+    var id: Self { self }
+
+    static let legacyRawValues: [String: Occasion] = [
+        "Birthday": .birthday,
+        "Home anniversary": .homeAnniversary,
+        "Wedding anniversary": .weddingAnniversary,
+        "Thanksgiving": .thanksgiving,
+        "Christmas": .christmas,
+        "Client appreciation": .clientAppreciation
+    ]
+
+    var title: String {
+        switch self {
+        case .birthday: "Birthday"
+        case .homeAnniversary: "Home anniversary"
+        case .weddingAnniversary: "Wedding anniversary"
+        case .thanksgiving: "Thanksgiving"
+        case .christmas: "Christmas"
+        case .clientAppreciation: "Client appreciation"
+        }
+    }
+
+    static let contactSpecificCases: [Occasion] = [
+        .birthday,
+        .homeAnniversary,
+        .weddingAnniversary,
+        .clientAppreciation
+    ]
 
     var icon: String {
         switch self {
@@ -43,12 +109,26 @@ enum Occasion: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-enum ContactMethod: String, CaseIterable, Identifiable, Codable {
-    case sms = "Text message"
-    case email = "Email"
-    case reminder = "Reminder only"
+enum ContactMethod: String, CaseIterable, Identifiable, StableStringCodable {
+    case sms
+    case email
+    case reminder
 
     var id: Self { self }
+
+    static let legacyRawValues: [String: ContactMethod] = [
+        "Text message": .sms,
+        "Email": .email,
+        "Reminder only": .reminder
+    ]
+
+    var title: String {
+        switch self {
+        case .sms: "Text message"
+        case .email: "Email"
+        case .reminder: "Reminder only"
+        }
+    }
 
     var icon: String {
         switch self {
@@ -59,13 +139,29 @@ enum ContactMethod: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-enum GreetingStatus: String, CaseIterable, Identifiable, Codable {
-    case planned = "Planned"
-    case ready = "Ready"
-    case completed = "Completed"
-    case skipped = "Skipped"
+enum GreetingStatus: String, CaseIterable, Identifiable, StableStringCodable {
+    case planned
+    case ready
+    case completed
+    case skipped
 
     var id: Self { self }
+
+    static let legacyRawValues: [String: GreetingStatus] = [
+        "Planned": .planned,
+        "Ready": .ready,
+        "Completed": .completed,
+        "Skipped": .skipped
+    ]
+
+    var title: String {
+        switch self {
+        case .planned: "Planned"
+        case .ready: "Ready"
+        case .completed: "Completed"
+        case .skipped: "Skipped"
+        }
+    }
 }
 
 struct Person: Identifiable, Hashable, Codable {
@@ -73,7 +169,9 @@ struct Person: Identifiable, Hashable, Codable {
     var name: String
     var email: String
     var phone: String
+    var organization: String
     var relationship: Relationship
+    var preferredContactMethod: ContactMethod
     var preferredLanguage: String
     var timeZoneIdentifier: String
     var importantDates: [ImportantDate]
@@ -83,7 +181,9 @@ struct Person: Identifiable, Hashable, Codable {
         name: String,
         email: String = "",
         phone: String = "",
+        organization: String = "",
         relationship: Relationship,
+        preferredContactMethod: ContactMethod = .sms,
         preferredLanguage: String = "English",
         timeZoneIdentifier: String = "America/Los_Angeles",
         importantDates: [ImportantDate] = []
@@ -92,7 +192,9 @@ struct Person: Identifiable, Hashable, Codable {
         self.name = name
         self.email = email
         self.phone = phone
+        self.organization = organization
         self.relationship = relationship
+        self.preferredContactMethod = preferredContactMethod
         self.preferredLanguage = preferredLanguage
         self.timeZoneIdentifier = timeZoneIdentifier
         self.importantDates = importantDates
@@ -119,6 +221,16 @@ struct ImportantDate: Identifiable, Hashable, Codable {
         self.occasion = occasion
         self.month = month
         self.day = day
+    }
+
+    var formatted: String {
+        var components = DateComponents()
+        components.calendar = .current
+        components.year = 2000
+        components.month = month
+        components.day = day
+        guard let date = components.date else { return "Date unavailable" }
+        return date.formatted(.dateTime.month(.wide).day())
     }
 }
 
@@ -150,7 +262,7 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
     }
 }
 
-struct GreetingTemplate: Identifiable, Hashable {
+struct GreetingTemplate: Identifiable, Hashable, Codable {
     let id: UUID
     var title: String
     var occasion: Occasion

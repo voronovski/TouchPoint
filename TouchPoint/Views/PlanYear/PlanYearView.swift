@@ -2,23 +2,37 @@ import SwiftUI
 
 struct PlanYearView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPeople: Set<UUID> = []
     @State private var relationshipFilter: Relationship? = .client
+    @State private var didSetInitialFilter = false
     @State private var selectedOccasions: Set<Occasion> = [.birthday]
     @State private var contactMethod: ContactMethod = .sms
+    @State private var templateIDsByOccasion: [Occasion: UUID] = [:]
     @State private var step = 0
     @State private var scheduledCount: Int?
 
-    private let stepTitles = ["People", "Occasions", "Action"]
+    private let stepTitles = ["People", "Occasions", "Message", "Review"]
 
     private var visiblePeople: [Person] {
-        guard let relationshipFilter else { return store.people }
-        return store.people.filter { $0.relationship == relationshipFilter }
+        let people = if let relationshipFilter {
+            store.people.filter { $0.relationship == relationshipFilter }
+        } else {
+            store.people
+        }
+        return people.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     private var allVisiblePeopleSelected: Bool {
         !visiblePeople.isEmpty && visiblePeople.allSatisfy { selectedPeople.contains($0.id) }
+    }
+
+    private var schedulableCount: Int {
+        store.schedulableGreetingCount(
+            personIDs: selectedPeople,
+            occasions: selectedOccasions
+        )
     }
 
     var body: some View {
@@ -30,7 +44,8 @@ struct PlanYearView: View {
                     switch step {
                     case 0: peopleStep
                     case 1: occasionsStep
-                    default: actionStep
+                    case 2: messageStep
+                    default: reviewStep
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -51,7 +66,12 @@ struct PlanYearView: View {
             )) {
                 Button("Done") { dismiss() }
             } message: {
-                Text("\(scheduledCount ?? 0) greetings were added to your calendar.")
+                Text(scheduledResultMessage)
+            }
+            .onAppear {
+                guard !didSetInitialFilter else { return }
+                relationshipFilter = preferences.mode.defaultRelationship
+                didSetInitialFilter = true
             }
         }
     }
@@ -86,7 +106,7 @@ struct PlanYearView: View {
                                 Text(person.name)
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(.primary)
-                                Text(person.relationship.rawValue)
+                                Text(person.relationship.title)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -109,14 +129,14 @@ struct PlanYearView: View {
                                 relationshipFilter = relationship
                             } label: {
                                 if relationshipFilter == relationship {
-                                    Label(relationship.rawValue, systemImage: "checkmark")
+                                    Label(relationship.title, systemImage: "checkmark")
                                 } else {
-                                    Text(relationship.rawValue)
+                                    Text(relationship.title)
                                 }
                             }
                         }
                     } label: {
-                        Label(relationshipFilter?.rawValue ?? "All relationships", systemImage: "line.3.horizontal.decrease")
+                        Label(relationshipFilter?.title ?? "All relationships", systemImage: "line.3.horizontal.decrease")
                     }
                     .textCase(nil)
 
@@ -141,13 +161,13 @@ struct PlanYearView: View {
     private var occasionsStep: some View {
         List {
             Section("Choose occasions") {
-                ForEach(Occasion.allCases) { occasion in
+                ForEach(preferences.mode.occasionPriority) { occasion in
                     Button {
                         toggle(occasion, in: &selectedOccasions)
                     } label: {
                         HStack(spacing: 12) {
                             IconTile(systemImage: occasion.icon, tint: occasion.tint)
-                            Text(occasion.rawValue)
+                            Text(occasion.title)
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.primary)
                             Spacer()
@@ -164,7 +184,7 @@ struct PlanYearView: View {
         .listStyle(.insetGrouped)
     }
 
-    private var actionStep: some View {
+    private var messageStep: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
                 VStack(alignment: .leading, spacing: 10) {
@@ -177,7 +197,7 @@ struct PlanYearView: View {
                                 } label: {
                                     HStack(spacing: 12) {
                                         IconTile(systemImage: method.icon, tint: .accentColor)
-                                        Text(method.rawValue)
+                                        Text(method.title)
                                             .font(.subheadline.weight(.semibold))
                                             .foregroundStyle(.primary)
                                         Spacer()
@@ -191,6 +211,21 @@ struct PlanYearView: View {
                                 .buttonStyle(.plain)
 
                                 if index < ContactMethod.allCases.count - 1 {
+                                    Divider().padding(.leading, 52)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeading(title: "Greeting templates")
+                    SurfaceCard {
+                        VStack(spacing: 0) {
+                            ForEach(Array(orderedSelectedOccasions.enumerated()), id: \.element.id) { index, occasion in
+                                templateMenu(for: occasion)
+
+                                if index < orderedSelectedOccasions.count - 1 {
                                     Divider().padding(.leading, 52)
                                 }
                             }
@@ -212,6 +247,159 @@ struct PlanYearView: View {
         }
     }
 
+    private var reviewStep: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeading(title: "Plan summary")
+                    SurfaceCard {
+                        VStack(spacing: 0) {
+                            reviewRow(
+                                icon: "person.2",
+                                title: "People",
+                                value: selectedPeople.count.formatted()
+                            )
+                            Divider().padding(.leading, 52)
+                            reviewRow(
+                                icon: "calendar.badge.plus",
+                                title: "Greetings to add",
+                                value: schedulableCount.formatted()
+                            )
+                            Divider().padding(.leading, 52)
+                            reviewRow(
+                                icon: contactMethod.icon,
+                                title: "Action",
+                                value: contactMethod.title
+                            )
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeading(title: "Messages")
+                    SurfaceCard {
+                        VStack(spacing: 0) {
+                            ForEach(Array(orderedSelectedOccasions.enumerated()), id: \.element.id) { index, occasion in
+                                HStack(spacing: 12) {
+                                    IconTile(systemImage: occasion.icon, tint: occasion.tint)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(occasion.title)
+                                            .font(.subheadline.weight(.semibold))
+                                        Text(templateTitle(for: occasion))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(TouchPointMetric.cardPadding)
+
+                                if index < orderedSelectedOccasions.count - 1 {
+                                    Divider().padding(.leading, 52)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Label {
+                    Text(reviewExplanation)
+                } icon: {
+                    Image(systemName: schedulableCount == 0 ? "exclamationmark.triangle" : "checkmark.circle")
+                        .foregroundStyle(schedulableCount == 0 ? TouchPointColor.amber : Color.accentColor)
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, TouchPointMetric.screenPadding)
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var orderedSelectedOccasions: [Occasion] {
+        preferences.mode.occasionPriority.filter { selectedOccasions.contains($0) }
+    }
+
+    private func matchingTemplates(for occasion: Occasion) -> [GreetingTemplate] {
+        store.templates
+            .filter { $0.occasion == occasion }
+            .sorted {
+                if $0.isFavorite != $1.isFavorite {
+                    return $0.isFavorite
+                }
+                return $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            }
+    }
+
+    private func templateTitle(for occasion: Occasion) -> String {
+        guard let templateID = templateIDsByOccasion[occasion],
+              let template = store.templates.first(where: { $0.id == templateID }) else {
+            return "Standard greeting"
+        }
+        return template.title
+    }
+
+    private func templateMenu(for occasion: Occasion) -> some View {
+        Menu {
+            Button {
+                templateIDsByOccasion.removeValue(forKey: occasion)
+            } label: {
+                if templateIDsByOccasion[occasion] == nil {
+                    Label("Standard greeting", systemImage: "checkmark")
+                } else {
+                    Text("Standard greeting")
+                }
+            }
+
+            let templates = matchingTemplates(for: occasion)
+            if !templates.isEmpty {
+                Divider()
+            }
+            ForEach(templates) { template in
+                Button {
+                    templateIDsByOccasion[occasion] = template.id
+                } label: {
+                    if templateIDsByOccasion[occasion] == template.id {
+                        Label(template.title, systemImage: "checkmark")
+                    } else {
+                        Text(template.title)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                IconTile(systemImage: occasion.icon, tint: occasion.tint)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(occasion.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text(templateTitle(for: occasion))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(TouchPointMetric.cardPadding)
+            .contentShape(Rectangle())
+        }
+    }
+
+    private func reviewRow(icon: String, title: String, value: String) -> some View {
+        HStack(spacing: 12) {
+            IconTile(systemImage: icon)
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(TouchPointMetric.cardPadding)
+    }
+
     private var footer: some View {
         HStack(spacing: 12) {
             if step > 0 {
@@ -228,26 +416,73 @@ struct PlanYearView: View {
 
             Button {
                 if step < stepTitles.count - 1 {
+                    if step == 1 {
+                        selectRecommendedTemplates()
+                    }
                     withAnimation(.snappy) { step += 1 }
                 } else {
                     scheduledCount = store.scheduleYear(
                         personIDs: selectedPeople,
                         occasions: selectedOccasions,
-                        method: contactMethod
+                        method: contactMethod,
+                        templateIDsByOccasion: templateIDsByOccasion
                     )
                 }
             } label: {
                 PrimaryButtonLabel(
-                    title: step == stepTitles.count - 1 ? "Schedule greetings" : "Continue",
+                    title: primaryActionTitle,
                     systemImage: step == stepTitles.count - 1 ? "calendar.badge.plus" : "chevron.right"
                 )
             }
             .buttonStyle(TouchPointPrimaryButtonStyle())
-            .disabled(step == 0 && selectedPeople.isEmpty || step == 1 && selectedOccasions.isEmpty)
-            .opacity(step == 0 && selectedPeople.isEmpty || step == 1 && selectedOccasions.isEmpty ? 0.45 : 1)
+            .disabled(cannotContinue)
+            .opacity(cannotContinue ? 0.45 : 1)
         }
         .padding(TouchPointMetric.screenPadding)
         .background(.bar)
+    }
+
+    private var primaryActionTitle: String {
+        switch step {
+        case 2:
+            "Review plan"
+        case 3:
+            "Schedule \(schedulableCount) \(schedulableCount == 1 ? "greeting" : "greetings")"
+        default:
+            "Continue"
+        }
+    }
+
+    private var cannotContinue: Bool {
+        switch step {
+        case 0: selectedPeople.isEmpty
+        case 1: selectedOccasions.isEmpty
+        case 3: schedulableCount == 0
+        default: false
+        }
+    }
+
+    private var reviewExplanation: String {
+        if schedulableCount == 0 {
+            return "No new greetings can be added. The selected people may be missing these dates, or matching greetings may already be planned."
+        }
+        return "Only greetings with an available date are added. Each message is personalized now and remains editable before you open Messages or Mail."
+    }
+
+    private var scheduledResultMessage: String {
+        let count = scheduledCount ?? 0
+        if count == 1 {
+            return "1 greeting was added to your calendar."
+        }
+        return "\(count) greetings were added to your calendar."
+    }
+
+    private func selectRecommendedTemplates() {
+        for occasion in selectedOccasions where templateIDsByOccasion[occasion] == nil {
+            if let recommended = matchingTemplates(for: occasion).first {
+                templateIDsByOccasion[occasion] = recommended.id
+            }
+        }
     }
 
     private var actionExplanation: String {

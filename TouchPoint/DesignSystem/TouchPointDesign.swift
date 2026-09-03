@@ -103,7 +103,7 @@ struct StatusPill: View {
     }
 
     var body: some View {
-        Text(status.rawValue)
+        Text(status.title)
             .font(.caption2.weight(.semibold))
             .foregroundStyle(tint)
             .padding(.horizontal, 8)
@@ -145,5 +145,22 @@ extension Date {
 
     var touchPointTime: String {
         formatted(date: .omitted, time: .shortened)
+    }
+
+    func touchPointDay(in timeZoneIdentifier: String) -> String {
+        var style = Date.FormatStyle.dateTime
+            .weekday(.abbreviated)
+            .month(.abbreviated)
+            .day()
+        style.timeZone = TimeZone(identifier: timeZoneIdentifier) ?? .current
+        return formatted(style)
+    }
+
+    func touchPointTime(in timeZoneIdentifier: String) -> String {
+        var style = Date.FormatStyle.dateTime
+            .hour()
+            .minute()
+        style.timeZone = TimeZone(identifier: timeZoneIdentifier) ?? .current
+        return formatted(style)
     }
 }

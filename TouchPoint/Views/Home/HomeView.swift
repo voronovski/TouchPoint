@@ -2,8 +2,10 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @State private var horizon: PlanningHorizon = .week
     @State private var showingPlanYear = false
+    @State private var showingSettings = false
     @State private var selectedEvent: GreetingEvent?
 
     private var upcomingEvents: [GreetingEvent] {
@@ -44,6 +46,26 @@ struct HomeView: View {
         return "\(greetings) this week · \(ready)"
     }
 
+    private var headerSummary: String {
+        switch preferences.mode {
+        case .professional: workloadSummary
+        case .personal: "Stay close to the people who matter"
+        }
+    }
+
+    private var planTitle: String {
+        preferences.mode == .professional ? "Plan client outreach" : "Plan your year"
+    }
+
+    private var planDescription: String {
+        switch preferences.mode {
+        case .professional:
+            "Choose clients and occasions once. Touch Point will build your outreach schedule."
+        case .personal:
+            "Choose family, friends, and special moments once. Touch Point will remember the rest."
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -58,10 +80,23 @@ struct HomeView: View {
                 .padding(.bottom, 24)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("TouchPoint")
+            .navigationTitle("Touch Point")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Settings")
+                }
+            }
             .sheet(isPresented: $showingPlanYear) {
                 PlanYearView()
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
             .sheet(item: $selectedEvent) { event in
                 NavigationStack {
@@ -86,7 +121,7 @@ struct HomeView: View {
                 Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text(workloadSummary)
+                Text(headerSummary)
                     .font(.subheadline.weight(.semibold))
             }
 
@@ -97,7 +132,7 @@ struct HomeView: View {
     @ViewBuilder
     private var nextUpSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeading(title: "Next up")
+            SectionHeading(title: preferences.mode == .professional ? "Next action" : "Next up")
 
             if let nextEvent, let person = store.person(for: nextEvent) {
                 SurfaceCard {
@@ -108,7 +143,7 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(person.name)
                                     .font(.headline)
-                                Label(nextEvent.occasion.rawValue, systemImage: nextEvent.occasion.icon)
+                                Label(nextEvent.occasion.title, systemImage: nextEvent.occasion.icon)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -120,9 +155,15 @@ struct HomeView: View {
                         Divider()
 
                         HStack {
-                            Label(nextEvent.date.touchPointDay, systemImage: "calendar")
+                            Label(
+                                nextEvent.date.touchPointDay(in: person.timeZoneIdentifier),
+                                systemImage: "calendar"
+                            )
                             Spacer()
-                            Label(nextEvent.date.touchPointTime, systemImage: "clock")
+                            Label(
+                                nextEvent.date.touchPointTime(in: person.timeZoneIdentifier),
+                                systemImage: "clock"
+                            )
                         }
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
@@ -150,9 +191,9 @@ struct HomeView: View {
                     IconTile(systemImage: "calendar.badge.plus", tint: .accentColor)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Plan the year")
+                        Text(planTitle)
                             .font(.headline)
-                        Text("Choose people and occasions once. TouchPoint will build the schedule.")
+                        Text(planDescription)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -161,7 +202,10 @@ struct HomeView: View {
                 Button {
                     showingPlanYear = true
                 } label: {
-                    PrimaryButtonLabel(title: "Plan greetings", systemImage: "wand.and.sparkles")
+                    PrimaryButtonLabel(
+                        title: preferences.mode == .professional ? "Plan client greetings" : "Plan greetings",
+                        systemImage: "wand.and.sparkles"
+                    )
                 }
                 .buttonStyle(TouchPointPrimaryButtonStyle())
             }
@@ -172,7 +216,7 @@ struct HomeView: View {
     private var scheduleSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Schedule")
+                Text(preferences.mode == .professional ? "Outreach schedule" : "Upcoming")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -222,7 +266,7 @@ struct EventRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(person.name)
                         .font(.subheadline.weight(.semibold))
-                    Text(event.occasion.rawValue)
+                    Text(event.occasion.title)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -230,9 +274,9 @@ struct EventRow: View {
                 Spacer(minLength: 8)
 
                 VStack(alignment: .trailing, spacing: 3) {
-                    Text(event.date.touchPointDay)
+                    Text(event.date.touchPointDay(in: person.timeZoneIdentifier))
                         .font(.caption.weight(.semibold))
-                    Label(event.method.rawValue, systemImage: event.method.icon)
+                    Label(event.method.title, systemImage: event.method.icon)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

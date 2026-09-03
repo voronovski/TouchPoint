@@ -1,0 +1,87 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-gray:1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "spring 2.svg",
+          "name" : "spring 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0.5000873360540936,
+              -283.73581108470887
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "srgb:0.47563,0.47565,0.47564,1.00000"
+          },
+          "image-name" : "calendar.svg",
+          "name" : "calendar"
+        },
+        {
+          "fill" : {
+            "solid" : "srgb:1.00000,0.14913,0.00000,1.00000"
+          },
+          "image-name" : "circle_top.svg",
+          "name" : "circle_top",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -84.71875,
+              221.99994200000015
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "srgb:1.00000,0.14913,0.00000,1.00000"
+          },
+          "image-name" : "circle_mid.svg",
+          "name" : "circle_mid",
+          "opacity" : 0.6,
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -84.7188590000003,
+              221.99980850000009
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "srgb:1.00000,0.14913,0.00000,1.00000"
+          },
+          "image-name" : "circle_bottom.svg",
+          "name" : "circle_bottom",
+          "opacity" : 0.3,
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -84.71837200000004,
+              222.00040750000005
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
