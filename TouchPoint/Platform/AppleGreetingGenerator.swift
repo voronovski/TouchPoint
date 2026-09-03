@@ -23,6 +23,7 @@ enum AppleGreetingGeneratorError: LocalizedError {
     case modelUnavailable(String)
     case unsupportedLocale
     case emptyResponse
+    case invalidPlaceholder
 
     var errorDescription: String? {
         switch self {
@@ -34,6 +35,8 @@ enum AppleGreetingGeneratorError: LocalizedError {
             "Apple Intelligence does not support the current device language. You can still write the message manually."
         case .emptyResponse:
             "Apple Intelligence returned an empty message. Please try again."
+        case .invalidPlaceholder:
+            "The generated message used an unsupported name placeholder. Please generate again or edit it manually."
         }
     }
 }
@@ -110,6 +113,12 @@ enum AppleGreetingGenerator {
         let response = try await session.respond(to: prompt)
         let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw AppleGreetingGeneratorError.emptyResponse }
+        let placeholderCount = text.components(separatedBy: "{{first_name}}").count - 1
+        if context.usesNamePlaceholder {
+            guard placeholderCount == 1 else { throw AppleGreetingGeneratorError.invalidPlaceholder }
+        } else if text.contains("{{") || text.contains("}}") {
+            throw AppleGreetingGeneratorError.invalidPlaceholder
+        }
         return text
 #else
         throw AppleGreetingGeneratorError.unsupportedOS
@@ -143,6 +152,8 @@ struct AppleGreetingGeneratorSheet: View {
     @State private var tone = "Warm"
     @State private var details = ""
     @State private var generatedText = ""
+    @State private var variants: [String] = []
+    @State private var selectedVariant = 0
     @State private var isGenerating = false
     @State private var errorMessage: String?
 
@@ -169,6 +180,18 @@ struct AppleGreetingGeneratorSheet: View {
 
                 if !generatedText.isEmpty {
                     Section("Generated message") {
+                        if variants.count > 1 {
+                            Picker("Variant", selection: $selectedVariant) {
+                                ForEach(variants.indices, id: \.self) { index in
+                                    Text("Option \(index + 1)").tag(index)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .onChange(of: selectedVariant) { _, index in
+                                guard variants.indices.contains(index) else { return }
+                                generatedText = variants[index]
+                            }
+                        }
                         TextEditor(text: $generatedText)
                             .frame(minHeight: 150)
                     }
@@ -190,6 +213,16 @@ struct AppleGreetingGeneratorSheet: View {
                         }
                     }
                     .disabled(isGenerating || !isModelAvailable)
+                    if !generatedText.isEmpty {
+                        Menu {
+                            Button("Rewrite") { refine("Rewrite this message with fresh wording while preserving its meaning.") }
+                            Button("Shorten") { refine("Shorten this message to one or two concise sentences.") }
+                            Button("Translate to \(context.language)") { refine("Translate this message into \(context.language), preserving its warmth and intent.") }
+                        } label: {
+                            Label("Improve message", systemImage: "wand.and.stars")
+                        }
+                        .disabled(isGenerating)
+                    }
                 } footer: {
                     Text(availabilityExplanation)
                 }
@@ -239,11 +272,31 @@ struct AppleGreetingGeneratorSheet: View {
         Task {
             defer { isGenerating = false }
             do {
-                generatedText = try await AppleGreetingGenerator.generate(
-                    context: context,
-                    tone: tone,
-                    details: details
-                )
+                var generated: [String] = []
+                for number in 1...3 {
+                    let direction = details + "\nCreate distinct option \(number) with different phrasing."
+                    generated.append(try await AppleGreetingGenerator.generate(context: context, tone: tone, details: direction))
+                }
+                variants = generated
+                selectedVariant = 0
+                generatedText = generated[0]
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func refine(_ instruction: String) {
+        isGenerating = true
+        errorMessage = nil
+        Task {
+            defer { isGenerating = false }
+            do {
+                let direction = "Existing draft:\n\(generatedText)\n\n\(instruction)"
+                let refined = try await AppleGreetingGenerator.generate(context: context, tone: tone, details: direction)
+                generatedText = refined
+                variants = [refined]
+                selectedVariant = 0
             } catch {
                 errorMessage = error.localizedDescription
             }

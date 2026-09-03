@@ -16,6 +16,7 @@ struct PlanYearView: View {
     @State private var showingRecipientOverrides = false
     @State private var step = 0
     @State private var scheduledCount: Int?
+    @State private var schedulingError: String?
 
     private let stepTitles = ["People", "Occasions", "Message", "Review"]
 
@@ -71,6 +72,14 @@ struct PlanYearView: View {
                 Button("Done") { dismiss() }
             } message: {
                 Text(scheduledResultMessage)
+            }
+            .alert("Greetings not saved", isPresented: Binding(
+                get: { schedulingError != nil },
+                set: { if !$0 { schedulingError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(schedulingError ?? "")
             }
             .onAppear {
                 guard !didSetInitialFilter else { return }
@@ -350,6 +359,22 @@ struct PlanYearView: View {
                                     Divider().padding(.leading, 52)
                                 }
                             }
+                        }
+                    }
+                }
+
+                if !preflightWarnings.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        SectionHeading(title: "Before scheduling")
+                        SurfaceCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                ForEach(preflightWarnings, id: \.self) { warning in
+                                    Label(warning, systemImage: "exclamationmark.triangle")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(TouchPointMetric.cardPadding)
                         }
                     }
                 }
@@ -707,7 +732,7 @@ struct PlanYearView: View {
                 if step < stepTitles.count - 1 {
                     withAnimation(.snappy) { step += 1 }
                 } else {
-                    scheduledCount = store.scheduleYear(
+                    let count = store.scheduleYear(
                         personIDs: selectedPeople,
                         occasions: selectedOccasions,
                         method: contactMethod,
@@ -715,6 +740,11 @@ struct PlanYearView: View {
                         templateIDsByPersonAndOccasion: templateIDsByPersonAndOccasion,
                         usePreferredContactMethods: usePreferredContactMethods
                     )
+                    if count == 0 {
+                        schedulingError = store.persistenceError ?? "Touch Point could not save these greetings."
+                    } else {
+                        scheduledCount = count
+                    }
                 }
             } label: {
                 PrimaryButtonLabel(
@@ -755,6 +785,36 @@ struct PlanYearView: View {
             return "No new greetings can be added. The selected people may be missing these dates, or matching greetings may already be planned."
         }
         return "Only greetings with an available date are added. Each message is personalized now and remains editable before you open Messages or Mail."
+    }
+
+    private var preflightWarnings: [String] {
+        var warnings: [String] = []
+        let selected = selectedPeopleInOrder
+        let missingPhone = selected.filter { $0.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
+        let missingEmail = selected.filter { $0.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
+
+        if usePreferredContactMethods {
+            let smsWithoutPhone = selected.filter {
+                $0.preferredContactMethod == .sms && $0.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            }.count
+            let emailWithoutEmail = selected.filter {
+                $0.preferredContactMethod == .email && $0.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            }.count
+            if smsWithoutPhone > 0 {
+                warnings.append("\(smsWithoutPhone) \(smsWithoutPhone == 1 ? "person has" : "people have") Text message selected but no phone number; Touch Point will fall back to Email or Reminder.")
+            }
+            if emailWithoutEmail > 0 {
+                warnings.append("\(emailWithoutEmail) \(emailWithoutEmail == 1 ? "person has" : "people have") Email selected but no email address; Touch Point will fall back to Text message or Reminder.")
+            }
+        } else {
+            if contactMethod == .sms && missingPhone > 0 {
+                warnings.append("Text message is selected, but \(missingPhone) selected \(missingPhone == 1 ? "person has" : "people have") no phone number. Their greeting will use Email or Reminder when possible.")
+            }
+            if contactMethod == .email && missingEmail > 0 {
+                warnings.append("Email is selected, but \(missingEmail) selected \(missingEmail == 1 ? "person has" : "people have") no email address. Their greeting will use Text message or Reminder when possible.")
+            }
+        }
+        return warnings
     }
 
     private var scheduledResultMessage: String {

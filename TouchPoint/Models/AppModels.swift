@@ -41,10 +41,10 @@ enum Relationship: String, CaseIterable, Identifiable, StableStringCodable {
 
     var title: String {
         switch self {
-        case .client: "Client"
-        case .family: "Family"
-        case .friend: "Friend"
-        case .colleague: "Colleague"
+        case .client: String(localized: "Client")
+        case .family: String(localized: "Family")
+        case .friend: String(localized: "Friend")
+        case .colleague: String(localized: "Colleague")
         }
     }
 }
@@ -56,6 +56,7 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
     case thanksgiving
     case christmas
     case clientAppreciation = "client_appreciation"
+    case custom
 
     var id: Self { self }
 
@@ -65,17 +66,19 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         "Wedding anniversary": .weddingAnniversary,
         "Thanksgiving": .thanksgiving,
         "Christmas": .christmas,
-        "Client appreciation": .clientAppreciation
+        "Client appreciation": .clientAppreciation,
+        "Custom occasion": .custom
     ]
 
     var title: String {
         switch self {
-        case .birthday: "Birthday"
-        case .homeAnniversary: "Home anniversary"
-        case .weddingAnniversary: "Wedding anniversary"
-        case .thanksgiving: "Thanksgiving"
-        case .christmas: "Christmas"
-        case .clientAppreciation: "Client appreciation"
+        case .birthday: String(localized: "Birthday")
+        case .homeAnniversary: String(localized: "Home anniversary")
+        case .weddingAnniversary: String(localized: "Wedding anniversary")
+        case .thanksgiving: String(localized: "Thanksgiving")
+        case .christmas: String(localized: "Christmas")
+        case .clientAppreciation: String(localized: "Client appreciation")
+        case .custom: String(localized: "Custom occasion")
         }
     }
 
@@ -83,7 +86,8 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         .birthday,
         .homeAnniversary,
         .weddingAnniversary,
-        .clientAppreciation
+        .clientAppreciation,
+        .custom
     ]
 
     var icon: String {
@@ -94,6 +98,7 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .thanksgiving: "leaf"
         case .christmas: "gift"
         case .clientAppreciation: "hands.sparkles"
+        case .custom: "star"
         }
     }
 
@@ -105,6 +110,7 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .thanksgiving: TouchPointColor.amber
         case .christmas: TouchPointColor.forest
         case .clientAppreciation: TouchPointColor.teal
+        case .custom: .accentColor
         }
     }
 }
@@ -124,9 +130,9 @@ enum ContactMethod: String, CaseIterable, Identifiable, StableStringCodable {
 
     var title: String {
         switch self {
-        case .sms: "Text message"
-        case .email: "Email"
-        case .reminder: "Reminder only"
+        case .sms: String(localized: "Text message")
+        case .email: String(localized: "Email")
+        case .reminder: String(localized: "Reminder only")
         }
     }
 
@@ -156,10 +162,10 @@ enum GreetingStatus: String, CaseIterable, Identifiable, StableStringCodable {
 
     var title: String {
         switch self {
-        case .planned: "Planned"
-        case .ready: "Ready"
-        case .completed: "Completed"
-        case .skipped: "Skipped"
+        case .planned: String(localized: "Planned")
+        case .ready: String(localized: "Ready")
+        case .completed: String(localized: "Completed")
+        case .skipped: String(localized: "Skipped")
         }
     }
 }
@@ -175,6 +181,9 @@ struct Person: Identifiable, Hashable, Codable {
     var preferredLanguage: String
     var timeZoneIdentifier: String
     var importantDates: [ImportantDate]
+    /// Free-form context kept with a person. Missing fields decode as empty for legacy data.
+    var notes: String
+    var tags: [String]
 
     init(
         id: UUID = UUID(),
@@ -186,7 +195,9 @@ struct Person: Identifiable, Hashable, Codable {
         preferredContactMethod: ContactMethod = .sms,
         preferredLanguage: String = "English",
         timeZoneIdentifier: String = "America/Los_Angeles",
-        importantDates: [ImportantDate] = []
+        importantDates: [ImportantDate] = [],
+        notes: String = "",
+        tags: [String] = []
     ) {
         self.id = id
         self.name = name
@@ -198,6 +209,43 @@ struct Person: Identifiable, Hashable, Codable {
         self.preferredLanguage = preferredLanguage
         self.timeZoneIdentifier = timeZoneIdentifier
         self.importantDates = importantDates
+        self.notes = notes
+        self.tags = tags
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, email, phone, organization, relationship, preferredContactMethod
+        case preferredLanguage, timeZoneIdentifier, importantDates, notes, tags
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+        email = try container.decodeIfPresent(String.self, forKey: .email) ?? ""
+        phone = try container.decodeIfPresent(String.self, forKey: .phone) ?? ""
+        organization = try container.decodeIfPresent(String.self, forKey: .organization) ?? ""
+        relationship = try container.decodeIfPresent(Relationship.self, forKey: .relationship) ?? .friend
+        preferredContactMethod = try container.decodeIfPresent(ContactMethod.self, forKey: .preferredContactMethod) ?? .sms
+        preferredLanguage = try container.decodeIfPresent(String.self, forKey: .preferredLanguage) ?? "English"
+        timeZoneIdentifier = try container.decodeIfPresent(String.self, forKey: .timeZoneIdentifier) ?? "America/Los_Angeles"
+        importantDates = try container.decodeIfPresent([ImportantDate].self, forKey: .importantDates) ?? []
+        notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        tags = (try container.decodeIfPresent([String].self, forKey: .tags) ?? [])
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id); try container.encode(name, forKey: .name)
+        try container.encode(email, forKey: .email); try container.encode(phone, forKey: .phone)
+        try container.encode(organization, forKey: .organization); try container.encode(relationship, forKey: .relationship)
+        try container.encode(preferredContactMethod, forKey: .preferredContactMethod)
+        try container.encode(preferredLanguage, forKey: .preferredLanguage)
+        try container.encode(timeZoneIdentifier, forKey: .timeZoneIdentifier)
+        try container.encode(importantDates, forKey: .importantDates)
+        try container.encode(notes, forKey: .notes); try container.encode(tags, forKey: .tags)
     }
 
     var initials: String {
@@ -215,12 +263,33 @@ struct ImportantDate: Identifiable, Hashable, Codable {
     var occasion: Occasion
     var month: Int
     var day: Int
+    /// Optional label for a custom event represented by this date.
+    var customName: String?
 
-    init(id: UUID = UUID(), occasion: Occasion, month: Int, day: Int) {
+    init(id: UUID = UUID(), occasion: Occasion, month: Int, day: Int, customName: String? = nil) {
         self.id = id
         self.occasion = occasion
         self.month = month
         self.day = day
+        self.customName = customName
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, occasion, month, day, customName }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        occasion = try c.decodeIfPresent(Occasion.self, forKey: .occasion) ?? .birthday
+        month = try c.decodeIfPresent(Int.self, forKey: .month) ?? 1
+        day = try c.decodeIfPresent(Int.self, forKey: .day) ?? 1
+        customName = try c.decodeIfPresent(String.self, forKey: .customName)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id); try c.encode(occasion, forKey: .occasion)
+        try c.encode(month, forKey: .month); try c.encode(day, forKey: .day)
+        try c.encodeIfPresent(customName, forKey: .customName)
     }
 
     var formatted: String {
@@ -231,6 +300,12 @@ struct ImportantDate: Identifiable, Hashable, Codable {
         components.day = day
         guard let date = components.date else { return "Date unavailable" }
         return date.formatted(.dateTime.month(.wide).day())
+    }
+
+    var displayName: String {
+        guard let customName else { return occasion.title }
+        let trimmed = customName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? occasion.title : trimmed
     }
 }
 
@@ -246,6 +321,9 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
     /// The template snapshot used when this greeting was planned. Optional for legacy events.
     var sourceTemplateID: UUID?
     var sourceTemplateRevision: Int?
+    /// Optional user-facing name for an event that does not fit the built-in occasions.
+    var customName: String?
+    var recurrence: EventRecurrence
 
     init(
         id: UUID = UUID(),
@@ -257,7 +335,9 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         message: String = "",
         subject: String? = nil,
         sourceTemplateID: UUID? = nil,
-        sourceTemplateRevision: Int? = nil
+        sourceTemplateRevision: Int? = nil,
+        customName: String? = nil,
+        recurrence: EventRecurrence = .annual
     ) {
         self.id = id
         self.personID = personID
@@ -269,6 +349,65 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         self.subject = subject
         self.sourceTemplateID = sourceTemplateID
         self.sourceTemplateRevision = sourceTemplateRevision
+        self.customName = customName
+        self.recurrence = recurrence
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, personID, occasion, date, method, status, message, subject
+        case sourceTemplateID, sourceTemplateRevision, customName, recurrence
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        personID = try c.decodeIfPresent(UUID.self, forKey: .personID) ?? UUID()
+        occasion = try c.decodeIfPresent(Occasion.self, forKey: .occasion) ?? .birthday
+        date = try c.decodeIfPresent(Date.self, forKey: .date) ?? .now
+        method = try c.decodeIfPresent(ContactMethod.self, forKey: .method) ?? .reminder
+        status = try c.decodeIfPresent(GreetingStatus.self, forKey: .status) ?? .planned
+        message = try c.decodeIfPresent(String.self, forKey: .message) ?? ""
+        subject = try c.decodeIfPresent(String.self, forKey: .subject)
+        sourceTemplateID = try c.decodeIfPresent(UUID.self, forKey: .sourceTemplateID)
+        sourceTemplateRevision = try c.decodeIfPresent(Int.self, forKey: .sourceTemplateRevision)
+        customName = try c.decodeIfPresent(String.self, forKey: .customName)
+        recurrence = try c.decodeIfPresent(EventRecurrence.self, forKey: .recurrence) ?? .annual
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id); try c.encode(personID, forKey: .personID)
+        try c.encode(occasion, forKey: .occasion); try c.encode(date, forKey: .date)
+        try c.encode(method, forKey: .method); try c.encode(status, forKey: .status)
+        try c.encode(message, forKey: .message); try c.encodeIfPresent(subject, forKey: .subject)
+        try c.encodeIfPresent(sourceTemplateID, forKey: .sourceTemplateID)
+        try c.encodeIfPresent(sourceTemplateRevision, forKey: .sourceTemplateRevision)
+        try c.encodeIfPresent(customName, forKey: .customName)
+        try c.encode(recurrence, forKey: .recurrence)
+    }
+
+    var displayName: String {
+        guard let customName else { return occasion.title }
+        let trimmed = customName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? occasion.title : trimmed
+    }
+}
+
+enum EventRecurrence: String, CaseIterable, Codable, Identifiable, StableStringCodable {
+    case annual
+    case oneTime = "one_time"
+
+    var id: Self { self }
+
+    static let legacyRawValues: [String: EventRecurrence] = [
+        "Annual": .annual, "One-time": .oneTime, "one-time": .oneTime
+    ]
+
+    var title: String {
+        switch self {
+        case .annual: String(localized: "Annual")
+        case .oneTime: String(localized: "One-time")
+        }
     }
 }
 
@@ -680,6 +819,7 @@ extension Occasion {
         case .thanksgiving: "amber"
         case .christmas: "forest"
         case .clientAppreciation: "teal"
+        case .custom: "indigo"
         }
     }
 }

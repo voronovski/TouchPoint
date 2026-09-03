@@ -239,12 +239,12 @@ TouchPoint may schedule on-device notifications for future greeting actions. The
 
 ## Local data
 
-The current prototype persists a versioned JSON snapshot in the app's Application Support directory. Schema `v2` separates stable cross-platform identifiers from English display labels.
+The current prototype persists a versioned JSON snapshot in the app's Application Support directory. Schema `v7` includes stable identifiers, people context, event recurrence, complete archive metadata, and a last-modified timestamp for private iCloud snapshot recovery; English display labels remain separate from machine values.
 
 - Persist people, important dates, greeting plans, templates, contact methods, and completion state.
 - Write atomically so an interrupted save does not leave a partially written snapshot.
 - Keep stored values platform-neutral: UUIDs, enums with stable raw values, ISO-8601 instants, month/day pairs, and IANA time-zone identifiers.
-- Decode the legacy `v1` English enum values, then atomically rewrite the successfully loaded snapshot as `v2`. Never discard a readable older snapshot merely because labels were separated from identifiers.
+- Decode legacy `v1`–`v6` payloads, then atomically rewrite the successfully loaded snapshot as `v7`. Never discard a readable older snapshot merely because labels or newly added fields are absent.
 - Surface load or save failure inline while preserving usable in-memory content.
 - Treat this file as prototype storage, not the permanent synchronization architecture. A future account/team backend must define migrations and conflict behavior explicitly.
 
@@ -272,7 +272,7 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 - Birthdays and anniversaries are date-only values. Never shift them by converting midnight across time zones.
 - Create the action instant at `09:00` in the recipient's IANA time zone, then persist that instant in UTC. Planning an occasion later on the same recipient-local day keeps it due today instead of moving it to the next year.
 - Show recipient date, recipient time, and zone in greeting detail. When the recipient zone differs from the device zone, also show the equivalent local `Your time` value.
-- Compact Home and Calendar rows show the occasion date in the recipient's zone; grouping may remain based on the device-local action day because that is when the owner must act.
+- Compact Home and Calendar rows show the occasion date in the recipient's zone; Calendar grouping uses that same recipient-local day.
 - Format dates, names, phone numbers, pluralization, and week starts with platform locale APIs.
 - Templates declare their language. Automatic translation or AI rewriting requires an explicit preview and approval.
 
@@ -288,15 +288,14 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 - Source UI language for the prototype: English; localization architecture remains required.
 - First-run focus offers `Work`, `Personal`, and preselected `All`.
 - Work annual planning defaults to `Client`; Personal defaults to `Family`; All begins with every relationship visible.
-- Focus and onboarding completion persist in `UserDefaults`; relationship data remains in the separate JSON snapshot.
-- The prototype saves a `v5` local JSON snapshot between launches and migrates readable `v1`–`v4` data in place.
+- Focus, onboarding completion, and reminder preferences persist in `UserDefaults` and iCloud KVS; relationship data remains in the separate JSON snapshot.
+- The prototype saves a `v7` local JSON snapshot between launches and migrates readable `v1`–`v6` data in place. Private iCloud backup stores the complete archive as a CloudKit asset; local operation remains available offline.
 - Apple Intelligence message generation uses the on-device Foundation Models framework on iOS 26+ and never blocks manual editing.
 - Keep the minimum deployment target at iOS 18. Gate Foundation Models at runtime and explain device, settings, locale, and model-readiness limitations in context.
 
 ## Open product questions
 
 - Should the first release support both Messages and Mail composers, or prioritize Messages in onboarding while retaining Mail?
-- Should skipped greetings automatically roll forward next year, or remain an explicit planning decision?
 - Which event types require a year as well as month/day?
 - Should one person support multiple household or business roles?
 - Will shared team accounts own people and templates at the workspace level?

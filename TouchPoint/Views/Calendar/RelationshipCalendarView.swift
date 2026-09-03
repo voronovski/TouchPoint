@@ -3,6 +3,8 @@ import SwiftUI
 struct RelationshipCalendarView: View {
     @Environment(AppStore.self) private var store
     @State private var status: GreetingStatus?
+    @State private var refreshTick = Date()
+    @State private var showingNewGreeting = false
 
     private var visibleEvents: [GreetingEvent] {
         store.events
@@ -14,8 +16,8 @@ struct RelationshipCalendarView: View {
         NavigationStack {
             List {
                 if !visibleEvents.isEmpty {
-                    ForEach(groupedEvents, id: \.day) { group in
-                        Section(group.day.formatted(.dateTime.month(.wide).day())) {
+                    ForEach(groupedEvents) { group in
+                        Section(group.title) {
                             ForEach(group.events) { event in
                                 NavigationLink {
                                     GreetingDetailView(eventID: event.id)
@@ -40,6 +42,14 @@ struct RelationshipCalendarView: View {
             .navigationTitle("Calendar")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingNewGreeting = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add greeting")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button("All") { status = nil }
                         Divider()
@@ -60,13 +70,43 @@ struct RelationshipCalendarView: View {
                     .accessibilityLabel("Filter greetings")
                 }
             }
+            .sheet(isPresented: $showingNewGreeting) {
+                NewGreetingView()
+            }
+            .task {
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(60))
+                    refreshTick = .now
+                }
+            }
         }
     }
 
-    private var groupedEvents: [(day: Date, events: [GreetingEvent])] {
-        let groups = Dictionary(grouping: visibleEvents) { Calendar.current.startOfDay(for: $0.date) }
-        return groups
-            .map { (day: $0.key, events: $0.value.sorted { $0.date < $1.date }) }
-            .sorted { $0.day < $1.day }
+    private var groupedEvents: [EventDayGroup] {
+        let groups = Dictionary(grouping: visibleEvents) { recipientDayKey(for: $0) }
+        return groups.map { key, events in
+            let sortedEvents = events.sorted { $0.date < $1.date }
+            let first = sortedEvents[0]
+            let timeZoneID = store.person(for: first)?.timeZoneIdentifier ?? TimeZone.current.identifier
+            var style = Date.FormatStyle(date: .long, time: .omitted)
+            style.timeZone = TimeZone(identifier: timeZoneID) ?? .current
+            return EventDayGroup(id: key, title: first.date.formatted(style), events: sortedEvents)
+        }
+        .sorted { $0.id < $1.id }
     }
+
+    private func recipientDayKey(for event: GreetingEvent) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        if let person = store.person(for: event) {
+            calendar.timeZone = TimeZone(identifier: person.timeZoneIdentifier) ?? .current
+        }
+        let components = calendar.dateComponents([.year, .month, .day], from: event.date)
+        return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
+    }
+}
+
+private struct EventDayGroup: Identifiable {
+    let id: String
+    let title: String
+    let events: [GreetingEvent]
 }

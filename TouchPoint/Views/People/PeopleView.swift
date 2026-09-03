@@ -5,6 +5,8 @@ struct PeopleView: View {
     @Environment(AppPreferences.self) private var preferences
     @State private var query = ""
     @State private var showingNewPerson = false
+    @State private var showingContactsPicker = false
+    @State private var importMessage: String?
 
     private var filteredPeople: [Person] {
         let focusMatches = store.people.filter {
@@ -70,8 +72,17 @@ struct PeopleView: View {
             .navigationTitle("People")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingNewPerson = true
+                    Menu {
+                        Button {
+                            showingContactsPicker = true
+                        } label: {
+                            Label("Import from Contacts", systemImage: "person.crop.circle.badge.plus")
+                        }
+                        Button {
+                            showingNewPerson = true
+                        } label: {
+                            Label("Add person", systemImage: "person.badge.plus")
+                        }
                     } label: {
                         Label("Add person", systemImage: "person.badge.plus")
                     }
@@ -83,6 +94,21 @@ struct PeopleView: View {
                     defaultRelationship: preferences.focus.defaultRelationship
                 )
             }
+            .sheet(isPresented: $showingContactsPicker) {
+                ContactsPicker(
+                    onSelect: importContacts,
+                    onCancel: { showingContactsPicker = false }
+                )
+                .ignoresSafeArea()
+            }
+            .alert("Contacts imported", isPresented: Binding(
+                get: { importMessage != nil },
+                set: { if !$0 { importMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(importMessage ?? "")
+            }
         }
     }
 
@@ -91,6 +117,35 @@ struct PeopleView: View {
             get: { preferences.focus },
             set: { preferences.focus = $0 }
         )
+    }
+
+    private func importContacts(_ imported: [Person]) {
+        showingContactsPicker = false
+        let existing = Set(store.people.map { normalizedContactKey(name: $0.name, email: $0.email, phone: $0.phone) })
+        var seen = existing
+        var uniquePeople: [Person] = []
+        for person in imported {
+            let key = normalizedContactKey(name: person.name, email: person.email, phone: person.phone)
+            guard !key.isEmpty, !seen.contains(key) else { continue }
+            seen.insert(key)
+            uniquePeople.append(person)
+        }
+        let added = store.addPeople(uniquePeople)
+        if !uniquePeople.isEmpty, added == 0, let error = store.persistenceError {
+            importMessage = error
+            return
+        }
+        importMessage = added == 0
+            ? "No new contacts were added. Existing people were left unchanged."
+            : "Added " + String(added) + " " + (added == 1 ? "person" : "people") + " from Contacts."
+    }
+
+    private func normalizedContactKey(name: String, email: String, phone: String) -> String {
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if !normalizedEmail.isEmpty { return "email:\(normalizedEmail)" }
+        let normalizedPhone = phone.filter(\.isNumber)
+        if !normalizedPhone.isEmpty { return "phone:\(normalizedPhone)" }
+        return "name:\(name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())"
     }
 }
 
@@ -112,10 +167,29 @@ private struct PersonListRow: View {
     }
 }
 
+private struct FlowTagView: View {
+    let tags: [String]
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(tags, id: \.self) { tag in
+                Text(tag)
+                    .font(.caption.weight(.medium))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.accentColor.opacity(0.12))
+                    .clipShape(Capsule())
+            }
+        }
+    }
+}
+
 private struct PersonDetailView: View {
     @Environment(AppStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
     let personID: UUID
     @State private var editingPerson: Person?
+    @State private var showingDeleteConfirmation = false
 
     private var person: Person? {
         store.people.first { $0.id == personID }
@@ -153,6 +227,18 @@ private struct PersonDetailView: View {
                     Label(person.timeZoneIdentifier.replacingOccurrences(of: "_", with: " "), systemImage: "globe")
                 }
 
+                if !person.notes.isEmpty || !person.tags.isEmpty {
+                    Section("Context") {
+                        if !person.notes.isEmpty {
+                            Text(person.notes)
+                                .font(.subheadline)
+                        }
+                        if !person.tags.isEmpty {
+                            FlowTagView(tags: person.tags)
+                        }
+                    }
+                }
+
                 Section("Important dates") {
                     if person.importantDates.isEmpty {
                         Text("No important dates yet")
@@ -161,7 +247,7 @@ private struct PersonDetailView: View {
                         ForEach(person.importantDates.sorted(by: importantDateSort)) { importantDate in
                             Label {
                                 HStack {
-                                    Text(importantDate.occasion.title)
+                                    Text(importantDate.displayName)
                                     Spacer()
                                     Text(importantDate.formatted)
                                         .foregroundStyle(.secondary)
@@ -185,7 +271,7 @@ private struct PersonDetailView: View {
                             } label: {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(event.occasion.title)
+                                        Text(event.displayName)
                                         Text(event.date.touchPointDay(in: person.timeZoneIdentifier))
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
@@ -208,14 +294,36 @@ private struct PersonDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if let person {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Edit") { editingPerson = person }
+                    Menu {
+                        Button(role: .destructive) {
+                            showingDeleteConfirmation = true
+                        } label: {
+                            Label("Delete person", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
                 }
             }
         }
         .sheet(item: $editingPerson) { person in
             PersonEditorView(person: person)
         }
+        .confirmationDialog("Delete this person?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete person and greetings", role: .destructive) {
+                deletePerson()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This also removes the person's planned greetings and cannot be undone.")
+        }
+    }
+
+    private func deletePerson() {
+        guard person != nil else { return }
+        if store.deletePerson(id: personID) { dismiss() }
     }
 
     private func importantDateSort(_ lhs: ImportantDate, _ rhs: ImportantDate) -> Bool {
@@ -230,22 +338,17 @@ private struct PersonEditorView: View {
     @State private var draft: Person
     @State private var addingDate = false
     @State private var editingDate: ImportantDate?
+    @State private var showingTimeZonePicker = false
+    @State private var tagsText: String
+    @State private var saveError: String?
 
     private let isEditing: Bool
-    private let supportedTimeZones = [
-        "America/Los_Angeles",
-        "America/Denver",
-        "America/Chicago",
-        "America/New_York",
-        "Europe/London",
-        "Europe/Paris",
-        "Asia/Tokyo",
-        "Australia/Sydney"
-    ]
+    private let languageOptions = ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Korean", "Chinese"]
 
     init(person: Person?, defaultRelationship: Relationship = .client) {
         let draft = person ?? Person(name: "", relationship: defaultRelationship)
         _draft = State(initialValue: draft)
+        _tagsText = State(initialValue: draft.tags.joined(separator: ", "))
         isEditing = person != nil
     }
 
@@ -304,12 +407,38 @@ private struct PersonEditorView: View {
                 }
 
                 Section("Preferences") {
-                    TextField("Preferred language", text: $draft.preferredLanguage)
-                    Picker("Time zone", selection: $draft.timeZoneIdentifier) {
-                        ForEach(timeZoneOptions, id: \.self) { identifier in
-                            Text(identifier.replacingOccurrences(of: "_", with: " ")).tag(identifier)
+                    Picker("Preferred language", selection: $draft.preferredLanguage) {
+                        ForEach(languageOptionsForDraft, id: \.self) { language in
+                            Text(language).tag(language)
                         }
                     }
+                    Button {
+                        showingTimeZonePicker = true
+                    } label: {
+                        HStack {
+                            Text("Time zone")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text(timeZoneDisplayName(draft.timeZoneIdentifier))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                }
+
+                Section("Context") {
+                    TextEditor(text: $draft.notes)
+                        .frame(minHeight: 90)
+                        .overlay(alignment: .topLeading) {
+                            if draft.notes.isEmpty {
+                                Text("Private notes about this person")
+                                    .foregroundStyle(.tertiary)
+                                    .padding(.top, 8)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                    TextField("Tags (comma separated)", text: $tagsText)
+                        .textInputAutocapitalization(.never)
                 }
 
                 Section {
@@ -319,7 +448,7 @@ private struct PersonEditorView: View {
                         } label: {
                             HStack(spacing: 12) {
                                 IconTile(systemImage: importantDate.occasion.icon, tint: importantDate.occasion.tint)
-                                Text(importantDate.occasion.title)
+                                Text(importantDate.displayName)
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Text(importantDate.formatted)
@@ -370,14 +499,29 @@ private struct PersonEditorView: View {
                     editingDate = nil
                 }
             }
+            .sheet(isPresented: $showingTimeZonePicker) {
+                TimeZonePickerView(selection: $draft.timeZoneIdentifier)
+            }
+            .alert("Person not saved", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(saveError ?? "")
+            }
         }
     }
 
-    private var timeZoneOptions: [String] {
-        if supportedTimeZones.contains(draft.timeZoneIdentifier) {
-            return supportedTimeZones
-        }
-        return [draft.timeZoneIdentifier] + supportedTimeZones
+    private var languageOptionsForDraft: [String] {
+        languageOptions.contains { $0.caseInsensitiveCompare(draft.preferredLanguage) == .orderedSame }
+            ? languageOptions
+            : [draft.preferredLanguage] + languageOptions
+    }
+
+    private func timeZoneDisplayName(_ identifier: String) -> String {
+        let name = TimeZone(identifier: identifier)?.localizedName(for: .generic, locale: .current)
+        return name ?? identifier.replacingOccurrences(of: "_", with: " ")
     }
 
     private var newImportantDate: ImportantDate {
@@ -395,11 +539,21 @@ private struct PersonEditorView: View {
         draft.phone = draft.phone.trimmingCharacters(in: .whitespacesAndNewlines)
         draft.organization = draft.organization.trimmingCharacters(in: .whitespacesAndNewlines)
         draft.preferredLanguage = draft.preferredLanguage.trimmingCharacters(in: .whitespacesAndNewlines)
+        draft.notes = draft.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        draft.tags = tagsText
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { result, tag in
+                if !result.contains(where: { $0.caseInsensitiveCompare(tag) == .orderedSame }) {
+                    result.append(tag)
+                }
+            }
 
-        if isEditing {
-            store.updatePerson(draft)
-        } else {
-            store.addPerson(draft)
+        let didSave = isEditing ? store.updatePerson(draft) : store.addPerson(draft)
+        guard didSave else {
+            saveError = store.persistenceError ?? "Touch Point could not save this person."
+            return
         }
         dismiss()
     }
@@ -436,6 +590,17 @@ private struct ImportantDateEditorView: View {
                             Text(occasion.title).tag(occasion)
                         }
                     }
+                    TextField(date.occasion == .custom
+                        ? String(localized: "Custom occasion name")
+                        : String(localized: "Custom name (optional)"), text: Binding(
+                        get: { date.customName ?? "" },
+                        set: { date.customName = $0.isEmpty ? nil : $0 }
+                    ))
+                    if date.occasion == .custom {
+                        Text("A custom occasion needs a name.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Section("Annual date") {
@@ -458,12 +623,77 @@ private struct ImportantDateEditorView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { onSave(date) }
+                    Button("Save") {
+                        let trimmedName = date.customName?.trimmingCharacters(in: .whitespacesAndNewlines)
+                        date.customName = trimmedName?.isEmpty == false ? trimmedName : nil
+                        onSave(date)
+                    }
+                    .disabled(
+                        date.occasion == .custom
+                            && date.customName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false
+                    )
                 }
             }
             .onChange(of: date.month) {
                 date.day = min(date.day, maximumDay)
             }
         }
+    }
+}
+
+private struct TimeZonePickerView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selection: String
+    @State private var query = ""
+
+    private var zones: [String] {
+        let all = TimeZone.knownTimeZoneIdentifiers.sorted {
+            TimeZonePickerView.displayName(for: $0).localizedStandardCompare(TimeZonePickerView.displayName(for: $1)) == .orderedAscending
+        }
+        guard !query.isEmpty else { return all }
+        return all.filter {
+            $0.localizedCaseInsensitiveContains(query)
+                || Self.displayName(for: $0).localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(zones, id: \.self) { identifier in
+                Button {
+                    selection = identifier
+                    dismiss()
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Self.displayName(for: identifier))
+                            Text(identifier)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if selection == identifier {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                }
+                .foregroundStyle(.primary)
+            }
+            .searchable(text: $query, prompt: "City or time zone")
+            .navigationTitle("Time zone")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private static func displayName(for identifier: String) -> String {
+        let zone = TimeZone(identifier: identifier)
+        return zone?.localizedName(for: .generic, locale: .current)
+            ?? identifier.replacingOccurrences(of: "_", with: " ")
     }
 }

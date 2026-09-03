@@ -572,10 +572,10 @@ private enum TemplateSort: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .recommended: "Recommended"
-        case .name: "Name"
-        case .mostUsed: "Most used"
-        case .recentlyUpdated: "Recently updated"
+        case .recommended: String(localized: "Recommended")
+        case .name: String(localized: "Name")
+        case .mostUsed: String(localized: "Most used")
+        case .recentlyUpdated: String(localized: "Recently updated")
         }
     }
 }

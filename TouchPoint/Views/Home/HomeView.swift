@@ -7,6 +7,7 @@ struct HomeView: View {
     @State private var showingPlanYear = false
     @State private var showingSettings = false
     @State private var selectedEvent: GreetingEvent?
+    @State private var refreshTick = Date()
 
     private var focusedEvents: [GreetingEvent] {
         guard preferences.focus != .all else { return store.events }
@@ -75,6 +76,7 @@ struct HomeView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
                     welcomeHeader
+                    insightsSection
                     nextUpSection
                     planYearCard
                     scheduleSection
@@ -105,6 +107,59 @@ struct HomeView: View {
             .sheet(item: $selectedEvent) { event in
                 NavigationStack {
                     GreetingDetailView(eventID: event.id, showsDoneButton: true)
+                }
+            }
+            .task {
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(60))
+                    refreshTick = .now
+                }
+            }
+        }
+    }
+
+    private var insights: [(String, String, String)] {
+        let focusedPeople = preferences.focus == .all
+            ? store.people
+            : store.people.filter { preferences.focus.includes($0.relationship) }
+        let missingDates = focusedPeople.filter { person in
+            !person.importantDates.contains { $0.occasion == .birthday }
+        }.count
+        let missingContact = focusedPeople.filter {
+            $0.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && $0.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }.count
+        let unplanned = store.schedulableGreetingCount(
+            personIDs: Set(focusedPeople.map(\.id)),
+            occasions: Set(Occasion.allCases)
+        )
+        var result: [(String, String, String)] = []
+        if missingDates > 0 { result.append(("calendar.badge.exclamationmark", "Missing dates", "Add birthdays for \(missingDates) \(missingDates == 1 ? "person" : "people")")) }
+        if missingContact > 0 { result.append(("person.crop.circle.badge.exclamationmark", "Missing contact info", "Add a phone or email for \(missingContact) \(missingContact == 1 ? "person" : "people")")) }
+        if unplanned > 0 { result.append(("calendar.badge.plus", "Unplanned greetings", "\(unplanned) greeting\(unplanned == 1 ? "" : "s") can be added")) }
+        return result
+    }
+
+    @ViewBuilder
+    private var insightsSection: some View {
+        if !insights.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                SectionHeading(title: "Keep your circle current")
+                SurfaceCard {
+                    VStack(spacing: 0) {
+                        ForEach(Array(insights.enumerated()), id: \.offset) { index, insight in
+                            HStack(spacing: 12) {
+                                IconTile(systemImage: insight.0, tint: TouchPointColor.amber)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(insight.1).font(.subheadline.weight(.semibold))
+                                    Text(insight.2).font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                            }
+                            .padding(TouchPointMetric.cardPadding)
+                            if index < insights.count - 1 { Divider().padding(.leading, 64) }
+                        }
+                    }
                 }
             }
         }
@@ -147,7 +202,7 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(person.name)
                                     .font(.headline)
-                                Label(nextEvent.occasion.title, systemImage: nextEvent.occasion.icon)
+                                Label(nextEvent.displayName, systemImage: nextEvent.occasion.icon)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -275,7 +330,7 @@ struct EventRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(person.name)
                         .font(.subheadline.weight(.semibold))
-                    Text(event.occasion.title)
+                    Text(event.displayName)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

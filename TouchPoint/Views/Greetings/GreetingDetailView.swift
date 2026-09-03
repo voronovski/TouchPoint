@@ -10,6 +10,9 @@ struct GreetingDetailView: View {
     @State private var composerError: String?
     @State private var messageEditorRequest: MessageEditorRequest?
     @State private var showingSkipConfirmation = false
+    @State private var showingScheduleEditor = false
+    @State private var showingDeleteConfirmation = false
+    @State private var refreshTick = Date()
 
     private var event: GreetingEvent? {
         store.event(id: eventID)
@@ -25,7 +28,7 @@ struct GreetingDetailView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(person.name)
                                     .font(.headline)
-                                Label(event.occasion.title, systemImage: event.occasion.icon)
+                                Label(eventDisplayName(event), systemImage: event.occasion.icon)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -33,6 +36,23 @@ struct GreetingDetailView: View {
                             StatusPill(status: store.status(for: event))
                         }
                         .padding(TouchPointMetric.cardPadding)
+                    }
+
+                    if event.customName != nil || event.recurrence == .oneTime {
+                        SurfaceCard {
+                            HStack(spacing: 12) {
+                                IconTile(systemImage: event.recurrence == .oneTime ? "arrow.right" : "tag")
+                                VStack(alignment: .leading, spacing: 2) {
+                                    if let customName = event.customName, !customName.isEmpty {
+                                        Text(customName).font(.subheadline.weight(.semibold))
+                                    }
+                                    Text(event.recurrence == .oneTime ? "One-time greeting" : "Repeats annually")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(TouchPointMetric.cardPadding)
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
@@ -142,6 +162,19 @@ struct GreetingDetailView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button("Edit schedule", systemImage: "calendar.badge.clock") {
+                        showingScheduleEditor = true
+                    }
+                    Button("Delete greeting", systemImage: "trash", role: .destructive) {
+                        showingDeleteConfirmation = true
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .accessibilityLabel("Greeting actions")
+            }
         }
         .sheet(item: $composerRequest) { request in
             switch request.kind {
@@ -177,14 +210,16 @@ struct GreetingDetailView: View {
                     usesNamePlaceholder: false
                 ),
                 onSave: { message in
-                    store.updateGreetingMessage(id: request.id, message: message)
-                    messageEditorRequest = nil
+                    if store.updateGreetingMessage(id: request.id, message: message) {
+                        messageEditorRequest = nil
+                    }
                 },
                 onSaveAsTemplate: { message in
-                    store.addTemplate(GreetingTemplate(
+                    let templateMessage = messageForTemplate(message, recipientName: request.personName)
+                    return store.addTemplate(GreetingTemplate(
                         title: "\(request.occasion.title) message",
                         occasions: [request.occasion],
-                        body: message,
+                        body: templateMessage,
                         iconSemantic: "occasion",
                         iconID: request.occasion.icon,
                         colorToken: request.occasion.defaultColorToken,
@@ -194,6 +229,15 @@ struct GreetingDetailView: View {
                     ))
                 }
             )
+        }
+        .sheet(isPresented: $showingScheduleEditor) {
+            if let event, let person = store.person(for: event) {
+                GreetingScheduleEditor(event: event, availableMethods: store.availableContactMethods(for: person)) { updated in
+                    var resolved = updated
+                    resolved.method = store.resolvedContactMethod(for: person, preferred: updated.method) ?? .reminder
+                    return store.updateGreeting(resolved)
+                }
+            }
         }
         .alert("Cannot open composer", isPresented: Binding(
             get: { composerError != nil },
@@ -211,6 +255,33 @@ struct GreetingDetailView: View {
         } message: {
             Text("It will remain in Calendar and can be restored later.")
         }
+        .confirmationDialog("Delete this greeting?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete greeting", role: .destructive) {
+                if store.deleteGreeting(id: eventID) { dismiss() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This removes the scheduled greeting and cannot be undone.")
+        }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                refreshTick = .now
+            }
+        }
+    }
+
+    private func eventDisplayName(_ event: GreetingEvent) -> String {
+        event.displayName
+    }
+
+    private func messageForTemplate(_ message: String, recipientName: String) -> String {
+        let fullName = recipientName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let firstName = fullName.split(separator: " ").first.map(String.init) ?? fullName
+        guard !firstName.isEmpty else { return message }
+        return message
+            .replacingOccurrences(of: fullName, with: "{{first_name}}", options: .caseInsensitive)
+            .replacingOccurrences(of: firstName, with: "{{first_name}}", options: .caseInsensitive)
     }
 
     private func detailRow(icon: String, title: String, value: String) -> some View {
@@ -229,9 +300,9 @@ struct GreetingDetailView: View {
 
     private func actionTitle(for method: ContactMethod) -> String {
         switch method {
-        case .sms: "Open Messages"
-        case .email: "Open Mail"
-        case .reminder: "Mark complete"
+        case .sms: String(localized: "Open Messages")
+        case .email: String(localized: "Open Mail")
+        case .reminder: String(localized: "Mark complete")
         }
     }
 
@@ -285,6 +356,85 @@ private struct MessageEditorRequest: Identifiable {
     let language: String
 }
 
+private struct GreetingScheduleEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var draft: GreetingEvent
+    let availableMethods: [ContactMethod]
+    @State private var saveError: String?
+    let onSave: (GreetingEvent) -> Bool
+
+    init(event: GreetingEvent, availableMethods: [ContactMethod], onSave: @escaping (GreetingEvent) -> Bool) {
+        _draft = State(initialValue: event)
+        self.availableMethods = availableMethods
+        self.onSave = onSave
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Schedule") {
+                    DatePicker("Date and time", selection: $draft.date)
+                    Picker("Contact method", selection: $draft.method) {
+                        ForEach(availableMethods) { method in
+                            Label(method.title, systemImage: method.icon).tag(method)
+                        }
+                    }
+                    Picker("Recurrence", selection: $draft.recurrence) {
+                        Text("Every year").tag(EventRecurrence.annual)
+                        Text("One time").tag(EventRecurrence.oneTime)
+                    }
+                }
+
+                Section("Occasion") {
+                    TextField(
+                        draft.occasion == .custom
+                            ? String(localized: "Custom occasion name")
+                            : String(localized: "Custom occasion name (optional)"),
+                        text: Binding(
+                        get: { draft.customName ?? "" },
+                        set: { draft.customName = $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0 }
+                    ))
+                    if draft.occasion == .custom {
+                        Text("A custom occasion needs a name.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .navigationTitle("Edit schedule")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        let trimmedName = draft.customName?.trimmingCharacters(in: .whitespacesAndNewlines)
+                        draft.customName = trimmedName?.isEmpty == false ? trimmedName : nil
+                        if onSave(draft) {
+                            dismiss()
+                        } else {
+                            saveError = "Touch Point could not save this schedule."
+                        }
+                    }
+                    .disabled(
+                        draft.occasion == .custom
+                            && draft.customName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false
+                    )
+                }
+            }
+            .alert("Schedule not saved", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(saveError ?? "")
+            }
+        }
+    }
+}
+
 private struct GreetingMessageEditor: View {
     @Environment(\.dismiss) private var dismiss
     @State private var message: String
@@ -292,13 +442,13 @@ private struct GreetingMessageEditor: View {
     @State private var didSaveTemplate = false
     let context: GreetingGenerationContext
     let onSave: (String) -> Void
-    let onSaveAsTemplate: (String) -> Void
+    let onSaveAsTemplate: (String) -> Bool
 
     init(
         message: String,
         context: GreetingGenerationContext,
         onSave: @escaping (String) -> Void,
-        onSaveAsTemplate: @escaping (String) -> Void
+        onSaveAsTemplate: @escaping (String) -> Bool
     ) {
         _message = State(initialValue: message)
         self.context = context
@@ -327,8 +477,7 @@ private struct GreetingMessageEditor: View {
                         Label("Generate with Apple Intelligence", systemImage: "apple.intelligence")
                     }
                     Button {
-                        onSaveAsTemplate(trimmedMessage)
-                        didSaveTemplate = true
+                        didSaveTemplate = onSaveAsTemplate(trimmedMessage)
                     } label: {
                         Label(didSaveTemplate ? "Saved to templates" : "Save as template", systemImage: didSaveTemplate ? "checkmark" : "rectangle.stack.badge.plus")
                     }
