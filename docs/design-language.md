@@ -62,6 +62,16 @@ Use semantic system background, label, separator, and fill colors in light and d
 - Standard primary action: full width, height `50`, radius `16`.
 - Minimum interactive target: `44 x 44` on iOS and `48 x 48` on Android.
 
+### Row alignment
+
+Rows with a leading or trailing icon/avatar and stacked text align the visual
+elements to the vertical center of the row content. This applies to selection,
+identity, event, status, and explanatory rows, including rows whose supporting
+text wraps. In SwiftUI use `TouchPointMetric.rowContentAlignment` (currently
+`.center`). Use top alignment only when the leading icon belongs to a genuinely
+multiline text input; that exception is named
+`TouchPointMetric.multilineTextFieldAlignment`.
+
 ### Typography
 
 Use the platform system font and Dynamic Type/font scaling. Do not encode fixed font sizes in shared product specifications.
@@ -203,7 +213,11 @@ Reserve compact pills for actionable planning state: `Planned`, `Ready`, `Comple
 
 ### Primary action
 
-Each surface or step has at most one visually dominant action. Use the shared solid accent button. The label contains an icon plus regular body text and remains visible during loading; replace the icon with a small progress indicator. Destructive, toolbar, and list actions retain native treatment.
+Each surface or step has at most one visually dominant action. Use the shared solid accent button. The label contains an icon plus regular body text and remains visible during loading; replace the icon with a small progress indicator. Destructive and toolbar actions retain native treatment.
+
+### Tertiary action
+
+An action that occupies its own row inside a `List`, `Form`, or grouped surface card uses `TouchPointTertiaryButtonStyle`. The row has a neutral `28 x 28` icon tile with a continuous `7`-point corner radius, `12` points between icon and title, and `.subheadline.weight(.semibold)` text. Ordinary actions use the app accent for icon and title; destructive actions pass a red tint. While an asynchronous action runs, keep its title visible and replace the tile icon with a small progress indicator. The style fills the row width while the surrounding container retains native insets and separators. Do not apply it to navigation, selection, compact inline controls, menu items, toolbar, alert, or swipe actions.
 
 ### Selection row
 
@@ -300,6 +314,8 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 - Focus, onboarding completion, and reminder preferences persist in `UserDefaults` and iCloud KVS; relationship data remains in the separate JSON snapshot.
 - The prototype saves a `v7` local JSON snapshot between launches and migrates readable `v1`–`v6` data in place. Private iCloud backup stores the complete archive as a CloudKit asset; local operation remains available offline.
 - Apple Intelligence message generation uses the on-device Foundation Models framework on iOS 26+ and never blocks manual editing.
+- Apple Intelligence entry actions are disabled before presentation when the chosen language or local model is unavailable; the parent form footer explains the exact reason. Date/timing, audience, channel, and language are inherited context values, not free-form fields inside the generator.
+- Standalone actions inside lists, forms, and grouped row cards share `TouchPointTertiaryButtonStyle`; ordinary actions remain accent-colored and destructive actions are red.
 - Keep the minimum deployment target at iOS 18. Gate Foundation Models at runtime and explain device, settings, locale, and model-readiness limitations in context.
 
 ## Open product questions

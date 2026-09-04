@@ -91,9 +91,13 @@ struct TemplatesView: View {
                 if !visibleTemplates.isEmpty {
                     Section(scope.title(in: store)) {
                         ForEach(visibleTemplates) { template in
-                            TemplateRow(template: template, group: group(for: template))
-                                .contentShape(Rectangle())
-                                .onTapGesture { editingTemplate = template }
+                            Button {
+                                editingTemplate = template
+                            } label: {
+                                TemplateRow(template: template, group: group(for: template))
+                                    .contentShape(Rectangle())
+                            }
+                                .buttonStyle(.plain)
                                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                     Button {
                                         store.toggleTemplateFavorite(id: template.id)
@@ -583,12 +587,18 @@ private struct TemplateFiltersSheet: View {
 
                 if activeCount > 0 {
                     Section {
-                        Button("Clear context filters", role: .destructive) {
+                        Button(role: .destructive) {
                             occasion = nil
                             relationship = nil
                             channel = nil
                             language = nil
+                        } label: {
+                            Label(
+                                "Clear context filters",
+                                systemImage: "line.3.horizontal.decrease.circle"
+                            )
                         }
+                        .buttonStyle(TouchPointTertiaryButtonStyle(tint: .red))
                     }
                 }
             }
@@ -618,7 +628,7 @@ private struct TemplateRow: View {
     let group: TemplateGroup?
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
             IconTile(systemImage: template.iconID, tint: template.colorToken.templateColor)
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 5) {
@@ -726,6 +736,7 @@ private struct TemplateEditorView: View {
                         } label: {
                             Label("Duplicate to edit", systemImage: "plus.square.on.square")
                         }
+                        .buttonStyle(TouchPointTertiaryButtonStyle())
                     } footer: {
                         Text("The duplicate is an unlocked copy. Approval and locking are local controls on this device.")
                     }
@@ -850,22 +861,35 @@ private struct TemplateEditorView: View {
                         TextField("Email subject (optional)", text: emailSubjectBinding)
                     }
                     TextEditor(text: $draft.body).frame(minHeight: 150)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(GreetingTemplate.supportedTokens.sorted(), id: \.self) { token in
-                                Button("{{\(token)}}") { appendToken(token) }
-                                    .buttonStyle(.bordered)
-                                    .controlSize(.small)
+                    WrappingTokenLayout(horizontalSpacing: 8, verticalSpacing: 4) {
+                        ForEach(GreetingTemplate.supportedTokens.sorted(), id: \.self) { token in
+                            Button {
+                                appendToken(token)
+                            } label: {
+                                Text(token)
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.secondary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color(.tertiarySystemFill), in: Capsule())
                             }
+                            .buttonStyle(.plain)
+                            .frame(minHeight: 44)
+                            .accessibilityLabel("Insert \(token) variable")
                         }
                     }
                     Button { showingGenerator = true } label: {
                         Label("Generate with Apple Intelligence", systemImage: "apple.intelligence")
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
+                    .disabled(!isGeneratorAvailable)
                 } header: {
                     Text("Message")
                 } footer: {
-                    Text("Insert variables with the buttons above. Generation happens on device when Apple Intelligence is available.")
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Insert variables with the buttons above.")
+                        Text(generatorAvailabilityExplanation)
+                    }
                 }
                 .disabled(isReadOnly)
 
@@ -993,6 +1017,21 @@ private struct TemplateEditorView: View {
             senderName: preferences.senderName
         )
     }
+    private var generatorStatus: AppleGreetingGeneratorStatus {
+        AppleGreetingGenerator.status(for: generationContext.language)
+    }
+    private var isGeneratorAvailable: Bool {
+        if case .available = generatorStatus { return true }
+        return false
+    }
+    private var generatorAvailabilityExplanation: String {
+        switch generatorStatus {
+        case .available:
+            String(localized: "Apple Intelligence generation happens privately on this device.")
+        case .unavailable(let reason):
+            reason
+        }
+    }
 
     @ViewBuilder
     private var governanceSection: some View {
@@ -1013,6 +1052,7 @@ private struct TemplateEditorView: View {
                     } label: {
                         Label("Remove approval", systemImage: "checkmark.seal.slash")
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
                 }
             } else {
                 Button {
@@ -1020,6 +1060,7 @@ private struct TemplateEditorView: View {
                 } label: {
                     Label("Approve on this device", systemImage: "checkmark.seal")
                 }
+                .buttonStyle(TouchPointTertiaryButtonStyle())
             }
 
             LabeledContent("Editing", value: draft.isLocked ? "Locked" : "Unlocked")
@@ -1034,6 +1075,7 @@ private struct TemplateEditorView: View {
                     } label: {
                         Label("Unlock to edit", systemImage: "lock.open")
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
                 }
             } else {
                 Button {
@@ -1041,6 +1083,7 @@ private struct TemplateEditorView: View {
                 } label: {
                     Label("Lock template", systemImage: "lock")
                 }
+                .buttonStyle(TouchPointTertiaryButtonStyle())
             }
         }
     }
@@ -1083,6 +1126,7 @@ private struct TemplateEditorView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Version \(revision.number)")
                     .accessibilityValue(revision.createdAt.formatted(date: .abbreviated, time: .shortened))
                     .accessibilityHint("Double-tap to preview this version")
@@ -1225,9 +1269,12 @@ private struct TemplateRevisionPreviewView: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     } else {
-                        Button("Restore this version") {
+                        Button {
                             requestRestore()
+                        } label: {
+                            Label("Restore this version", systemImage: "arrow.uturn.backward")
                         }
+                        .buttonStyle(TouchPointTertiaryButtonStyle())
                     }
                 } footer: {
                     Text("Restoring is additive: it creates a new current version and keeps this version in history.")
@@ -1451,6 +1498,80 @@ private struct CollectionRow: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityHint("Double-tap to edit this collection")
+    }
+}
+
+/// Lays out compact template-variable buttons across as many rows as needed,
+/// keeping every option visible without introducing a nested horizontal scroll.
+private struct WrappingTokenLayout: Layout {
+    let horizontalSpacing: CGFloat
+    let verticalSpacing: CGFloat
+
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
+        let maximumWidth = proposal.width ?? .infinity
+        var rowWidth: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var requiredWidth: CGFloat = 0
+        var requiredHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            let spacing = rowWidth == 0 ? 0 : horizontalSpacing
+
+            if rowWidth > 0, rowWidth + spacing + size.width > maximumWidth {
+                requiredWidth = max(requiredWidth, rowWidth)
+                requiredHeight += rowHeight + verticalSpacing
+                rowWidth = size.width
+                rowHeight = size.height
+            } else {
+                rowWidth += spacing + size.width
+                rowHeight = max(rowHeight, size.height)
+            }
+        }
+
+        requiredWidth = max(requiredWidth, rowWidth)
+        requiredHeight += rowHeight
+
+        return CGSize(
+            width: proposal.width ?? requiredWidth,
+            height: requiredHeight
+        )
+    }
+
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            let spacing = x == bounds.minX ? 0 : horizontalSpacing
+
+            if x > bounds.minX, x + spacing + size.width > bounds.maxX {
+                x = bounds.minX
+                y += rowHeight + verticalSpacing
+                rowHeight = 0
+            } else {
+                x += spacing
+            }
+
+            subview.place(
+                at: CGPoint(x: x, y: y),
+                anchor: .topLeading,
+                proposal: ProposedViewSize(size)
+            )
+            x += size.width
+            rowHeight = max(rowHeight, size.height)
+        }
     }
 }
 

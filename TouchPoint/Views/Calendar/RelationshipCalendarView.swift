@@ -396,7 +396,7 @@ private struct CalendarEventRow: View {
 
     var body: some View {
         if let person = store.person(for: event) {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                 PersonAvatar(person: person)
 
                 VStack(alignment: .leading, spacing: 5) {

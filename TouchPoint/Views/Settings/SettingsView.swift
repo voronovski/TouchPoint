@@ -162,7 +162,7 @@ struct SettingsView: View {
         Section {
             ForEach(Focus.allCases) { focus in
                 Button { preferences.focus = focus } label: {
-                    HStack(alignment: .top, spacing: 12) {
+                    HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                         IconTile(systemImage: focus.icon, tint: preferences.focus == focus ? Color.accentColor : Color.secondary)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(focus.title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
@@ -202,8 +202,18 @@ struct SettingsView: View {
                 ))
             }
             Button { synchronizeNotificationsNow() } label: {
-                Label(isSynchronizingNotifications ? "Syncing reminders…" : "Sync reminders now", systemImage: "arrow.triangle.2.circlepath")
+                Label {
+                    Text(isSynchronizingNotifications ? "Syncing reminders…" : "Sync reminders now")
+                } icon: {
+                    if isSynchronizingNotifications {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                    }
+                }
             }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
             .disabled(isSynchronizingNotifications)
             if let syncError = preferences.notificationSyncError {
                 Label(syncError, systemImage: "exclamationmark.triangle.fill").font(.footnote).foregroundStyle(.red)
@@ -219,12 +229,18 @@ struct SettingsView: View {
     private var reminderAuthorizationAction: some View {
         switch notificationStatus {
         case .notDetermined:
-            Button { enableReminders() } label: { Label("Enable reminders", systemImage: "bell.badge") }
+            Button { enableReminders() } label: {
+                Label("Enable reminders", systemImage: "bell.badge")
+            }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
         case .denied:
             Button {
                 guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                 openURL(url)
-            } label: { Label("Open System Settings", systemImage: "gear") }
+            } label: {
+                Label("Open System Settings", systemImage: "gear")
+            }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
         default:
             EmptyView()
         }
@@ -258,7 +274,7 @@ struct SettingsView: View {
 
     private var cloudSettingsSection: some View {
         Section {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                 Image(systemName: cloudStatusIcon).foregroundStyle(cloudStatusColor)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(cloudKit.state.title).font(.subheadline.weight(.semibold))
@@ -266,8 +282,18 @@ struct SettingsView: View {
                 }
             }
             Button { synchronizeCloudKit() } label: {
-                Label(isSynchronizingCloudKit ? "Syncing…" : "Sync iCloud now", systemImage: "arrow.triangle.2.circlepath.icloud")
+                Label {
+                    Text(isSynchronizingCloudKit ? "Syncing…" : "Sync iCloud now")
+                } icon: {
+                    if isSynchronizingCloudKit {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.triangle.2.circlepath.icloud")
+                    }
+                }
             }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
             .disabled(isSynchronizingCloudKit)
         } header: {
             Text("Private iCloud backup")
@@ -284,14 +310,19 @@ struct SettingsView: View {
                     showingArchiveExporter = true
                 }
                 catch { archiveError = error.localizedDescription }
-            } label: { Label("Export all Touch Point data", systemImage: "square.and.arrow.up") }
+            } label: {
+                Label("Export all Touch Point data", systemImage: "square.and.arrow.up")
+            }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
             Button { showingArchiveImporter = true } label: {
                 Label("Replace with an archive…", systemImage: "square.and.arrow.down")
             }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
             if store.recoverableSnapshotData() != nil {
                 Button(role: .destructive) { showingRecoveryConfirmation = true } label: {
                     Label("Restore recovered local backup", systemImage: "arrow.uturn.backward.circle")
                 }
+                .buttonStyle(TouchPointTertiaryButtonStyle(tint: .red))
             }
         } header: {
             Text("Local archive")
@@ -305,6 +336,7 @@ struct SettingsView: View {
             Button { showingTemplateImporter = true } label: {
                 Label("Import library", systemImage: "square.and.arrow.down")
             }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
             Button {
                 templateExportDocument = TemplateLibraryDocument(
                     templates: store.templates,
@@ -314,6 +346,7 @@ struct SettingsView: View {
             } label: {
                 Label("Export library", systemImage: "square.and.arrow.up")
             }
+            .buttonStyle(TouchPointTertiaryButtonStyle())
         } header: {
             Text("Template library")
         } footer: {

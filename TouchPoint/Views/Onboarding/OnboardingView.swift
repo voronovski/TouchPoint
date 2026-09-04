@@ -66,7 +66,7 @@ struct OnboardingView: View {
         return Button {
             selection = focus
         } label: {
-            HStack(alignment: .top, spacing: 14) {
+            HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 14) {
                 IconTile(systemImage: focus.icon, tint: isSelected ? .accentColor : .secondary)
 
                 VStack(alignment: .leading, spacing: 4) {

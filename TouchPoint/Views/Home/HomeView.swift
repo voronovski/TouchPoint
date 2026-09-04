@@ -196,7 +196,7 @@ struct HomeView: View {
             if let nextEvent, let person = store.person(for: nextEvent) {
                 SurfaceCard {
                     VStack(alignment: .leading, spacing: 14) {
-                        HStack(alignment: .top, spacing: 12) {
+                        HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                             PersonAvatar(person: person, size: 46)
 
                             VStack(alignment: .leading, spacing: 4) {
@@ -246,7 +246,7 @@ struct HomeView: View {
     private var planYearCard: some View {
         SurfaceCard {
             VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                     IconTile(systemImage: "calendar.badge.plus", tint: .accentColor)
 
                     VStack(alignment: .leading, spacing: 4) {

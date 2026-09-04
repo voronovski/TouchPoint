@@ -424,6 +424,7 @@ private struct PersonEditorView: View {
                                 .multilineTextAlignment(.trailing)
                         }
                     }
+                    .buttonStyle(.plain)
                 }
 
                 Section("Context") {
@@ -469,6 +470,7 @@ private struct PersonEditorView: View {
                     } label: {
                         Label("Add important date", systemImage: "calendar.badge.plus")
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
                 } header: {
                     Text("Important dates")
                 } footer: {
@@ -703,6 +705,7 @@ private struct TimeZonePickerView: View {
                         }
                     }
                 }
+                .buttonStyle(.plain)
                 .foregroundStyle(.primary)
             }
             .searchable(text: $query, prompt: "City or time zone")

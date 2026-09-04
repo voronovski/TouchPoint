@@ -66,22 +66,22 @@ enum AppleGreetingGenerator {
 
     @MainActor
     static func status(for language: String) -> AppleGreetingGeneratorStatus {
-        switch status {
-        case .unavailable(let reason):
-            return .unavailable(reason)
-        case .available:
-            break
-        }
 #if canImport(FoundationModels)
-        guard #available(iOS 26.0, *),
-              let locale = locale(for: language),
-              SystemLanguageModel.default.supportsLocale(locale) else {
+        guard #available(iOS 26.0, *) else { return status }
+
+        let model = SystemLanguageModel.default
+        guard let locale = locale(for: language), model.supportsLocale(locale) else {
             let displayLanguage = language.trimmingCharacters(in: .whitespacesAndNewlines)
             return .unavailable(
                 "Apple Intelligence does not support \(displayLanguage.isEmpty ? "the selected language" : displayLanguage). Choose another language or write the message manually."
             )
         }
-        return .available
+        switch model.availability {
+        case .available:
+            return .available
+        case .unavailable(let reason):
+            return .unavailable(unavailableMessage(for: reason))
+        }
 #else
         return .unavailable("This build does not include Apple's Foundation Models framework.")
 #endif
@@ -349,7 +349,7 @@ struct AppleGreetingGeneratorSheet: View {
 
     private var availabilityCard: some View {
         SurfaceCard {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                 IconTile(
                     systemImage: isModelAvailable ? "apple.intelligence" : "exclamationmark.triangle.fill",
                     tint: isModelAvailable ? .accentColor : TouchPointColor.amber
@@ -414,13 +414,13 @@ struct AppleGreetingGeneratorSheet: View {
                         Divider().padding(.leading, 52)
                         contextField("Event context", text: $context.occasionDetails, axis: .vertical)
                         Divider().padding(.leading, 52)
-                        contextField("Date or timing (optional)", text: $context.eventDate)
+                        contextValueRow("Date or timing", value: context.eventDate)
                         Divider().padding(.leading, 52)
-                        contextField("Audience", text: $context.relationship)
+                        contextValueRow("Audience", value: context.relationship)
                         Divider().padding(.leading, 52)
-                        contextField("Channel", text: $context.channel)
+                        contextValueRow("Channel", value: context.channel)
                         Divider().padding(.leading, 52)
-                        contextField("Language", text: $context.language)
+                        contextValueRow("Language", value: context.language)
                         Divider().padding(.leading, 52)
                         contextField("Sender (optional)", text: $context.senderName)
                     }
@@ -479,9 +479,8 @@ struct AppleGreetingGeneratorSheet: View {
                         Button("Translate to \(context.language)") { refine("Translate this message into \(context.language), preserving its warmth and intent.") }
                     } label: {
                         Label("Improve message", systemImage: "wand.and.stars")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
                     .disabled(isGenerating || !isModelAvailable)
                 }
                 .padding(TouchPointMetric.cardPadding)
@@ -526,6 +525,21 @@ struct AppleGreetingGeneratorSheet: View {
             TextField("", text: text, prompt: Text(title), axis: axis)
                 .lineLimit(axis == .vertical ? 2...4 : 1...1)
                 .accessibilityLabel(Text(title))
+        }
+        .padding(.leading, 40)
+        .padding(.vertical, 10)
+    }
+
+    private func contextValueRow(_ title: LocalizedStringKey, value: String) -> some View {
+        let normalizedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return LabeledContent {
+            Text(normalizedValue.isEmpty ? String(localized: "Not specified") : normalizedValue)
+                .foregroundStyle(normalizedValue.isEmpty ? Color.secondary : Color.primary)
+                .multilineTextAlignment(.trailing)
+        } label: {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .padding(.leading, 40)
         .padding(.vertical, 10)

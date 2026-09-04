@@ -633,6 +633,7 @@ struct PlanYearView: View {
             .padding(TouchPointMetric.cardPadding)
             .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 
     private var recipientOverridesSheet: some View {
@@ -753,6 +754,7 @@ struct PlanYearView: View {
             .padding(TouchPointMetric.cardPadding)
             .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 
     private func reviewRow(icon: String, title: String, value: String) -> some View {

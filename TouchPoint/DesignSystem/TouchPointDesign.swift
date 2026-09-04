@@ -64,6 +64,11 @@ enum TouchPointMetric {
     static let cardRadius: CGFloat = 16
     static let iconSize: CGFloat = 28
     static let buttonHeight: CGFloat = 50
+
+    /// Leading and trailing icons in rows with stacked text are centered on
+    /// the row's content. Reserve top alignment for a multiline text input.
+    static let rowContentAlignment: VerticalAlignment = .center
+    static let multilineTextFieldAlignment: VerticalAlignment = .top
 }
 
 struct SurfaceCard<Content: View>: View {
@@ -173,6 +178,49 @@ struct TouchPointPrimaryButtonStyle: ButtonStyle {
             .clipShape(.rect(cornerRadius: TouchPointMetric.cardRadius, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.snappy(duration: 0.18), value: configuration.isPressed)
+    }
+}
+
+/// A full-width tertiary action for `List`, `Form`, and grouped card rows.
+/// The surrounding container owns its insets and separator; this style supplies
+/// Touch Point's neutral icon tile, typography, tint, and pressed treatment.
+struct TouchPointTertiaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    var tint: Color = .accentColor
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .labelStyle(TouchPointTertiaryLabelStyle(tint: resolvedTint))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .opacity(configuration.isPressed ? 0.55 : (isEnabled ? 1 : 0.6))
+            .contentShape(Rectangle())
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+
+    private var resolvedTint: Color {
+        isEnabled ? tint : .secondary
+    }
+}
+
+private struct TouchPointTertiaryLabelStyle: LabelStyle {
+    let tint: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 12) {
+            configuration.icon
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+                .tint(tint)
+                .frame(width: TouchPointMetric.iconSize, height: TouchPointMetric.iconSize)
+                .background(Color(.tertiarySystemGroupedBackground))
+                .clipShape(.rect(cornerRadius: 7, style: .continuous))
+
+            configuration.title
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+
+            Spacer(minLength: 0)
+        }
     }
 }
 

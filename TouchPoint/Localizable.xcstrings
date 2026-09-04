@@ -280,6 +280,16 @@
         }
       }
     },
+    "Apple Intelligence generation happens privately on this device." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence выполняет генерацию конфиденциально на этом устройстве."
+          }
+        }
+      }
+    },
     "Approval" : {
       "localizations" : {
         "ru" : {
@@ -969,7 +979,18 @@
         }
       }
     },
+    "Date or timing" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата или время"
+          }
+        }
+      }
+    },
     "Date or timing (optional)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -1919,7 +1940,18 @@
         }
       }
     },
+    "Insert variables with the buttons above." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавляйте переменные кнопками выше."
+          }
+        }
+      }
+    },
     "Insert variables with the buttons above. Generation happens on device when Apple Intelligence is available." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -2564,6 +2596,16 @@
     },
     "None" : {
 
+    },
+    "Not specified" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не указано"
+          }
+        }
+      }
     },
     "Nothing scheduled" : {
       "localizations" : {

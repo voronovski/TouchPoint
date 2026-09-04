@@ -24,7 +24,7 @@ struct GreetingDetailView: View {
             if let event, let person = store.person(for: event) {
                 VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
                     SurfaceCard {
-                        HStack(alignment: .top, spacing: 12) {
+                        HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
                             PersonAvatar(person: person, size: 48)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(person.name)
@@ -488,12 +488,21 @@ private struct GreetingMessageEditor: View {
                     Button { showingGenerator = true } label: {
                         Label("Generate with Apple Intelligence", systemImage: "apple.intelligence")
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
+                    .disabled(!isGeneratorAvailable)
                     Button {
                         didSaveTemplate = onSaveAsTemplate(trimmedMessage)
                     } label: {
-                        Label(didSaveTemplate ? "Saved to templates" : "Save as template", systemImage: didSaveTemplate ? "checkmark" : "rectangle.stack.badge.plus")
+                        if didSaveTemplate {
+                            Label("Saved to templates", systemImage: "checkmark")
+                        } else {
+                            Label("Save as template", systemImage: "rectangle.stack.badge.plus")
+                        }
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
                     .disabled(trimmedMessage.isEmpty || didSaveTemplate)
+                } footer: {
+                    Text(generatorAvailabilityExplanation)
                 }
             }
             .navigationTitle("Edit message")
@@ -510,6 +519,24 @@ private struct GreetingMessageEditor: View {
             .sheet(isPresented: $showingGenerator) {
                 AppleGreetingGeneratorSheet(context: context) { message = $0 }
             }
+        }
+    }
+
+    private var generatorStatus: AppleGreetingGeneratorStatus {
+        AppleGreetingGenerator.status(for: context.language)
+    }
+
+    private var isGeneratorAvailable: Bool {
+        if case .available = generatorStatus { return true }
+        return false
+    }
+
+    private var generatorAvailabilityExplanation: String {
+        switch generatorStatus {
+        case .available:
+            String(localized: "Apple Intelligence generation happens privately on this device.")
+        case .unavailable(let reason):
+            reason
         }
     }
 }
