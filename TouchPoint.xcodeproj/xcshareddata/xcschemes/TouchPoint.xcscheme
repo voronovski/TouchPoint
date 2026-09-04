@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FAD18B103048DB4100D3927C"
-               BuildableName = "TouchPoint.app"
+               BuildableName = "My Touchpoint.app"
                BlueprintName = "TouchPoint"
                ReferencedContainer = "container:TouchPoint.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FAD18B103048DB4100D3927C"
-            BuildableName = "TouchPoint.app"
+            BuildableName = "My Touchpoint.app"
             BlueprintName = "TouchPoint"
             ReferencedContainer = "container:TouchPoint.xcodeproj">
          </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FAD18B103048DB4100D3927C"
-            BuildableName = "TouchPoint.app"
+            BuildableName = "My Touchpoint.app"
             BlueprintName = "TouchPoint"
             ReferencedContainer = "container:TouchPoint.xcodeproj">
          </BuildableReference>

@@ -90,7 +90,7 @@ final class CloudKitSnapshotService {
 
             // A fresh install has no knowledge of whether its seeded/empty store is
             // meaningful. Bootstrap from an existing private snapshot first; this
-            // prevents a new device's sample data from overwriting a real backup.
+            // prevents an empty starter workspace from overwriting a real backup.
             if let remote, !hasSyncMetadata, !hasLocalUserData, let payload = remote.payload {
                 defaults.set(digestFor(payload), forKey: lastDigestKey)
                 state = .synced(remote.modifiedAt)
@@ -150,12 +150,7 @@ final class CloudKitSnapshotService {
     }
 
     private func accountStatus() async throws -> CKAccountStatus {
-        try await withCheckedThrowingContinuation { continuation in
-            container.accountStatus { status, error in
-                if let error { continuation.resume(throwing: error) }
-                else { continuation.resume(returning: status) }
-            }
-        }
+        try await container.accountStatus()
     }
 
     private struct RemoteSnapshot {

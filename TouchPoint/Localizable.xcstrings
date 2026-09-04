@@ -2,20 +2,16 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-
-    },
-    "{{%@}}" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "{{%@}}"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "%@ and %lld more" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ and %lld more"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25,10 +21,29 @@
       }
     },
     "%lld active" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld active"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld активных"
+          }
+        }
+      }
     },
     "%lld greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -39,6 +54,12 @@
     },
     "%lld selected" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld selected"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -49,6 +70,12 @@
     },
     "%lld/%lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/%lld"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -59,6 +86,12 @@
     },
     "1 greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -69,6 +102,12 @@
     },
     "A custom occasion needs a name." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A custom occasion needs a name."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -79,6 +118,12 @@
     },
     "A greeting needs someone to contact. Add them in People, then return here." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A greeting needs someone to contact. Add them in People, then return here."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -89,6 +134,12 @@
     },
     "About" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -99,6 +150,12 @@
     },
     "Add" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -109,6 +166,12 @@
     },
     "Add a greeting or plan the year to build your calendar." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a greeting or plan the year to build your calendar."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -119,6 +182,12 @@
     },
     "Add a person first" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a person first"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -129,6 +198,12 @@
     },
     "Add greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -139,6 +214,12 @@
     },
     "Add important date" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add important date"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -149,6 +230,12 @@
     },
     "Add person" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add person"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -159,6 +246,12 @@
     },
     "All" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -168,10 +261,29 @@
       }
     },
     "All languages" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All languages"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все языки"
+          }
+        }
+      }
     },
     "All relationships" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All relationships"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -182,6 +294,12 @@
     },
     "Amber" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amber"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -192,6 +310,12 @@
     },
     "An archive includes people, dates, greetings, templates, revisions, and usage history. Replacing data is validated before it is saved." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An archive includes people, dates, greetings, templates, revisions, and usage history. Replacing data is validated before it is saved."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -202,6 +326,12 @@
     },
     "Annual" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annual"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -212,6 +342,12 @@
     },
     "Annual date" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annual date"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -222,6 +358,12 @@
     },
     "Any channel" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any channel"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -232,6 +374,12 @@
     },
     "Any occasion" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any occasion"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -242,6 +390,12 @@
     },
     "Any relationship" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any relationship"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -252,6 +406,12 @@
     },
     "App" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -262,6 +422,12 @@
     },
     "Appearance" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -272,6 +438,12 @@
     },
     "Apple Intelligence" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -282,6 +454,12 @@
     },
     "Apple Intelligence generation happens privately on this device." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence generation happens privately on this device."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -292,6 +470,12 @@
     },
     "Approval" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approval"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -302,6 +486,12 @@
     },
     "Approval and locking are local controls on this device, not team approval." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approval and locking are local controls on this device, not team approval."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -312,6 +502,12 @@
     },
     "Approve" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approve"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -322,6 +518,12 @@
     },
     "Approve on this device" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approve on this device"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -332,6 +534,12 @@
     },
     "Archive" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archive"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -342,6 +550,12 @@
     },
     "Archive unavailable" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archive unavailable"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -352,6 +566,12 @@
     },
     "Armistice Day (France)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Armistice Day (France)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -362,6 +582,12 @@
     },
     "Audience" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audience"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -372,6 +598,12 @@
     },
     "Automatic recommendation" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic recommendation"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -382,6 +614,12 @@
     },
     "Automatic recommendations use each recipient's relationship, preferred contact method, and language. Choose a template only for people who need an exception." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic recommendations use each recipient's relationship, preferred contact method, and language. Choose a template only for people who need an exception."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -392,6 +630,12 @@
     },
     "Backed up to iCloud" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backed up to iCloud"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -418,6 +662,12 @@
     },
     "Birthday" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birthday"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -428,6 +678,12 @@
     },
     "Blue" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -438,6 +694,12 @@
     },
     "Built-in approval cannot be removed." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in approval cannot be removed."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -448,6 +710,12 @@
     },
     "Built-in templates cannot be unlocked." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in templates cannot be unlocked."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -458,6 +726,12 @@
     },
     "Calendar" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -468,6 +742,12 @@
     },
     "Cancel" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -478,6 +758,12 @@
     },
     "Cannot open composer" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot open composer"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -488,6 +774,12 @@
     },
     "Changing this approved template will remove its approval on this device and create a new version." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changing this approved template will remove its approval on this device and create a new version."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -498,6 +790,12 @@
     },
     "Channel" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Channel"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -508,6 +806,12 @@
     },
     "Checking account and private database status." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking account and private database status."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -518,6 +822,12 @@
     },
     "Checking iCloud…" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking iCloud…"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -528,6 +838,12 @@
     },
     "Chinese holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chinese holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -538,6 +854,12 @@
     },
     "Choose a person" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a person"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -548,6 +870,12 @@
     },
     "Choose a starting focus" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a starting focus"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -558,6 +886,12 @@
     },
     "Choose a template for this person and occasion. Automatic uses the best channel and language match." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a template for this person and occasion. Automatic uses the best channel and language match."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -568,6 +902,12 @@
     },
     "Choose date range" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose date range"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -577,10 +917,29 @@
       }
     },
     "Choose occasions" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose occasions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать поводы"
+          }
+        }
+      }
     },
     "Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -591,6 +950,12 @@
     },
     "Christmas" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Christmas"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -601,6 +966,12 @@
     },
     "Cinco de Mayo" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cinco de Mayo"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -611,6 +982,12 @@
     },
     "City or time zone" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "City or time zone"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -621,6 +998,12 @@
     },
     "Clear" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -631,6 +1014,12 @@
     },
     "Clear context filters" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear context filters"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -641,6 +1030,12 @@
     },
     "Clear filters" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear filters"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -651,6 +1046,12 @@
     },
     "Clear status filter" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear status filter"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -661,6 +1062,12 @@
     },
     "Client" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -671,6 +1078,12 @@
     },
     "Client appreciation" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client appreciation"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -681,6 +1094,12 @@
     },
     "Clients and colleagues" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clients and colleagues"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -691,6 +1110,12 @@
     },
     "Close" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -701,6 +1126,12 @@
     },
     "Colleague" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colleague"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -711,6 +1142,12 @@
     },
     "Collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -721,6 +1158,12 @@
     },
     "Collections" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -731,6 +1174,12 @@
     },
     "Collections keep related templates together." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections keep related templates together."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -741,6 +1190,12 @@
     },
     "Color" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -751,6 +1206,12 @@
     },
     "Columbus Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Columbus Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -761,6 +1222,12 @@
     },
     "Completed" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -771,6 +1238,12 @@
     },
     "Constitution Day of Ukraine" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Constitution Day of Ukraine"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -781,6 +1254,12 @@
     },
     "Constitution Memorial Day (Japan)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Constitution Memorial Day (Japan)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -791,6 +1270,12 @@
     },
     "Contact" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -801,6 +1286,12 @@
     },
     "Contact method" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact method"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -811,6 +1302,12 @@
     },
     "Contacts imported" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contacts imported"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -821,6 +1318,12 @@
     },
     "Context" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Context"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -831,6 +1334,12 @@
     },
     "Context filters combine with the selected collection and search." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Context filters combine with the selected collection and search."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -841,6 +1350,12 @@
     },
     "Coral" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coral"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -851,6 +1366,12 @@
     },
     "Could not restore version" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not restore version"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -861,6 +1382,12 @@
     },
     "Could not save collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not save collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -871,6 +1398,12 @@
     },
     "Could not save template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not save template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -881,6 +1414,12 @@
     },
     "Create template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -891,6 +1430,12 @@
     },
     "Created" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Created"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -901,6 +1446,12 @@
     },
     "Culture Day (Japan)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Culture Day (Japan)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -911,6 +1462,12 @@
     },
     "Current version" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current version"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -921,6 +1478,12 @@
     },
     "Custom name (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom name (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -931,6 +1494,12 @@
     },
     "Custom occasion" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom occasion"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -941,6 +1510,12 @@
     },
     "Custom occasion name" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom occasion name"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -951,6 +1526,12 @@
     },
     "Custom occasion name (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom occasion name (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -961,6 +1542,12 @@
     },
     "Customize specific people" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customize specific people"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -971,6 +1558,12 @@
     },
     "Date and time" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date and time"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -981,6 +1574,12 @@
     },
     "Date or timing" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date or timing"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -989,19 +1588,14 @@
         }
       }
     },
-    "Date or timing (optional)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дата или время (необязательно)"
-          }
-        }
-      }
-    },
     "Date range" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date range"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1012,6 +1606,12 @@
     },
     "Date Range" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date Range"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1022,6 +1622,12 @@
     },
     "Dates repeat every year. The year is intentionally not stored." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dates repeat every year. The year is intentionally not stored."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1032,6 +1638,12 @@
     },
     "Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1042,6 +1654,12 @@
     },
     "DEFAULT" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DEFAULT"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1052,6 +1670,12 @@
     },
     "Default for this context" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default for this context"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1062,6 +1686,12 @@
     },
     "Default language" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default language"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1072,6 +1702,12 @@
     },
     "Defender of the Fatherland Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defender of the Fatherland Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1082,6 +1718,12 @@
     },
     "Defenders Day of Ukraine" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defenders Day of Ukraine"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1092,6 +1734,12 @@
     },
     "Delete" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1102,6 +1750,12 @@
     },
     "Delete collection?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete collection?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1112,6 +1766,12 @@
     },
     "Delete collections?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete collections?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1122,6 +1782,12 @@
     },
     "Delete greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1132,6 +1798,12 @@
     },
     "Delete person" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete person"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1142,6 +1814,12 @@
     },
     "Delete person and greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete person and greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1152,6 +1830,12 @@
     },
     "Delete template?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete template?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1162,6 +1846,12 @@
     },
     "Delete this greeting?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this greeting?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1172,6 +1862,12 @@
     },
     "Delete this person?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this person?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1182,6 +1878,12 @@
     },
     "Día de la Raza" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día de la Raza"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1192,6 +1894,12 @@
     },
     "Día de los Muertos" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día de los Muertos"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1202,6 +1910,12 @@
     },
     "Direction" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direction"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1212,6 +1926,12 @@
     },
     "Done" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1222,6 +1942,12 @@
     },
     "Double-tap to edit this collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double-tap to edit this collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1232,6 +1958,12 @@
     },
     "Double-tap to edit this template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double-tap to edit this template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1242,6 +1974,12 @@
     },
     "Double-tap to preview this version" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double-tap to preview this version"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1252,6 +1990,12 @@
     },
     "Double-tap to view this locked template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double-tap to view this locked template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1262,6 +2006,12 @@
     },
     "Duplicate" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1272,6 +2022,12 @@
     },
     "Duplicate to edit" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate to edit"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1282,6 +2038,12 @@
     },
     "Earth Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earth Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1292,6 +2054,12 @@
     },
     "Edit" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1302,6 +2070,12 @@
     },
     "Edit collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1312,6 +2086,12 @@
     },
     "Edit message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1322,6 +2102,12 @@
     },
     "Edit schedule" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit schedule"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1332,6 +2118,12 @@
     },
     "Edit template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1342,6 +2134,12 @@
     },
     "Editing" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1352,6 +2150,12 @@
     },
     "Email" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1362,6 +2166,12 @@
     },
     "Email (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1372,6 +2182,12 @@
     },
     "Email subject (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email subject (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1382,6 +2198,12 @@
     },
     "Enable reminders" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable reminders"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1392,6 +2214,12 @@
     },
     "Event context" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event context"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1402,6 +2230,12 @@
     },
     "Every relationship" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every relationship"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1412,6 +2246,12 @@
     },
     "Every year" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every year"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1422,6 +2262,12 @@
     },
     "Existing scheduled greetings keep their current message." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Existing scheduled greetings keep their current message."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1432,6 +2278,12 @@
     },
     "Export all Touch Point data" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export all Touch Point data"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1442,6 +2294,12 @@
     },
     "Export library" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export library"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1452,6 +2310,12 @@
     },
     "Family" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1462,6 +2326,12 @@
     },
     "Family and friends" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family and friends"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1472,6 +2342,12 @@
     },
     "Father's Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Father's Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1482,6 +2358,12 @@
     },
     "Favorite" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorite"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1492,6 +2374,12 @@
     },
     "Filter by relationship, then select the people to include. You can fine-tune each greeting later." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter by relationship, then select the people to include. You can fine-tune each greeting later."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1502,6 +2390,12 @@
     },
     "Filter greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1512,6 +2406,12 @@
     },
     "Filters" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filters"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1522,6 +2422,12 @@
     },
     "Focus" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1532,6 +2438,12 @@
     },
     "Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1542,6 +2454,12 @@
     },
     "Forest" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forest"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1552,6 +2470,12 @@
     },
     "French holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "French holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1562,6 +2486,12 @@
     },
     "French National Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "French National Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1572,6 +2502,12 @@
     },
     "Friend" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friend"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1582,6 +2518,12 @@
     },
     "From" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1592,6 +2534,12 @@
     },
     "Full name" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full name"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1602,6 +2550,12 @@
     },
     "Generate another" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate another"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1612,6 +2566,12 @@
     },
     "Generate message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1622,6 +2582,12 @@
     },
     "Generate with Apple Intelligence" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate with Apple Intelligence"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1632,6 +2598,12 @@
     },
     "Generated message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generated message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1642,6 +2614,12 @@
     },
     "Generation unavailable" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generation unavailable"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1652,6 +2630,12 @@
     },
     "German holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "German holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1662,6 +2646,12 @@
     },
     "German Labor Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "German Labor Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1672,6 +2662,12 @@
     },
     "German Reformation Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "German Reformation Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1682,6 +2678,12 @@
     },
     "German Unity Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "German Unity Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1692,6 +2694,12 @@
     },
     "Governance" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Governance"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1702,6 +2710,12 @@
     },
     "Greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1712,6 +2726,12 @@
     },
     "Greeting actions" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greeting actions"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1722,6 +2742,12 @@
     },
     "Greeting not saved" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greeting not saved"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1732,6 +2758,12 @@
     },
     "Greeting unavailable" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greeting unavailable"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1742,6 +2774,12 @@
     },
     "Greetings not saved" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greetings not saved"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1752,6 +2790,12 @@
     },
     "Halloween" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halloween"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1762,6 +2806,12 @@
     },
     "Hangul Day (Korea)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangul Day (Korea)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1772,6 +2822,12 @@
     },
     "Hide names in notifications" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide names in notifications"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1782,6 +2838,12 @@
     },
     "Hispanic Heritage Month" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hispanic Heritage Month"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1792,6 +2854,12 @@
     },
     "History" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1802,6 +2870,12 @@
     },
     "Home" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1812,6 +2886,12 @@
     },
     "Home anniversary" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home anniversary"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1822,6 +2902,12 @@
     },
     "iCloud sync issue" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud sync issue"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1832,6 +2918,12 @@
     },
     "iCloud unavailable" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud unavailable"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1842,6 +2934,12 @@
     },
     "Icon" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icon"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1852,6 +2950,12 @@
     },
     "Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1862,6 +2966,12 @@
     },
     "Import from Contacts" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from Contacts"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1872,6 +2982,12 @@
     },
     "Import library" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import library"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1882,6 +2998,12 @@
     },
     "Important date" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Important date"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1892,6 +3014,12 @@
     },
     "Important dates" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Important dates"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1902,6 +3030,12 @@
     },
     "Improve message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Improve message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1912,6 +3046,12 @@
     },
     "Independence Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Independence Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1922,6 +3062,12 @@
     },
     "Independence Day of Ukraine" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Independence Day of Ukraine"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1932,6 +3078,12 @@
     },
     "Indigo" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indigo"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1940,8 +3092,30 @@
         }
       }
     },
+    "Insert %@ variable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert %@ variable"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставить переменную %@"
+          }
+        }
+      }
+    },
     "Insert variables with the buttons above." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert variables with the buttons above."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1950,19 +3124,14 @@
         }
       }
     },
-    "Insert variables with the buttons above. Generation happens on device when Apple Intelligence is available." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Добавляйте переменные кнопками выше. Генерация выполняется на устройстве, если доступна Apple Intelligence."
-          }
-        }
-      }
-    },
     "International Women's Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "International Women's Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1973,6 +3142,12 @@
     },
     "It will remain in Calendar and can be restored later." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It will remain in Calendar and can be restored later."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1983,6 +3158,12 @@
     },
     "Italian Assumption Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Italian Assumption Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1993,6 +3174,12 @@
     },
     "Italian holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Italian holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2003,6 +3190,12 @@
     },
     "Italian Liberation Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Italian Liberation Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2013,6 +3206,12 @@
     },
     "Italian Republic Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Italian Republic Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2023,6 +3222,12 @@
     },
     "Its templates are kept and moved to Ungrouped." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its templates are kept and moved to Ungrouped."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2033,6 +3238,12 @@
     },
     "Japanese holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japanese holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2043,6 +3254,12 @@
     },
     "Juneteenth" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juneteenth"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2053,6 +3270,12 @@
     },
     "Keep every relationship in view. You can change this focus anytime." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep every relationship in view. You can change this focus anytime."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2063,6 +3286,12 @@
     },
     "Korean holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korean holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2073,6 +3302,12 @@
     },
     "Labor Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Labor Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2083,6 +3318,12 @@
     },
     "Labor Day (China)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Labor Day (China)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2093,6 +3334,12 @@
     },
     "Labor Thanksgiving Day (Japan)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Labor Thanksgiving Day (Japan)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2103,6 +3350,12 @@
     },
     "Language" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2113,6 +3366,12 @@
     },
     "Languages" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Languages"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2123,6 +3382,12 @@
     },
     "Las Posadas" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las Posadas"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2133,6 +3398,12 @@
     },
     "Last synced %@." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last synced %@."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2143,6 +3414,12 @@
     },
     "Last updated" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last updated"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2153,6 +3430,12 @@
     },
     "Last used" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last used"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2163,6 +3446,12 @@
     },
     "Latin American dates" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Latin American dates"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2173,6 +3462,12 @@
     },
     "Leave this blank to start with the best matching template. You can edit it later." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave this blank to start with the best matching template. You can edit it later."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2183,6 +3478,12 @@
     },
     "Liberation Day (Korea)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liberation Day (Korea)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2193,6 +3494,12 @@
     },
     "Library" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Library"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2203,6 +3510,12 @@
     },
     "Lifetime schedules" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lifetime schedules"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2213,6 +3526,12 @@
     },
     "Local archive" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local archive"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2223,6 +3542,12 @@
     },
     "Local reminders" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local reminders"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2233,6 +3558,12 @@
     },
     "Lock" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2243,6 +3574,12 @@
     },
     "Lock template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2252,10 +3589,29 @@
       }
     },
     "Locked" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокировано"
+          }
+        }
+      }
     },
     "Manage collections" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage collections"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2266,6 +3622,12 @@
     },
     "March 1st Movement Day (Korea)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "March 1st Movement Day (Korea)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2276,6 +3638,12 @@
     },
     "Mark complete" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark complete"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2286,6 +3654,12 @@
     },
     "Martin Luther King Jr. Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Martin Luther King Jr. Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2296,6 +3670,12 @@
     },
     "Memorial Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memorial Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2306,6 +3686,12 @@
     },
     "Message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2316,6 +3702,12 @@
     },
     "Mexican Independence Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mexican Independence Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2326,6 +3718,12 @@
     },
     "Mexican Mother's Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mexican Mother's Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2336,6 +3734,12 @@
     },
     "Month" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2346,6 +3750,12 @@
     },
     "Most used" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most used"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2356,6 +3766,12 @@
     },
     "Mother's Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mother's Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2366,6 +3782,12 @@
     },
     "Name" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2376,6 +3798,12 @@
     },
     "Name, email, or organization" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, email, or organization"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2386,6 +3814,12 @@
     },
     "Name, message, occasion, audience, channel, or language" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, message, occasion, audience, channel, or language"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2396,6 +3830,12 @@
     },
     "National Day (China)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "National Day (China)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2406,6 +3846,12 @@
     },
     "National Foundation Day (Japan)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "National Foundation Day (Japan)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2416,6 +3862,12 @@
     },
     "National Foundation Day (Korea)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "National Foundation Day (Korea)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2426,6 +3878,12 @@
     },
     "National Unity Day (Russia)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "National Unity Day (Russia)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2436,6 +3894,12 @@
     },
     "Needs attention" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs attention"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2446,6 +3910,12 @@
     },
     "New collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2456,6 +3926,12 @@
     },
     "New greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2466,6 +3942,12 @@
     },
     "New template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2476,6 +3958,12 @@
     },
     "New Year's Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Year's Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2486,6 +3974,12 @@
     },
     "Next greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2496,6 +3990,12 @@
     },
     "Next month" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next month"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2506,6 +4006,12 @@
     },
     "No collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2516,6 +4022,12 @@
     },
     "No collections" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No collections"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2526,6 +4038,12 @@
     },
     "No earlier versions yet." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No earlier versions yet."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2536,6 +4054,12 @@
     },
     "No greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2546,6 +4070,12 @@
     },
     "No greetings planned" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No greetings planned"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2556,6 +4086,12 @@
     },
     "No greetings yet" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No greetings yet"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2566,6 +4102,12 @@
     },
     "No important dates yet" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No important dates yet"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2576,6 +4118,12 @@
     },
     "No occasions selected" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No occasions selected"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2586,6 +4134,12 @@
     },
     "Nochebuena" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nochebuena"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2595,10 +4149,29 @@
       }
     },
     "None" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет"
+          }
+        }
+      }
     },
     "Not specified" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not specified"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2609,6 +4182,12 @@
     },
     "Nothing scheduled" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing scheduled"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2619,6 +4198,12 @@
     },
     "Observances" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observances"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2629,6 +4214,12 @@
     },
     "Occasion" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasion"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2639,6 +4230,12 @@
     },
     "Occasion groups" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasion groups"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2649,6 +4246,12 @@
     },
     "Occasion setting · %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasion setting · %@"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2659,6 +4262,12 @@
     },
     "Occasions" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasions"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2669,6 +4278,12 @@
     },
     "OK" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2679,6 +4294,12 @@
     },
     "One time" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One time"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2689,6 +4310,12 @@
     },
     "One-time" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2699,6 +4326,12 @@
     },
     "One-time greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2709,6 +4342,12 @@
     },
     "Open greeting plan" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open greeting plan"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2719,6 +4358,12 @@
     },
     "Open Mail" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Mail"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2729,6 +4374,12 @@
     },
     "Open Messages" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Messages"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2739,6 +4390,12 @@
     },
     "Open next greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open next greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2749,6 +4406,12 @@
     },
     "Open System Settings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open System Settings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2759,6 +4422,12 @@
     },
     "Open the greeting planning screen in Touch Point." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the greeting planning screen in Touch Point."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2769,6 +4438,12 @@
     },
     "Open the next planned greeting in Touch Point." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the next planned greeting in Touch Point."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2779,6 +4454,12 @@
     },
     "Open Touch Point's form for adding a person." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Touch Point's form for adding a person."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2789,6 +4470,12 @@
     },
     "Opens a searchable multi-select list" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens a searchable multi-select list"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2799,6 +4486,12 @@
     },
     "Opens a searchable multi-select occasion list" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens a searchable multi-select occasion list"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2809,6 +4502,12 @@
     },
     "Opens a searchable occasion list" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens a searchable occasion list"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2819,6 +4518,12 @@
     },
     "Option %lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Option %lld"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2829,6 +4534,12 @@
     },
     "Optional details or guidance" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional details or guidance"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2839,6 +4550,12 @@
     },
     "Organization (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organization (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2849,6 +4566,12 @@
     },
     "Our Lady of Guadalupe" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Our Lady of Guadalupe"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2859,6 +4582,12 @@
     },
     "People" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2869,6 +4598,12 @@
     },
     "Person" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2879,6 +4614,12 @@
     },
     "Person not saved" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person not saved"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2889,6 +4630,12 @@
     },
     "Person unavailable" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person unavailable"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2899,6 +4646,12 @@
     },
     "Personal" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personal"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2909,6 +4662,12 @@
     },
     "Personal message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personal message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2919,6 +4678,12 @@
     },
     "Personal moments" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personal moments"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2929,6 +4694,12 @@
     },
     "Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2939,6 +4710,12 @@
     },
     "Personalization" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalization"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2949,6 +4726,12 @@
     },
     "Phone" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2959,6 +4742,12 @@
     },
     "Phone (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2969,6 +4758,12 @@
     },
     "Pick what you want to see first, or keep All. This is a focus—not an identity—and you can change it later without losing any people or plans." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick what you want to see first, or keep All. This is a focus—not an identity—and you can change it later without losing any people or plans."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2979,6 +4774,12 @@
     },
     "Plan greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2989,6 +4790,12 @@
     },
     "Plan once. Never forget again." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan once. Never forget again."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2999,6 +4806,12 @@
     },
     "Plan the year" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan the year"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3009,6 +4822,12 @@
     },
     "Planned" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3019,6 +4838,12 @@
     },
     "Planned greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3029,6 +4854,12 @@
     },
     "Planning horizon" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planning horizon"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3039,6 +4870,12 @@
     },
     "Portugal Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portugal Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3049,6 +4886,12 @@
     },
     "Portuguese Freedom Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portuguese Freedom Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3059,6 +4902,12 @@
     },
     "Portuguese holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portuguese holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3069,6 +4918,12 @@
     },
     "Portuguese Republic Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portuguese Republic Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3079,6 +4934,12 @@
     },
     "Preferences" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferences"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3089,6 +4950,12 @@
     },
     "Preferred language" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferred language"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3099,6 +4966,12 @@
     },
     "Preferred method" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferred method"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3109,6 +4982,12 @@
     },
     "Presidents' Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presidents' Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3119,6 +4998,12 @@
     },
     "Preview" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3129,6 +5014,12 @@
     },
     "Previous month" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous month"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3139,6 +5030,12 @@
     },
     "Previous step" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous step"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3149,6 +5046,12 @@
     },
     "Prioritize personal relationships when reviewing upcoming greetings." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prioritize personal relationships when reviewing upcoming greetings."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3159,6 +5062,12 @@
     },
     "Prioritize work relationships when reviewing upcoming greetings." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prioritize work relationships when reviewing upcoming greetings."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3169,6 +5078,12 @@
     },
     "Private iCloud backup" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private iCloud backup"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3179,6 +5094,12 @@
     },
     "Private notes about this person" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private notes about this person"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3189,6 +5110,12 @@
     },
     "Ready" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3199,6 +5126,12 @@
     },
     "Recently updated" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recently updated"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3209,6 +5142,12 @@
     },
     "Recipient exceptions" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recipient exceptions"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3219,6 +5158,12 @@
     },
     "Recommended" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3229,6 +5174,12 @@
     },
     "Recurrence" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recurrence"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3239,6 +5190,12 @@
     },
     "Relationship" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relationship"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3249,6 +5206,12 @@
     },
     "Remind me" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind me"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3259,6 +5222,12 @@
     },
     "Reminder only" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder only"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3269,6 +5238,12 @@
     },
     "Reminder time" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder time"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3279,6 +5254,12 @@
     },
     "Reminders" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminders"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3289,6 +5270,12 @@
     },
     "Reminders unavailable" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminders unavailable"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3298,10 +5285,29 @@
       }
     },
     "Remove %@ filter" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@ filter"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить фильтр %@"
+          }
+        }
+      }
     },
     "Remove approval" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove approval"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3312,6 +5318,12 @@
     },
     "Remove local approval?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove local approval?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3322,6 +5334,12 @@
     },
     "Repeats annually" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeats annually"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3332,6 +5350,12 @@
     },
     "Replace with an archive…" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace with an archive…"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3342,6 +5366,12 @@
     },
     "Reset to current month" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to current month"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3352,6 +5382,12 @@
     },
     "Restore" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3362,6 +5398,12 @@
     },
     "Restore and remove approval" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore and remove approval"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3372,6 +5414,12 @@
     },
     "Restore backup" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore backup"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3382,6 +5430,12 @@
     },
     "Restore greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3392,6 +5446,12 @@
     },
     "Restore recovered local backup" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore recovered local backup"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3402,6 +5462,12 @@
     },
     "Restore recovered local backup?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore recovered local backup?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3412,6 +5478,12 @@
     },
     "Restore this version" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore this version"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3422,6 +5494,12 @@
     },
     "Restoring a version creates a new version and keeps the existing history." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring a version creates a new version and keeps the existing history."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3432,6 +5510,12 @@
     },
     "Restoring is additive: it creates a new current version and keeps this version in history." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring is additive: it creates a new current version and keeps this version in history."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3442,6 +5526,12 @@
     },
     "Restoring this version changes the approved template and removes its approval on this device." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring this version changes the approved template and removes its approval on this device."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3452,6 +5542,12 @@
     },
     "Rewrite" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rewrite"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3462,6 +5558,12 @@
     },
     "Rose" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rose"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3472,6 +5574,12 @@
     },
     "Russia Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Russia Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3482,6 +5590,12 @@
     },
     "Russian holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Russian holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3492,6 +5606,12 @@
     },
     "Save" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3502,6 +5622,12 @@
     },
     "Save and remove approval" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save and remove approval"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3512,6 +5638,12 @@
     },
     "Save as template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save as template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3522,6 +5654,12 @@
     },
     "Saved to templates" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to templates"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3532,6 +5670,12 @@
     },
     "Schedule" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3542,6 +5686,12 @@
     },
     "Schedule not saved" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule not saved"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3552,6 +5702,12 @@
     },
     "Scheduled text won't change when this template is updated." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheduled text won't change when this template is updated."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3562,6 +5718,12 @@
     },
     "Search all moments or expand Personal, U.S. holidays, Observances, and Latin American dates." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search all moments or expand Personal, U.S. holidays, Observances, and Latin American dates."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3572,6 +5734,12 @@
     },
     "Search occasions" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search occasions"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3582,6 +5750,12 @@
     },
     "Select all" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select all"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3592,6 +5766,12 @@
     },
     "Select at least one occasion" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select at least one occasion"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3601,10 +5781,29 @@
       }
     },
     "Selected" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрано"
+          }
+        }
+      }
     },
     "Selected people" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected people"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3615,6 +5814,12 @@
     },
     "Sender (optional)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sender (optional)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3625,6 +5830,12 @@
     },
     "Settings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3635,6 +5846,12 @@
     },
     "Shorten" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shorten"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3645,6 +5862,12 @@
     },
     "Show nearest greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show nearest greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3655,6 +5878,12 @@
     },
     "Skip greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3665,6 +5894,12 @@
     },
     "Skip this greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip this greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3675,6 +5910,12 @@
     },
     "Skip this greeting?" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip this greeting?"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3685,6 +5926,12 @@
     },
     "Skipped" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skipped"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3695,6 +5942,12 @@
     },
     "Smart scopes" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart scopes"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3705,6 +5958,12 @@
     },
     "Sort templates" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort templates"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3731,6 +5990,12 @@
     },
     "Subject" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subject"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3741,6 +6006,12 @@
     },
     "Sync iCloud now" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync iCloud now"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3751,6 +6022,12 @@
     },
     "Sync reminders now" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync reminders now"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3761,6 +6038,12 @@
     },
     "Syncing reminders…" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing reminders…"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3771,6 +6054,12 @@
     },
     "Syncing to iCloud…" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing to iCloud…"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3781,6 +6070,12 @@
     },
     "Syncing…" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing…"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3791,6 +6086,12 @@
     },
     "Tags (comma separated)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tags (comma separated)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3801,6 +6102,12 @@
     },
     "Teal" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teal"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3811,6 +6118,12 @@
     },
     "Template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3821,6 +6134,12 @@
     },
     "Template collection" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template collection"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3831,6 +6150,12 @@
     },
     "Template filters" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template filters"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3841,6 +6166,12 @@
     },
     "Template library" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template library"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3851,6 +6182,12 @@
     },
     "Template name" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template name"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3861,6 +6198,12 @@
     },
     "Templates" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Templates"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3871,6 +6214,12 @@
     },
     "Text message" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text message"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3881,6 +6230,12 @@
     },
     "Thanksgiving" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thanksgiving"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3891,6 +6246,12 @@
     },
     "The duplicate is an unlocked copy. Approval and locking are local controls on this device." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The duplicate is an unlocked copy. Approval and locking are local controls on this device."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3901,6 +6262,12 @@
     },
     "The icon and color identify this template throughout the library." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The icon and color identify this template throughout the library."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3911,6 +6278,12 @@
     },
     "The recovered file will replace the current in-memory data only after it passes validation and saves successfully." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The recovered file will replace the current in-memory data only after it passes validation and saves successfully."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3921,6 +6294,12 @@
     },
     "Their templates are kept and moved to Ungrouped." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Their templates are kept and moved to Ungrouped."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3931,6 +6310,12 @@
     },
     "There are no greetings in the selected period." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There are no greetings in the selected period."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3941,6 +6326,12 @@
     },
     "There are no greetings with this status in the selected period." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There are no greetings with this status in the selected period."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3951,6 +6342,12 @@
     },
     "This also removes the person's planned greetings and cannot be undone." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This also removes the person's planned greetings and cannot be undone."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3961,6 +6358,12 @@
     },
     "This is the exact text TouchPoint will place in Messages or Mail." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the exact text TouchPoint will place in Messages or Mail."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3971,6 +6374,12 @@
     },
     "This month" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This month"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3981,6 +6390,12 @@
     },
     "This removes the scheduled greeting and cannot be undone." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This removes the scheduled greeting and cannot be undone."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3991,6 +6406,12 @@
     },
     "This template is locked and read-only." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This template is locked and read-only."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4001,6 +6422,12 @@
     },
     "This time range is clear." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This time range is clear."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4011,6 +6438,12 @@
     },
     "Three Kings Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three Kings Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4021,6 +6454,12 @@
     },
     "Time zone" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time zone"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4031,6 +6470,12 @@
     },
     "Title" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4041,6 +6486,12 @@
     },
     "To" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4051,6 +6502,12 @@
     },
     "Tone" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tone"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4061,6 +6518,12 @@
     },
     "Touch Point" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch Point"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4071,6 +6534,12 @@
     },
     "Touch Point keeps working locally without an account or network. Your complete private snapshot is used for recovery on another device; it is not shared with other people." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch Point keeps working locally without an account or network. Your complete private snapshot is used for recovery on another device; it is not shared with other people."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4081,6 +6550,12 @@
     },
     "Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4091,6 +6566,12 @@
     },
     "Translate to %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Translate to %@"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4101,6 +6582,12 @@
     },
     "Type" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4111,6 +6598,12 @@
     },
     "U.S. holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U.S. holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4121,6 +6614,12 @@
     },
     "Ukrainian holidays" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukrainian holidays"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4131,6 +6630,12 @@
     },
     "Unfavorite" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unfavorite"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4141,6 +6646,12 @@
     },
     "Unlock" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4151,6 +6662,12 @@
     },
     "Unlock the template before restoring a version." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock the template before restoring a version."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4161,6 +6678,12 @@
     },
     "Unlock to edit" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock to edit"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4171,6 +6694,12 @@
     },
     "Untitled template" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untitled template"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4181,6 +6710,12 @@
     },
     "Upcoming" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4191,6 +6726,12 @@
     },
     "Usage" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usage"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4201,6 +6742,12 @@
     },
     "Use" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4211,6 +6758,12 @@
     },
     "Use each person's preferred method" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use each person's preferred method"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4221,6 +6774,12 @@
     },
     "Valentine's Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valentine's Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4231,6 +6790,12 @@
     },
     "Variant" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variant"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4241,6 +6806,12 @@
     },
     "Version" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4251,6 +6822,12 @@
     },
     "Version %lld" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %lld"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4261,6 +6838,12 @@
     },
     "Veterans Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veterans Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4271,6 +6854,12 @@
     },
     "Victory Day" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victory Day"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4281,6 +6870,12 @@
     },
     "Victory in Europe Day (France)" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victory in Europe Day (France)"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4291,6 +6886,12 @@
     },
     "View details" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View details"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4301,6 +6902,12 @@
     },
     "Wedding anniversary" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wedding anniversary"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4311,6 +6918,12 @@
     },
     "Work" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4321,6 +6934,12 @@
     },
     "Work anniversary" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work anniversary"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4331,6 +6950,12 @@
     },
     "Year planned" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year planned"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4341,6 +6966,12 @@
     },
     "You can add birthdays and other important dates later from People." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can add birthdays and other important dates later from People."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4351,6 +6982,12 @@
     },
     "You can adjust this context for the generated text. The event, person, and template are not changed." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can adjust this context for the generated text. The event, person, and template are not changed."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4361,6 +6998,12 @@
     },
     "Your local data remains available while sync runs." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your local data remains available while sync runs."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4371,6 +7014,12 @@
     },
     "Your name" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4381,6 +7030,12 @@
     },
     "Your name is used as the sender. The default language is selected automatically for every new template." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name is used as the sender. The default language is selected automatically for every new template."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",

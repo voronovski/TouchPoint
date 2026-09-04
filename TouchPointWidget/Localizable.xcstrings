@@ -1,30 +1,14 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "A contact" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Контакт"
-          }
-        }
-      }
-    },
-    "Birthday" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "День рождения"
-          }
-        }
-      }
-    },
     "for %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "for %@"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35,6 +19,12 @@
     },
     "for your contact" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "for your contact"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -43,19 +33,14 @@
         }
       }
     },
-    "Greeting" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поздравление"
-          }
-        }
-      }
-    },
     "Next greeting" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next greeting"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -66,6 +51,12 @@
     },
     "No upcoming greetings" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No upcoming greetings"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
@@ -74,30 +65,14 @@
         }
       }
     },
-    "Planned" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Запланировано"
-          }
-        }
-      }
-    },
-    "See the nearest planned greeting from Touch Point." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показывает ближайшее запланированное поздравление из Touch Point."
-          }
-        }
-      }
-    },
     "You’re all caught up." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re all caught up."
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",

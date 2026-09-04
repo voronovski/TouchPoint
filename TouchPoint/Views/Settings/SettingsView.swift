@@ -1,18 +1,11 @@
 import SwiftUI
-import UIKit
 import UniformTypeIdentifiers
-import UserNotifications
 
 struct SettingsView: View {
     @Environment(AppStore.self) private var store
     @Environment(AppPreferences.self) private var preferences
     @Environment(CloudKitSnapshotService.self) private var cloudKit
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var notificationStatus: UNAuthorizationStatus?
-    @State private var notificationError: String?
-    @State private var isSynchronizingNotifications = false
     @State private var isSynchronizingCloudKit = false
     @State private var exportDocument: TouchPointArchiveDocument?
     @State private var showingArchiveExporter = false
@@ -31,7 +24,6 @@ struct SettingsView: View {
                 occasionGroupsSettingsSection
                 focusSettingsSection
                 remindersSettingsSection
-                aboutSettingsSection
                 cloudSettingsSection
                 templateLibrarySettingsSection
                 archiveSettingsSection
@@ -42,21 +34,6 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
-            }
-            .task {
-                await refreshNotificationStatus()
-            }
-            .onChange(of: scenePhase) {
-                guard scenePhase == .active else { return }
-                Task { await refreshNotificationStatus() }
-            }
-            .alert("Reminders unavailable", isPresented: Binding(
-                get: { notificationError != nil },
-                set: { if !$0 { notificationError = nil } }
-            )) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(notificationError ?? "")
             }
             .alert("Archive unavailable", isPresented: Binding(
                 get: { archiveError != nil },
@@ -186,12 +163,6 @@ struct SettingsView: View {
 
     private var remindersSettingsSection: some View {
         Section {
-            LabeledContent {
-                Text(notificationStatusTitle).foregroundStyle(.secondary)
-            } label: {
-                Label("Local reminders", systemImage: "bell")
-            }
-            reminderAuthorizationAction
             VStack(alignment: .leading, spacing: 10) {
                 Text("Remind me").font(.subheadline.weight(.semibold))
                 ForEach([0, 1, 3, 7], id: \.self) { days in reminderLeadTimeRow(days) }
@@ -201,48 +172,10 @@ struct SettingsView: View {
                     set: { preferences.hideReminderNames = $0 }
                 ))
             }
-            Button { synchronizeNotificationsNow() } label: {
-                Label {
-                    Text(isSynchronizingNotifications ? "Syncing reminders…" : "Sync reminders now")
-                } icon: {
-                    if isSynchronizingNotifications {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                    }
-                }
-            }
-            .buttonStyle(TouchPointTertiaryButtonStyle())
-            .disabled(isSynchronizingNotifications)
-            if let syncError = preferences.notificationSyncError {
-                Label(syncError, systemImage: "exclamationmark.triangle.fill").font(.footnote).foregroundStyle(.red)
-            }
         } header: {
             Text("Reminders")
         } footer: {
-            Text("Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you.")
-        }
-    }
-
-    @ViewBuilder
-    private var reminderAuthorizationAction: some View {
-        switch notificationStatus {
-        case .notDetermined:
-            Button { enableReminders() } label: {
-                Label("Enable reminders", systemImage: "bell.badge")
-            }
-            .buttonStyle(TouchPointTertiaryButtonStyle())
-        case .denied:
-            Button {
-                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                openURL(url)
-            } label: {
-                Label("Open System Settings", systemImage: "gear")
-            }
-            .buttonStyle(TouchPointTertiaryButtonStyle())
-        default:
-            EmptyView()
+            Text("Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you. You can change notification access in iOS Settings.")
         }
     }
 
@@ -263,13 +196,6 @@ struct SettingsView: View {
             }
         }
         .buttonStyle(.plain)
-    }
-
-    private var aboutSettingsSection: some View {
-        Section("About") {
-            LabeledContent("App", value: "Touch Point")
-            LabeledContent("Version", value: appVersion)
-        }
     }
 
     private var cloudSettingsSection: some View {
@@ -354,66 +280,6 @@ struct SettingsView: View {
         }
     }
 
-    private var notificationStatusTitle: String {
-        switch notificationStatus {
-        case .authorized, .provisional, .ephemeral:
-            "Enabled"
-        case .denied:
-            "Off"
-        case .notDetermined:
-            "Not enabled"
-        case nil:
-            "Checking"
-        @unknown default:
-            "Unavailable"
-        }
-    }
-
-    private func enableReminders() {
-        Task {
-            do {
-                let granted = try await LocalNotificationScheduler.requestAuthorization()
-                await refreshNotificationStatus()
-                guard granted else { return }
-                let result = try await LocalNotificationScheduler.synchronize(events: store.events, people: store.people, settings: reminderSettings)
-                preferences.notificationSyncError = result.droppedCount > 0
-                    ? "Only the nearest 64 reminders are scheduled. Touch Point will add later reminders as dates get closer."
-                    : nil
-            } catch {
-                notificationError = error.localizedDescription
-                preferences.notificationSyncError = error.localizedDescription
-            }
-        }
-    }
-
-    private func synchronizeNotificationsNow() {
-        isSynchronizingNotifications = true
-        Task {
-            defer { isSynchronizingNotifications = false }
-            do {
-                let result = try await LocalNotificationScheduler.synchronize(
-                    events: store.events,
-                    people: store.people,
-                    settings: reminderSettings
-                )
-                preferences.notificationSyncError = result.droppedCount > 0
-                    ? "Only the nearest 64 reminders are scheduled. Touch Point will add later reminders as dates get closer."
-                    : nil
-            } catch {
-                preferences.notificationSyncError = error.localizedDescription
-            }
-        }
-    }
-
-    private var reminderSettings: LocalReminderSettings {
-        LocalReminderSettings(
-            leadTimesDays: preferences.reminderLeadTimes,
-            hour: preferences.reminderHour,
-            minute: preferences.reminderMinute,
-            hidesNames: preferences.hideReminderNames
-        )
-    }
-
     private var reminderTimeBinding: Binding<Date> {
         Binding(
             get: {
@@ -433,17 +299,6 @@ struct SettingsView: View {
         case 1: "1 day before"
         default: "\(days) days before"
         }
-    }
-
-    private var appVersion: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
-        guard let build, !build.isEmpty else { return version }
-        return "\(version) (\(build))"
-    }
-
-    private func refreshNotificationStatus() async {
-        notificationStatus = await LocalNotificationScheduler.authorizationStatus()
     }
 
     private var cloudStatusIcon: String {

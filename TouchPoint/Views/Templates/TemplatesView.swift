@@ -984,7 +984,7 @@ private struct TemplateEditorView: View {
     }
     private var previewPerson: Person {
         store.people.first(where: { draft.relationships.isEmpty || draft.relationships.contains($0.relationship) })
-            ?? Person(name: "Alex Morgan", organization: "Northstar", relationship: draft.relationships.first ?? .friend)
+            ?? Person(name: "Recipient", organization: "Organization", relationship: draft.relationships.first ?? .friend)
     }
     private var previewBody: String {
         guard !draft.body.isEmpty else { return "Your personalized preview will appear here." }

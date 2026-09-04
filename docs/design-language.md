@@ -253,7 +253,7 @@ TouchPoint never sends an SMS or email automatically and never connects to a thi
 
 TouchPoint may schedule on-device notifications for future greeting actions. These reminders are distinct from message delivery and require no SMS/email provider.
 
-- Ask for notification permission only after an explicit `Enable reminders` action in Settings. Do not show the system prompt during first-run onboarding.
+- Ask for notification permission automatically on the first launch, with a system usage description explaining that notifications help the user remember upcoming greetings and never send messages automatically.
 - Schedule each reminder for the stored UTC action instant, which was derived from `09:00` in the recipient's time zone.
 - Reconcile pending notifications when events or people change and whenever the app becomes active. Completed and skipped actions must not retain pending reminders.
 - Notification copy says the greeting is ready and asks the user to open TouchPoint. It must not imply that a message was or will be sent automatically.
@@ -307,7 +307,7 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 - Home combines the next action, annual planning entry, and a filterable near-term schedule.
 - Default annual-plan action: text message opened in the system Messages composer.
 - Sending is always manual. No SMS/email provider integration is planned.
-- Optional reminders use local device notifications and are enabled explicitly from Settings.
+- Optional reminders use local device notifications. Notification permission is requested automatically on the first launch; timing and privacy preferences remain configurable in Settings.
 - Source UI language for the prototype: English; localization architecture remains required.
 - First-run focus offers `Work`, `Personal`, and preselected `All`.
 - Work annual planning defaults to `Client`; Personal defaults to `Family`; All begins with every relationship visible.

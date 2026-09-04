@@ -1403,7 +1403,11 @@ final class AppStore {
         }
     }
 
-    private func upgradeTemplateLibraryIfNeeded() {
+    @discardableResult
+    private func upgradeTemplateLibraryIfNeeded() -> Bool {
+        let previousTemplates = templates
+        let previousGroups = templateGroups
+
         func group(named name: String, icon: String, color: String) -> TemplateGroup {
             if let existing = templateGroups.first(where: { $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame }) {
                 return existing
@@ -1464,6 +1468,7 @@ final class AppStore {
             templates[index].isLocked = true
         }
         normalizeGroupOrder()
+        return previousTemplates != templates || previousGroups != templateGroups
     }
 
     private static func builtInTemplates(
@@ -1558,6 +1563,21 @@ final class AppStore {
             )
         ]
     }
+
+    /// The only data seeded into a fresh workspace is the shared starter library.
+    /// People, greetings, history, and usage must always come from the user.
+    private static func builtInTemplateLibrary() -> (groups: [TemplateGroup], templates: [GreetingTemplate]) {
+        let personalGroup = TemplateGroup(name: "Personal", iconSemantic: "personal", iconID: "heart", colorToken: "rose", sortOrder: 0)
+        let workGroup = TemplateGroup(name: "Work", iconSemantic: "work", iconID: "briefcase", colorToken: "teal", sortOrder: 1)
+        let seasonalGroup = TemplateGroup(name: "Seasonal", iconSemantic: "seasonal", iconID: "gift", colorToken: "forest", sortOrder: 2)
+        let groups = [personalGroup, workGroup, seasonalGroup]
+        let templates = builtInTemplates(
+            personalGroupID: personalGroup.id,
+            workGroupID: workGroup.id,
+            seasonalGroupID: seasonalGroup.id
+        )
+        return (groups: groups, templates: templates)
+    }
 }
 
 extension AppStore {
@@ -1566,9 +1586,10 @@ extension AppStore {
             for: .applicationSupportDirectory,
             in: .userDomainMask
         ).first else {
+            let library = Self.builtInTemplateLibrary()
             return AppStore(
-                people: [], events: [], templates: preview.templates,
-                templateGroups: preview.templateGroups,
+                people: [], events: [], templates: library.templates,
+                templateGroups: library.groups,
                 persistenceError: "Local storage is unavailable on this device.",
                 allowsEphemeralPersistence: false
             )
@@ -1622,8 +1643,7 @@ extension AppStore {
                 corruptSnapshotBackupURL: recoverableSnapshotURL(),
                 lastModifiedAt: snapshot.modifiedAt
             )
-            if snapshot.version < Self.currentPersistenceVersion {
-                store.upgradeTemplateLibraryIfNeeded()
+            if store.upgradeTemplateLibraryIfNeeded() {
                 store.save()
             }
             return store
@@ -1673,44 +1693,6 @@ extension AppStore {
         return URL(fileURLWithPath: path)
     }
 
-    static var preview: AppStore {
-        let people = [
-            Person(name: "Anna Smith", email: "anna@example.com", phone: "+1 415 555 0136", organization: "Smith Realty", relationship: .client, importantDates: [.init(occasion: .birthday, month: 9, day: 2), .init(occasion: .homeAnniversary, month: 10, day: 3)]),
-            Person(name: "Marcus Lee", email: "marcus@example.com", phone: "+1 206 555 0174", relationship: .friend, timeZoneIdentifier: "America/Denver", importantDates: [.init(occasion: .birthday, month: 10, day: 18), .init(occasion: .homeAnniversary, month: 9, day: 4)]),
-            Person(name: "Sofia Ramirez", email: "sofia@example.com", phone: "+1 512 555 0191", organization: "Ramirez Family", relationship: .client, preferredContactMethod: .email, preferredLanguage: "Spanish", timeZoneIdentifier: "America/Chicago", importantDates: [.init(occasion: .birthday, month: 9, day: 7)]),
-            Person(name: "Daniel Kim", email: "daniel@example.com", phone: "+1 917 555 0128", organization: "Northstar Lending", relationship: .colleague, timeZoneIdentifier: "America/New_York", importantDates: [.init(occasion: .birthday, month: 12, day: 8)]),
-            Person(name: "Maya Thompson", email: "maya@example.com", phone: "+1 310 555 0182", relationship: .family, importantDates: [.init(occasion: .birthday, month: 5, day: 20), .init(occasion: .weddingAnniversary, month: 9, day: 20)])
-        ]
-
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
-        func date(_ offset: Int, hour: Int = 9) -> Date {
-            let day = calendar.date(byAdding: .day, value: offset, to: today) ?? today
-            return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day) ?? day
-        }
-
-        let events = [
-            GreetingEvent(personID: people[0].id, occasion: .birthday, date: date(0, hour: 8), method: .sms, status: .planned, message: "Happy birthday, Anna! Wishing you a bright year ahead."),
-            GreetingEvent(personID: people[1].id, occasion: .homeAnniversary, date: date(2), method: .sms, status: .planned, message: "One year already. Hope your home is still your favorite place."),
-            GreetingEvent(personID: people[2].id, occasion: .birthday, date: date(5, hour: 10), method: .email, status: .planned, message: "Feliz cumpleanos, Sofia!"),
-            GreetingEvent(personID: people[3].id, occasion: .clientAppreciation, date: date(9), method: .reminder, status: .planned),
-            GreetingEvent(personID: people[4].id, occasion: .weddingAnniversary, date: date(18), method: .sms, status: .planned),
-            GreetingEvent(personID: people[1].id, occasion: .birthday, date: date(-2), method: .sms, status: .completed)
-        ]
-
-        let personalGroup = TemplateGroup(name: "Personal", iconSemantic: "personal", iconID: "heart", colorToken: "rose", sortOrder: 0)
-        let workGroup = TemplateGroup(name: "Work", iconSemantic: "work", iconID: "briefcase", colorToken: "teal", sortOrder: 1)
-        let seasonalGroup = TemplateGroup(name: "Seasonal", iconSemantic: "seasonal", iconID: "gift", colorToken: "forest", sortOrder: 2)
-        let templateGroups = [personalGroup, workGroup, seasonalGroup]
-
-        let templates = builtInTemplates(
-            personalGroupID: personalGroup.id,
-            workGroupID: workGroup.id,
-            seasonalGroupID: seasonalGroup.id
-        )
-
-        return AppStore(people: people, events: events, templates: templates, templateGroups: templateGroups)
-    }
 }
 
 private struct StoredAppData: Codable {
@@ -1873,7 +1855,7 @@ extension AppStore {
             let previous = mutableState
             people = snapshot.people; events = snapshot.events; templates = snapshot.templates
             templateGroups = snapshot.groups; templateRevisions = snapshot.revisions; templateUsage = snapshot.usage
-            if snapshot.version < Self.currentPersistenceVersion { upgradeTemplateLibraryIfNeeded() }
+            upgradeTemplateLibraryIfNeeded()
             lastModifiedAt = snapshot.modifiedAt
             let canPreserveTimestamp = preservingModifiedAt
                 && snapshot.version == Self.currentPersistenceVersion

@@ -38,7 +38,6 @@ enum TouchPointWidgetSnapshotStore {
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(snapshot) else { return }
         store.set(data, forKey: key)
-        store.synchronize()
     }
 
     static func read() -> TouchPointWidgetSnapshot? {

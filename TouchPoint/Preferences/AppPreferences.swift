@@ -117,7 +117,6 @@ final class AppPreferences {
         didSet {
             defaults.set(focus.rawValue, forKey: Key.focus)
             cloudDefaults.set(focus.rawValue, forKey: Key.focus)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -125,7 +124,6 @@ final class AppPreferences {
         didSet {
             defaults.set(hasCompletedOnboarding, forKey: Key.completedOnboarding)
             cloudDefaults.set(hasCompletedOnboarding, forKey: Key.completedOnboarding)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -136,7 +134,6 @@ final class AppPreferences {
             reminderLeadTimes = Set(reminderLeadTimes.filter { (0...30).contains($0) })
             defaults.set(Array(reminderLeadTimes).sorted(), forKey: Key.reminderLeadTimes)
             cloudDefaults.set(Array(reminderLeadTimes).sorted(), forKey: Key.reminderLeadTimes)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -145,7 +142,6 @@ final class AppPreferences {
             let value = min(max(reminderHour, 0), 23)
             defaults.set(value, forKey: Key.reminderHour)
             cloudDefaults.set(value, forKey: Key.reminderHour)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -154,7 +150,6 @@ final class AppPreferences {
             let value = min(max(reminderMinute, 0), 59)
             defaults.set(value, forKey: Key.reminderMinute)
             cloudDefaults.set(value, forKey: Key.reminderMinute)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -162,7 +157,6 @@ final class AppPreferences {
         didSet {
             defaults.set(hideReminderNames, forKey: Key.hideReminderNames)
             cloudDefaults.set(hideReminderNames, forKey: Key.hideReminderNames)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -171,7 +165,6 @@ final class AppPreferences {
         didSet {
             defaults.set(senderName, forKey: Key.senderName)
             cloudDefaults.set(senderName, forKey: Key.senderName)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -185,7 +178,6 @@ final class AppPreferences {
             }
             defaults.set(value, forKey: Key.preferredLanguage)
             cloudDefaults.set(value, forKey: Key.preferredLanguage)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -201,7 +193,6 @@ final class AppPreferences {
             let values = normalized.map(\.rawValue).sorted()
             defaults.set(values, forKey: Key.disabledOccasionCategories)
             cloudDefaults.set(values, forKey: Key.disabledOccasionCategories)
-            cloudDefaults.synchronize()
         }
     }
 
@@ -229,7 +220,6 @@ final class AppPreferences {
     ) {
         self.defaults = defaults
         self.cloudDefaults = cloudDefaults
-        cloudDefaults.synchronize()
         let resolvedFocus: Focus
         let shouldPersistMigration: Bool
         if let cloudFocus = cloudDefaults.string(forKey: Key.focus).flatMap(Focus.init(rawValue:)) {
@@ -297,7 +287,6 @@ final class AppPreferences {
         if cloudDefaults.object(forKey: Key.disabledOccasionCategories) == nil {
             cloudDefaults.set(disabledOccasionCategories.map(\.rawValue).sorted(), forKey: Key.disabledOccasionCategories)
         }
-        cloudDefaults.synchronize()
         let observerTarget = WeakPreferencesBox(self)
         cloudObserver = NotificationCenter.default.addObserver(
             forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
@@ -306,6 +295,10 @@ final class AppPreferences {
         ) { _ in
             Task { @MainActor in observerTarget.value?.applyCloudPreferences() }
         }
+        // Apple recommends requesting KVS synchronization sparingly, typically once
+        // at launch, after registering for external-change notifications. Local writes
+        // are propagated automatically after a short delay.
+        cloudDefaults.synchronize()
     }
 
     private func applyCloudPreferences() {

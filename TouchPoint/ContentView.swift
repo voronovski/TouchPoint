@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var store = AppStore.live
     @State private var preferences = AppPreferences()
     @State private var navigation = TouchPointNavigation.shared
+    @State private var notificationPermissionTask: Task<Void, Never>?
     @State private var notificationSyncTask: Task<Void, Never>?
     @State private var cloudKit = CloudKitSnapshotService.shared
     @State private var cloudKitSyncTask: Task<Void, Never>?
@@ -26,6 +27,7 @@ struct ContentView: View {
         .environment(navigation)
         .environment(cloudKit)
         .task {
+            requestNotificationPermissionIfNeeded()
             scheduleNotificationSync()
             scheduleCloudKitSync()
             scheduleWidgetSnapshot()
@@ -85,6 +87,18 @@ struct ContentView: View {
             case .addPerson:
                 QuickAddPersonView()
             }
+        }
+    }
+
+    private func requestNotificationPermissionIfNeeded() {
+        notificationPermissionTask?.cancel()
+        notificationPermissionTask = Task {
+            // Let the first screen appear before presenting Apple's system dialog.
+            try? await Task.sleep(nanoseconds: 700_000_000)
+            guard !Task.isCancelled else { return }
+            guard await LocalNotificationScheduler.authorizationStatus() == .notDetermined else { return }
+            guard (try? await LocalNotificationScheduler.requestAuthorization()) == true else { return }
+            scheduleNotificationSync()
         }
     }
 
