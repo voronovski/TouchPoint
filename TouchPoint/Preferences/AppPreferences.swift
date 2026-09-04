@@ -106,6 +106,7 @@ final class AppPreferences {
         static let hideReminderNames = "TouchPoint.HideReminderNames"
         static let senderName = "TouchPoint.SenderName"
         static let preferredLanguage = "TouchPoint.PreferredLanguage"
+        static let disabledOccasionCategories = "TouchPoint.DisabledOccasionCategories"
     }
 
     private let defaults: UserDefaults
@@ -188,6 +189,30 @@ final class AppPreferences {
         }
     }
 
+    /// Occasion categories hidden from selection lists. Personal moments are
+    /// always available because they contain recipient-specific dates.
+    var disabledOccasionCategories: Set<OccasionCategory> {
+        didSet {
+            let normalized = disabledOccasionCategories.subtracting([.personal])
+            if normalized != disabledOccasionCategories {
+                disabledOccasionCategories = normalized
+                return
+            }
+            let values = normalized.map(\.rawValue).sorted()
+            defaults.set(values, forKey: Key.disabledOccasionCategories)
+            cloudDefaults.set(values, forKey: Key.disabledOccasionCategories)
+            cloudDefaults.synchronize()
+        }
+    }
+
+    func isOccasionCategoryEnabled(_ category: OccasionCategory) -> Bool {
+        category == .personal || !disabledOccasionCategories.contains(category)
+    }
+
+    func isOccasionEnabled(_ occasion: Occasion) -> Bool {
+        isOccasionCategoryEnabled(occasion.category)
+    }
+
     /// Rendering performed by AppStore can happen outside a view, so it reads the
     /// current production preference through this narrow accessor by default.
     static var storedSenderName: String {
@@ -246,6 +271,14 @@ final class AppPreferences {
             cloudDefaults.string(forKey: Key.preferredLanguage)
                 ?? defaults.string(forKey: Key.preferredLanguage)
         )
+        let savedDisabledOccasionCategories = ((cloudDefaults.array(forKey: Key.disabledOccasionCategories)
+            ?? defaults.array(forKey: Key.disabledOccasionCategories)) as? [String]) ?? []
+        let knownOccasionCategories = Set(OccasionCategory.allCases.map(\.rawValue))
+        disabledOccasionCategories = Set(
+            savedDisabledOccasionCategories
+                .filter { knownOccasionCategories.contains($0) }
+                .compactMap(OccasionCategory.init(rawValue:))
+        ).subtracting([.personal])
         notificationSyncError = nil
         if shouldPersistMigration {
             defaults.set(resolvedFocus.rawValue, forKey: Key.focus)
@@ -260,6 +293,10 @@ final class AppPreferences {
         if cloudDefaults.object(forKey: Key.hideReminderNames) == nil { cloudDefaults.set(hideReminderNames, forKey: Key.hideReminderNames) }
         if cloudDefaults.object(forKey: Key.senderName) == nil { cloudDefaults.set(senderName, forKey: Key.senderName) }
         if cloudDefaults.object(forKey: Key.preferredLanguage) == nil { cloudDefaults.set(preferredLanguage, forKey: Key.preferredLanguage) }
+        defaults.set(disabledOccasionCategories.map(\.rawValue).sorted(), forKey: Key.disabledOccasionCategories)
+        if cloudDefaults.object(forKey: Key.disabledOccasionCategories) == nil {
+            cloudDefaults.set(disabledOccasionCategories.map(\.rawValue).sorted(), forKey: Key.disabledOccasionCategories)
+        }
         cloudDefaults.synchronize()
         let observerTarget = WeakPreferencesBox(self)
         cloudObserver = NotificationCenter.default.addObserver(
@@ -301,6 +338,12 @@ final class AppPreferences {
         if let value = cloudDefaults.string(forKey: Key.preferredLanguage) {
             let resolved = TouchPointLanguage.resolved(value)
             if resolved != preferredLanguage { preferredLanguage = resolved }
+        }
+        if let values = cloudDefaults.array(forKey: Key.disabledOccasionCategories) as? [String] {
+            let known = Set(OccasionCategory.allCases.map(\.rawValue))
+            let resolved = Set(values.filter { known.contains($0) }.compactMap(OccasionCategory.init(rawValue:)))
+                .subtracting([.personal])
+            if resolved != disabledOccasionCategories { disabledOccasionCategories = resolved }
         }
     }
 

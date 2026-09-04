@@ -131,7 +131,7 @@ struct HomeView: View {
         }.count
         let unplanned = store.schedulableGreetingCount(
             personIDs: Set(focusedPeople.map(\.id)),
-            occasions: Set(Occasion.allCases)
+            occasions: Set(Occasion.allCases.filter(preferences.isOccasionEnabled))
         )
         var result: [(String, String, String)] = []
         if missingDates > 0 { result.append(("calendar.badge.exclamationmark", "Missing dates", "Add birthdays for \(missingDates) \(missingDates == 1 ? "person" : "people")")) }

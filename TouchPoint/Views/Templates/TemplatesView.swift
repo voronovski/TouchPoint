@@ -1282,6 +1282,8 @@ private struct TemplateGroupsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editingGroup: TemplateGroup?
     @State private var showingNewGroup = false
+    @State private var groupsPendingDeletion: [TemplateGroup] = []
+    @State private var operationError: String?
 
     private var groups: [TemplateGroup] {
         store.templateGroups.filter { !$0.isArchived }.sorted { $0.sortOrder < $1.sortOrder }
@@ -1290,42 +1292,165 @@ private struct TemplateGroupsView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(groups) { group in
-                    Button { editingGroup = group } label: {
-                        HStack {
-                            IconTile(systemImage: group.iconID, tint: group.colorToken.templateColor)
-                            Text(group.name).foregroundStyle(.primary)
-                            Spacer()
-                            Text(store.templates(in: group.id).count.formatted()).foregroundStyle(.secondary)
-                        }
+                if let persistenceError = store.persistenceError {
+                    Section {
+                        Label(persistenceError, systemImage: "exclamationmark.triangle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
                     }
                 }
-                .onDelete { offsets in
-                    for index in offsets { _ = store.deleteTemplateGroup(id: groups[index].id) }
-                }
-                .onMove { source, destination in
-                    var reordered = groups
-                    reordered.move(fromOffsets: source, toOffset: destination)
-                    _ = store.reorderTemplateGroups(ids: reordered.map(\.id))
+
+                Section {
+                    ForEach(groups) { group in
+                        Button { editingGroup = group } label: {
+                            CollectionRow(
+                                group: group,
+                                templateCount: store.templates(in: group.id).count
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .deleteDisabled(group.isBuiltIn)
+                    }
+                    .onDelete { offsets in
+                        groupsPendingDeletion = offsets
+                            .map { groups[$0] }
+                            .filter { !$0.isBuiltIn }
+                    }
+                    .onMove(perform: moveGroups)
+                } footer: {
+                    Text("Collections keep related templates together.")
                 }
             }
             .overlay {
-                if groups.isEmpty {
-                    ContentUnavailableView("No collections", systemImage: "folder.badge.plus", description: Text("Collections keep related templates together."))
+                if groups.isEmpty && store.persistenceError == nil {
+                    ContentUnavailableView {
+                        Label("No collections", systemImage: "folder.badge.plus")
+                    } description: {
+                        Text("Collections keep related templates together.")
+                    } actions: {
+                        Button("New collection") { showingNewGroup = true }
+                            .buttonStyle(.borderedProminent)
+                    }
                 }
             }
             .navigationTitle("Collections")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    EditButton()
+                    if !groups.isEmpty { EditButton() }
                     Button { showingNewGroup = true } label: { Label("New collection", systemImage: "plus") }
                 }
             }
             .sheet(isPresented: $showingNewGroup) { TemplateGroupEditorView(group: nil) }
             .sheet(item: $editingGroup) { TemplateGroupEditorView(group: $0) }
+            .confirmationDialog(
+                deleteConfirmationTitle,
+                isPresented: Binding(
+                    get: { !groupsPendingDeletion.isEmpty },
+                    set: { if !$0 { groupsPendingDeletion = [] } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive, action: deletePendingGroup)
+                Button("Cancel", role: .cancel) { groupsPendingDeletion = [] }
+            } message: {
+                Text(deleteConfirmationMessage)
+            }
+            .alert("Collections", isPresented: Binding(
+                get: { operationError != nil },
+                set: { if !$0 { operationError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(operationError ?? "")
+            }
         }
+    }
+
+    private func moveGroups(from source: IndexSet, to destination: Int) {
+        var reordered = groups
+        reordered.move(fromOffsets: source, toOffset: destination)
+        let activeIDs = Set(reordered.map(\.id))
+        let archivedIDs = store.templateGroups
+            .filter { !activeIDs.contains($0.id) }
+            .sorted { $0.sortOrder < $1.sortOrder }
+            .map(\.id)
+        guard store.reorderTemplateGroups(ids: reordered.map(\.id) + archivedIDs) else {
+            operationError = "The collection order could not be saved."
+            return
+        }
+    }
+
+    private func deletePendingGroup() {
+        let groupsToDelete = groupsPendingDeletion
+        groupsPendingDeletion = []
+        guard !groupsToDelete.isEmpty else { return }
+
+        var allDeleted = true
+        for group in groupsToDelete where !group.isBuiltIn {
+            allDeleted = store.deleteTemplateGroup(id: group.id) && allDeleted
+        }
+        if !allDeleted {
+            operationError = groupsToDelete.count == 1
+                ? "The collection could not be deleted."
+                : "One or more collections could not be deleted."
+        }
+    }
+
+    private var deleteConfirmationTitle: String {
+        groupsPendingDeletion.count == 1
+            ? String(localized: "Delete collection?")
+            : String(localized: "Delete collections?")
+    }
+
+    private var deleteConfirmationMessage: String {
+        groupsPendingDeletion.count == 1
+            ? String(localized: "Its templates are kept and moved to Ungrouped.")
+            : String(localized: "Their templates are kept and moved to Ungrouped.")
+    }
+}
+
+private struct CollectionRow: View {
+    let group: TemplateGroup
+    let templateCount: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            IconTile(systemImage: group.iconID, tint: group.colorToken.templateColor)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(group.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                HStack(spacing: 4) {
+                    Text(templateCount.formatted())
+                        .monospacedDigit()
+                    Text(templateCount == 1 ? String(localized: "Template") : String(localized: "Templates"))
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 8)
+
+            if group.isBuiltIn {
+                Image(systemName: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .accessibilityLabel("Locked")
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
+        }
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Double-tap to edit this collection")
     }
 }
 
@@ -1333,49 +1458,193 @@ private struct TemplateGroupEditorView: View {
     @Environment(AppStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var draft: TemplateGroup
+    @State private var saveError: String?
     private let isEditing: Bool
 
     init(group: TemplateGroup?) {
         isEditing = group != nil
-        _draft = State(initialValue: group ?? TemplateGroup(name: "", sortOrder: Int.max))
+        var initialDraft = group ?? TemplateGroup(name: "", sortOrder: Int.max)
+        if TemplateColorToken(rawValue: initialDraft.colorToken) == nil {
+            initialDraft.colorToken = TemplateColorToken.indigo.rawValue
+        }
+        if !TemplateAppearance.groupIcons.contains(where: { $0.id == initialDraft.iconID }) {
+            initialDraft.iconID = TemplateAppearance.groupIcons[0].id
+        }
+        _draft = State(initialValue: initialDraft)
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Collection") {
-                    TextField("Name", text: $draft.name)
-                    Picker("Icon", selection: $draft.iconID) {
-                        ForEach(TemplateAppearance.groupIcons, id: \.id) { option in
-                            Label(option.title, systemImage: option.id).tag(option.id)
+                Section {
+                    HStack(spacing: 12) {
+                        IconTile(systemImage: draft.iconID, tint: draft.colorToken.templateColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(trimmedName.isEmpty ? String(localized: "New collection") : trimmedName)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                                .lineLimit(2)
+                            Text("Collection")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
-                    Picker("Color", selection: $draft.colorToken) {
-                        ForEach(TemplateColorToken.allCases) { option in
-                            HStack {
-                                Image(systemName: "circle.fill")
-                                    .foregroundStyle(option.color)
-                                Text(option.title)
+                    .padding(.vertical, 4)
+                }
+
+                Section("Collection") {
+                    TextField("Name", text: $draft.name)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.done)
+                }
+
+                Section("Appearance") {
+                    NavigationLink {
+                        CollectionIconPickerView(
+                            selection: $draft.iconID,
+                            colorToken: draft.colorToken
+                        )
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("Icon")
+                            Spacer(minLength: 12)
+                            HStack(spacing: 8) {
+                                Image(systemName: draft.iconID)
+                                Text(selectedIconTitle)
                             }
-                            .tag(option.rawValue)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    NavigationLink {
+                        CollectionColorPickerView(
+                            selection: $draft.colorToken,
+                            iconID: draft.iconID
+                        )
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("Color")
+                            Spacer(minLength: 12)
+                            Circle()
+                                .fill(selectedColor.color)
+                                .frame(width: 16, height: 16)
+                                .overlay {
+                                    Circle().strokeBorder(.primary.opacity(0.08), lineWidth: 1)
+                                }
+                            Text(selectedColor.title)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(isEditing ? "Edit collection" : "New collection")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        draft.name = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if isEditing { store.updateTemplateGroup(draft) } else { store.addTemplateGroup(draft) }
-                        dismiss()
-                    }
-                    .disabled(draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("Save", action: save)
+                        .disabled(trimmedName.isEmpty)
                 }
             }
+            .alert("Could not save collection", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(saveError ?? "")
+            }
         }
+    }
+
+    private var trimmedName: String {
+        draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var selectedIconTitle: String {
+        TemplateAppearance.groupIcons.first(where: { $0.id == draft.iconID })?.title
+            ?? String(localized: "Icon")
+    }
+
+    private var selectedColor: TemplateColorToken {
+        TemplateColorToken(rawValue: draft.colorToken) ?? .indigo
+    }
+
+    private func save() {
+        draft.name = trimmedName
+        let didSave = isEditing
+            ? store.updateTemplateGroup(draft)
+            : store.addTemplateGroup(draft)
+        guard didSave else {
+            saveError = store.persistenceError ?? "The collection could not be saved."
+            return
+        }
+        dismiss()
+    }
+}
+
+private struct CollectionIconPickerView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selection: String
+    let colorToken: String
+
+    var body: some View {
+        List(TemplateAppearance.groupIcons, id: \.id) { option in
+            Button {
+                selection = option.id
+                dismiss()
+            } label: {
+                HStack(spacing: 12) {
+                    IconTile(systemImage: option.id, tint: colorToken.templateColor)
+                    Text(option.title)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    if selection == option.id {
+                        Image(systemName: "checkmark")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.accent)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(selection == option.id ? .isSelected : [])
+        }
+        .navigationTitle("Icon")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct CollectionColorPickerView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selection: String
+    let iconID: String
+
+    var body: some View {
+        List(TemplateColorToken.allCases) { option in
+            Button {
+                selection = option.rawValue
+                dismiss()
+            } label: {
+                HStack(spacing: 12) {
+                    IconTile(systemImage: iconID, tint: option.color)
+                    Text(option.title)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    if selection == option.rawValue {
+                        Image(systemName: "checkmark")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.accent)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(selection == option.rawValue ? .isSelected : [])
+        }
+        .navigationTitle("Color")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

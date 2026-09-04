@@ -47,6 +47,16 @@
         }
       }
     },
+    "%lld/%lld" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/%lld"
+          }
+        }
+      }
+    },
     "1 greeting" : {
       "localizations" : {
         "ru" : {
@@ -250,6 +260,16 @@
         }
       }
     },
+    "Appearance" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оформление"
+          }
+        }
+      }
+    },
     "Apple Intelligence" : {
       "localizations" : {
         "ru" : {
@@ -316,6 +336,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Архив недоступен"
+          }
+        }
+      }
+    },
+    "Armistice Day (France)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День перемирия (Франция)"
           }
         }
       }
@@ -486,6 +516,16 @@
         }
       }
     },
+    "Chinese holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Китая"
+          }
+        }
+      }
+    },
     "Choose a person" : {
       "localizations" : {
         "ru" : {
@@ -528,6 +568,16 @@
     },
     "Choose occasions" : {
 
+    },
+    "Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите подходящие группы поводов. Отключённые группы скрыты в списках выбора поводов; сохранённые даты, шаблоны и поздравления не изменяются."
+          }
+        }
+      }
     },
     "Christmas" : {
       "localizations" : {
@@ -709,6 +759,26 @@
         }
       }
     },
+    "Constitution Day of Ukraine" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Конституции Украины"
+          }
+        }
+      }
+    },
+    "Constitution Memorial Day (Japan)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День памяти Конституции (Япония)"
+          }
+        }
+      }
+    },
     "Contact" : {
       "localizations" : {
         "ru" : {
@@ -779,6 +849,16 @@
         }
       }
     },
+    "Could not save collection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось сохранить коллекцию"
+          }
+        }
+      }
+    },
     "Could not save template" : {
       "localizations" : {
         "ru" : {
@@ -805,6 +885,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Создано"
+          }
+        }
+      }
+    },
+    "Culture Day (Japan)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День культуры (Япония)"
           }
         }
       }
@@ -959,12 +1049,52 @@
         }
       }
     },
+    "Defender of the Fatherland Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День защитника Отечества"
+          }
+        }
+      }
+    },
+    "Defenders Day of Ukraine" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День защитников Украины"
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить"
+          }
+        }
+      }
+    },
+    "Delete collection?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить коллекцию?"
+          }
+        }
+      }
+    },
+    "Delete collections?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить коллекции?"
           }
         }
       }
@@ -1065,6 +1195,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Готово"
+          }
+        }
+      }
+    },
+    "Double-tap to edit this collection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коснитесь дважды, чтобы изменить коллекцию"
           }
         }
       }
@@ -1389,6 +1529,26 @@
         }
       }
     },
+    "French holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Франции"
+          }
+        }
+      }
+    },
+    "French National Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Национальный праздник Франции"
+          }
+        }
+      }
+    },
     "Friend" : {
       "localizations" : {
         "ru" : {
@@ -1469,6 +1629,46 @@
         }
       }
     },
+    "German holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Германии"
+          }
+        }
+      }
+    },
+    "German Labor Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День труда в Германии"
+          }
+        }
+      }
+    },
+    "German Reformation Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Реформации в Германии"
+          }
+        }
+      }
+    },
+    "German Unity Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День германского единства"
+          }
+        }
+      }
+    },
     "Governance" : {
       "localizations" : {
         "ru" : {
@@ -1535,6 +1735,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хэллоуин"
+          }
+        }
+      }
+    },
+    "Hangul Day (Korea)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День хангыля (Корея)"
           }
         }
       }
@@ -1689,6 +1899,16 @@
         }
       }
     },
+    "Independence Day of Ukraine" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День независимости Украины"
+          }
+        }
+      }
+    },
     "Indigo" : {
       "localizations" : {
         "ru" : {
@@ -1729,6 +1949,66 @@
         }
       }
     },
+    "Italian Assumption Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Успение Богородицы в Италии"
+          }
+        }
+      }
+    },
+    "Italian holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Италии"
+          }
+        }
+      }
+    },
+    "Italian Liberation Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День освобождения Италии"
+          }
+        }
+      }
+    },
+    "Italian Republic Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Республики Италии"
+          }
+        }
+      }
+    },
+    "Its templates are kept and moved to Ungrouped." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблоны сохранятся и перейдут в раздел «Без коллекции»."
+          }
+        }
+      }
+    },
+    "Japanese holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Японии"
+          }
+        }
+      }
+    },
     "Juneteenth" : {
       "localizations" : {
         "ru" : {
@@ -1749,12 +2029,42 @@
         }
       }
     },
+    "Korean holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Кореи"
+          }
+        }
+      }
+    },
     "Labor Day" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "День труда в США"
+          }
+        }
+      }
+    },
+    "Labor Day (China)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День труда в Китае"
+          }
+        }
+      }
+    },
+    "Labor Thanksgiving Day (Japan)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День благодарности труду (Япония)"
           }
         }
       }
@@ -1839,6 +2149,16 @@
         }
       }
     },
+    "Liberation Day (Korea)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День освобождения Кореи"
+          }
+        }
+      }
+    },
     "Library" : {
       "localizations" : {
         "ru" : {
@@ -1899,12 +2219,25 @@
         }
       }
     },
+    "Locked" : {
+
+    },
     "Manage collections" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Управлять коллекциями"
+          }
+        }
+      }
+    },
+    "March 1st Movement Day (Korea)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День движения 1 марта (Корея)"
           }
         }
       }
@@ -2025,6 +2358,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Имя, сообщение, повод, аудитория, канал или язык"
+          }
+        }
+      }
+    },
+    "National Day (China)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Национальный день Китая"
+          }
+        }
+      }
+    },
+    "National Foundation Day (Japan)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День основания государства (Япония)"
+          }
+        }
+      }
+    },
+    "National Foundation Day (Korea)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День основания государства (Корея)"
+          }
+        }
+      }
+    },
+    "National Unity Day (Russia)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День народного единства (Россия)"
           }
         }
       }
@@ -2218,6 +2591,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Повод"
+          }
+        }
+      }
+    },
+    "Occasion groups" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Группы поводов"
           }
         }
       }
@@ -2502,6 +2885,16 @@
         }
       }
     },
+    "Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Личные даты» всегда включены. Отключённые группы скрываются из выбора поводов и подсказок о незапланированных поздравлениях."
+          }
+        }
+      }
+    },
     "Personalization" : {
       "localizations" : {
         "ru" : {
@@ -2598,6 +2991,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Горизонт планирования"
+          }
+        }
+      }
+    },
+    "Portugal Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Португалии"
+          }
+        }
+      }
+    },
+    "Portuguese Freedom Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День свободы Португалии"
+          }
+        }
+      }
+    },
+    "Portuguese holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Португалии"
+          }
+        }
+      }
+    },
+    "Portuguese Republic Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Республики Португалии"
           }
         }
       }
@@ -2991,6 +3424,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Розовый"
+          }
+        }
+      }
+    },
+    "Russia Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День России"
+          }
+        }
+      }
+    },
+    "Russian holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники России"
           }
         }
       }
@@ -3424,6 +3877,16 @@
         }
       }
     },
+    "Their templates are kept and moved to Ungrouped." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблоны сохранятся и перейдут в раздел «Без коллекции»."
+          }
+        }
+      }
+    },
     "There are no greetings in the selected period." : {
       "localizations" : {
         "ru" : {
@@ -3614,6 +4077,16 @@
         }
       }
     },
+    "Ukrainian holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники Украины"
+          }
+        }
+      }
+    },
     "Unfavorite" : {
       "localizations" : {
         "ru" : {
@@ -3750,6 +4223,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "День ветеранов"
+          }
+        }
+      }
+    },
+    "Victory Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Победы"
+          }
+        }
+      }
+    },
+    "Victory in Europe Day (France)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Победы в Европе (Франция)"
           }
         }
       }

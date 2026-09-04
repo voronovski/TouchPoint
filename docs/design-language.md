@@ -39,6 +39,7 @@ TouchPoint will have native iOS and Android clients. Share product semantics and
 | Token | Light reference | Purpose |
 | --- | --- | --- |
 | `accent` | Indigo `#5856D6` | Navigation, selection, links, focus, ordinary actions |
+| `moment.indigo` | Indigo `#5856D6` | Stable saved appearance for templates and collections; independent from the current app accent |
 | `moment.coral` | Coral `#E85447` | Birthdays and warm personal moments |
 | `moment.rose` | Rose `#C9457A` | Wedding and relationship anniversaries |
 | `moment.amber` | Amber `#BD7A0F` | Seasonal moments and ready-to-send actions |
@@ -131,6 +132,8 @@ Collection states are explicit:
 - Initial error: focused retry state.
 - Refresh failure: keep the last usable content and show the error inline.
 - Loaded: native list; do not add a redundant surrounding surface.
+
+Template collections use the shared semantic appearance palette. A saved color token always resolves to its named color, including `indigo`; changing the global app accent must not recolor saved collection identities. Collection rows show the collection icon, name, and template count. Creation and editing use a compact identity preview plus dedicated native icon and color selection screens. Deletion requires confirmation and moves contained templates to `Ungrouped` without deleting them.
 
 ### Template library
 

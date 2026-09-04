@@ -1,6 +1,7 @@
 import SwiftUI
 
 enum TouchPointColor {
+    static let indigo = Color(red: 88.0 / 255.0, green: 86.0 / 255.0, blue: 214.0 / 255.0)
     static let blue = Color(red: 0.16, green: 0.45, blue: 0.82)
     static let coral = Color(red: 0.91, green: 0.33, blue: 0.28)
     static let rose = Color(red: 0.79, green: 0.27, blue: 0.48)
@@ -37,7 +38,7 @@ enum TemplateColorToken: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
-        case .indigo: .accentColor
+        case .indigo: TouchPointColor.indigo
         case .blue: TouchPointColor.blue
         case .coral: TouchPointColor.coral
         case .rose: TouchPointColor.rose
@@ -48,7 +49,7 @@ enum TemplateColorToken: String, CaseIterable, Identifiable {
     }
 
     static func color(for rawValue: String) -> Color {
-        Self(rawValue: rawValue)?.color ?? .accentColor
+        Self(rawValue: rawValue)?.color ?? TouchPointColor.indigo
     }
 }
 
@@ -196,6 +197,7 @@ enum OccasionPickerMode: Equatable {
 /// occasion menus from drifting apart as the calendar grows.
 struct OccasionPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppPreferences.self) private var preferences
     @State private var query = ""
     @State private var selected: Set<Occasion>
     @State private var expandedCategories: Set<OccasionCategory>
@@ -339,7 +341,10 @@ struct OccasionPickerSheet: View {
     }
 
     private func visibleOccasions(in category: OccasionCategory) -> [Occasion] {
-        let categoryOptions = options.filter { $0.category == category }
+        let categoryOptions = options.filter {
+            $0.category == category
+                && (preferences.isOccasionCategoryEnabled(category) || selected.contains($0))
+        }
         let needle = normalized(query)
         guard !needle.isEmpty else { return categoryOptions }
         return categoryOptions.filter { occasion in
@@ -405,6 +410,11 @@ private extension OccasionCategory {
         case .usHolidays: "flag"
         case .observances: "calendar.badge.clock"
         case .latinAmerican: "globe.americas"
+        case .frenchHolidays, .germanHolidays, .italianHolidays, .portugueseHolidays,
+             .russianHolidays, .ukrainianHolidays:
+            "globe.europe.africa"
+        case .japaneseHolidays, .koreanHolidays, .chineseHolidays:
+            "globe.asia.australia"
         }
     }
 
@@ -414,6 +424,15 @@ private extension OccasionCategory {
         case .usHolidays: "us usa united states federal holidays"
         case .observances: "observances community dates"
         case .latinAmerican: "latin latino latina hispanic latin american dates"
+        case .frenchHolidays: "france french français holidays"
+        case .germanHolidays: "germany german deutsch holidays"
+        case .italianHolidays: "italy italian italiano holidays"
+        case .portugueseHolidays: "portugal portuguese português holidays"
+        case .russianHolidays: "russia russian русский holidays"
+        case .ukrainianHolidays: "ukraine ukrainian українська holidays"
+        case .japaneseHolidays: "japan japanese 日本語 holidays"
+        case .koreanHolidays: "korea korean 한국어 holidays"
+        case .chineseHolidays: "china chinese 中文 holidays"
         }
     }
 }

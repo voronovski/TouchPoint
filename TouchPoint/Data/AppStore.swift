@@ -1222,6 +1222,64 @@ final class AppStore {
             return fixedOccurrence(month: 12, day: 16, year: year, calendar: calendar)
         case .nochebuena:
             return fixedOccurrence(month: 12, day: 24, year: year, calendar: calendar)
+        case .franceNationalDay:
+            return fixedOccurrence(month: 7, day: 14, year: year, calendar: calendar)
+        case .franceVictoryInEuropeDay:
+            return fixedOccurrence(month: 5, day: 8, year: year, calendar: calendar)
+        case .franceArmisticeDay:
+            return fixedOccurrence(month: 11, day: 11, year: year, calendar: calendar)
+        case .germanLaborDay:
+            return fixedOccurrence(month: 5, day: 1, year: year, calendar: calendar)
+        case .germanUnityDay:
+            return fixedOccurrence(month: 10, day: 3, year: year, calendar: calendar)
+        case .germanReformationDay:
+            return fixedOccurrence(month: 10, day: 31, year: year, calendar: calendar)
+        case .italianLiberationDay:
+            return fixedOccurrence(month: 4, day: 25, year: year, calendar: calendar)
+        case .italianRepublicDay:
+            return fixedOccurrence(month: 6, day: 2, year: year, calendar: calendar)
+        case .italianAssumptionDay:
+            return fixedOccurrence(month: 8, day: 15, year: year, calendar: calendar)
+        case .portugalFreedomDay:
+            return fixedOccurrence(month: 4, day: 25, year: year, calendar: calendar)
+        case .portugalDay:
+            return fixedOccurrence(month: 6, day: 10, year: year, calendar: calendar)
+        case .portugalRepublicDay:
+            return fixedOccurrence(month: 10, day: 5, year: year, calendar: calendar)
+        case .russiaDefenderOfFatherlandDay:
+            return fixedOccurrence(month: 2, day: 23, year: year, calendar: calendar)
+        case .russiaVictoryDay:
+            return fixedOccurrence(month: 5, day: 9, year: year, calendar: calendar)
+        case .russiaDay:
+            return fixedOccurrence(month: 6, day: 12, year: year, calendar: calendar)
+        case .russiaNationalUnityDay:
+            return fixedOccurrence(month: 11, day: 4, year: year, calendar: calendar)
+        case .ukraineConstitutionDay:
+            return fixedOccurrence(month: 6, day: 28, year: year, calendar: calendar)
+        case .ukraineIndependenceDay:
+            return fixedOccurrence(month: 8, day: 24, year: year, calendar: calendar)
+        case .ukraineDefendersDay:
+            return fixedOccurrence(month: 10, day: 1, year: year, calendar: calendar)
+        case .japanNationalFoundationDay:
+            return fixedOccurrence(month: 2, day: 11, year: year, calendar: calendar)
+        case .japanConstitutionMemorialDay:
+            return fixedOccurrence(month: 5, day: 3, year: year, calendar: calendar)
+        case .japanCultureDay:
+            return fixedOccurrence(month: 11, day: 3, year: year, calendar: calendar)
+        case .japanLaborThanksgivingDay:
+            return fixedOccurrence(month: 11, day: 23, year: year, calendar: calendar)
+        case .koreaIndependenceMovementDay:
+            return fixedOccurrence(month: 3, day: 1, year: year, calendar: calendar)
+        case .koreaLiberationDay:
+            return fixedOccurrence(month: 8, day: 15, year: year, calendar: calendar)
+        case .koreaNationalFoundationDay:
+            return fixedOccurrence(month: 10, day: 3, year: year, calendar: calendar)
+        case .koreaHangulDay:
+            return fixedOccurrence(month: 10, day: 9, year: year, calendar: calendar)
+        case .chinaLaborDay:
+            return fixedOccurrence(month: 5, day: 1, year: year, calendar: calendar)
+        case .chinaNationalDay:
+            return fixedOccurrence(month: 10, day: 1, year: year, calendar: calendar)
         }
     }
 

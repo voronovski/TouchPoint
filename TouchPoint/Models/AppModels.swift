@@ -51,9 +51,18 @@ enum Relationship: String, CaseIterable, Identifiable, StableStringCodable {
 
 enum OccasionCategory: String, CaseIterable, Identifiable {
     case personal
-    case usHolidays
+    case usHolidays = "us_holidays"
     case observances
-    case latinAmerican
+    case latinAmerican = "latin_american"
+    case frenchHolidays = "french_holidays"
+    case germanHolidays = "german_holidays"
+    case italianHolidays = "italian_holidays"
+    case portugueseHolidays = "portuguese_holidays"
+    case russianHolidays = "russian_holidays"
+    case ukrainianHolidays = "ukrainian_holidays"
+    case japaneseHolidays = "japanese_holidays"
+    case koreanHolidays = "korean_holidays"
+    case chineseHolidays = "chinese_holidays"
 
     var id: Self { self }
 
@@ -63,6 +72,15 @@ enum OccasionCategory: String, CaseIterable, Identifiable {
         case .usHolidays: String(localized: "U.S. holidays")
         case .observances: String(localized: "Observances")
         case .latinAmerican: String(localized: "Latin American dates")
+        case .frenchHolidays: String(localized: "French holidays")
+        case .germanHolidays: String(localized: "German holidays")
+        case .italianHolidays: String(localized: "Italian holidays")
+        case .portugueseHolidays: String(localized: "Portuguese holidays")
+        case .russianHolidays: String(localized: "Russian holidays")
+        case .ukrainianHolidays: String(localized: "Ukrainian holidays")
+        case .japaneseHolidays: String(localized: "Japanese holidays")
+        case .koreanHolidays: String(localized: "Korean holidays")
+        case .chineseHolidays: String(localized: "Chinese holidays")
         }
     }
 }
@@ -108,6 +126,53 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
     case ourLadyOfGuadalupe = "our_lady_of_guadalupe"
     case lasPosadas = "las_posadas"
     case nochebuena
+
+    // Fixed-date French national and public holidays.
+    case franceNationalDay = "france_national_day"
+    case franceVictoryInEuropeDay = "france_victory_in_europe_day"
+    case franceArmisticeDay = "france_armistice_day"
+
+    // Fixed-date German national and state holidays.
+    case germanLaborDay = "german_labor_day"
+    case germanUnityDay = "german_unity_day"
+    case germanReformationDay = "german_reformation_day"
+
+    // Fixed-date Italian national holidays.
+    case italianLiberationDay = "italian_liberation_day"
+    case italianRepublicDay = "italian_republic_day"
+    case italianAssumptionDay = "italian_assumption_day"
+
+    // Fixed-date Portuguese national holidays.
+    case portugalFreedomDay = "portugal_freedom_day"
+    case portugalDay = "portugal_day"
+    case portugalRepublicDay = "portugal_republic_day"
+
+    // Fixed-date Russian national holidays.
+    case russiaDefenderOfFatherlandDay = "russia_defender_of_fatherland_day"
+    case russiaVictoryDay = "russia_victory_day"
+    case russiaDay = "russia_day"
+    case russiaNationalUnityDay = "russia_national_unity_day"
+
+    // Fixed-date Ukrainian national holidays.
+    case ukraineConstitutionDay = "ukraine_constitution_day"
+    case ukraineIndependenceDay = "ukraine_independence_day"
+    case ukraineDefendersDay = "ukraine_defenders_day"
+
+    // Fixed-date Japanese national holidays.
+    case japanNationalFoundationDay = "japan_national_foundation_day"
+    case japanConstitutionMemorialDay = "japan_constitution_memorial_day"
+    case japanCultureDay = "japan_culture_day"
+    case japanLaborThanksgivingDay = "japan_labor_thanksgiving_day"
+
+    // Fixed-date South Korean national holidays.
+    case koreaIndependenceMovementDay = "korea_independence_movement_day"
+    case koreaLiberationDay = "korea_liberation_day"
+    case koreaNationalFoundationDay = "korea_national_foundation_day"
+    case koreaHangulDay = "korea_hangul_day"
+
+    // Fixed-date Chinese public holidays. Lunar holidays are intentionally omitted.
+    case chinaLaborDay = "china_labor_day"
+    case chinaNationalDay = "china_national_day"
 
     var id: Self { self }
 
@@ -166,6 +231,35 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .ourLadyOfGuadalupe: String(localized: "Our Lady of Guadalupe")
         case .lasPosadas: String(localized: "Las Posadas")
         case .nochebuena: String(localized: "Nochebuena")
+        case .franceNationalDay: String(localized: "French National Day")
+        case .franceVictoryInEuropeDay: String(localized: "Victory in Europe Day (France)")
+        case .franceArmisticeDay: String(localized: "Armistice Day (France)")
+        case .germanLaborDay: String(localized: "German Labor Day")
+        case .germanUnityDay: String(localized: "German Unity Day")
+        case .germanReformationDay: String(localized: "German Reformation Day")
+        case .italianLiberationDay: String(localized: "Italian Liberation Day")
+        case .italianRepublicDay: String(localized: "Italian Republic Day")
+        case .italianAssumptionDay: String(localized: "Italian Assumption Day")
+        case .portugalFreedomDay: String(localized: "Portuguese Freedom Day")
+        case .portugalDay: String(localized: "Portugal Day")
+        case .portugalRepublicDay: String(localized: "Portuguese Republic Day")
+        case .russiaDefenderOfFatherlandDay: String(localized: "Defender of the Fatherland Day")
+        case .russiaVictoryDay: String(localized: "Victory Day")
+        case .russiaDay: String(localized: "Russia Day")
+        case .russiaNationalUnityDay: String(localized: "National Unity Day (Russia)")
+        case .ukraineConstitutionDay: String(localized: "Constitution Day of Ukraine")
+        case .ukraineIndependenceDay: String(localized: "Independence Day of Ukraine")
+        case .ukraineDefendersDay: String(localized: "Defenders Day of Ukraine")
+        case .japanNationalFoundationDay: String(localized: "National Foundation Day (Japan)")
+        case .japanConstitutionMemorialDay: String(localized: "Constitution Memorial Day (Japan)")
+        case .japanCultureDay: String(localized: "Culture Day (Japan)")
+        case .japanLaborThanksgivingDay: String(localized: "Labor Thanksgiving Day (Japan)")
+        case .koreaIndependenceMovementDay: String(localized: "March 1st Movement Day (Korea)")
+        case .koreaLiberationDay: String(localized: "Liberation Day (Korea)")
+        case .koreaNationalFoundationDay: String(localized: "National Foundation Day (Korea)")
+        case .koreaHangulDay: String(localized: "Hangul Day (Korea)")
+        case .chinaLaborDay: String(localized: "Labor Day (China)")
+        case .chinaNationalDay: String(localized: "National Day (China)")
         }
     }
 
@@ -184,6 +278,27 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
              .hispanicHeritageMonth, .diaDeLaRaza, .diaDeLosMuertos,
              .ourLadyOfGuadalupe, .lasPosadas, .nochebuena:
             .latinAmerican
+        case .franceNationalDay, .franceVictoryInEuropeDay, .franceArmisticeDay:
+            .frenchHolidays
+        case .germanLaborDay, .germanUnityDay, .germanReformationDay:
+            .germanHolidays
+        case .italianLiberationDay, .italianRepublicDay, .italianAssumptionDay:
+            .italianHolidays
+        case .portugalFreedomDay, .portugalDay, .portugalRepublicDay:
+            .portugueseHolidays
+        case .russiaDefenderOfFatherlandDay, .russiaVictoryDay, .russiaDay,
+             .russiaNationalUnityDay:
+            .russianHolidays
+        case .ukraineConstitutionDay, .ukraineIndependenceDay, .ukraineDefendersDay:
+            .ukrainianHolidays
+        case .japanNationalFoundationDay, .japanConstitutionMemorialDay,
+             .japanCultureDay, .japanLaborThanksgivingDay:
+            .japaneseHolidays
+        case .koreaIndependenceMovementDay, .koreaLiberationDay,
+             .koreaNationalFoundationDay, .koreaHangulDay:
+            .koreanHolidays
+        case .chinaLaborDay, .chinaNationalDay:
+            .chineseHolidays
         }
     }
 
@@ -216,6 +331,35 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .ourLadyOfGuadalupe: "virgen guadalupe diciembre december"
         case .lasPosadas: "posadas diciembre december"
         case .nochebuena: "christmas eve víspera navidad diciembre december"
+        case .franceNationalDay: "france national bastille july 14 juillet"
+        case .franceVictoryInEuropeDay: "france victory europe may 8 liberation"
+        case .franceArmisticeDay: "france armistice november 11 remembrance"
+        case .germanLaborDay: "germany german labor workers may 1 tag der arbeit"
+        case .germanUnityDay: "germany german unity reunification october 3"
+        case .germanReformationDay: "germany german reformation october 31"
+        case .italianLiberationDay: "italy italian liberation april 25"
+        case .italianRepublicDay: "italy italian republic june 2"
+        case .italianAssumptionDay: "italy italian assumption ferragosto august 15"
+        case .portugalFreedomDay: "portugal freedom carnation revolution april 25"
+        case .portugalDay: "portugal day portugal national june 10"
+        case .portugalRepublicDay: "portugal republic october 5"
+        case .russiaDefenderOfFatherlandDay: "russia defender fatherland february 23"
+        case .russiaVictoryDay: "russia victory may 9 победы"
+        case .russiaDay: "russia day national june 12"
+        case .russiaNationalUnityDay: "russia national unity november 4"
+        case .ukraineConstitutionDay: "ukraine constitution june 28"
+        case .ukraineIndependenceDay: "ukraine independence august 24"
+        case .ukraineDefendersDay: "ukraine defenders october 1"
+        case .japanNationalFoundationDay: "japan national foundation february 11"
+        case .japanConstitutionMemorialDay: "japan constitution memorial may 3"
+        case .japanCultureDay: "japan culture november 3"
+        case .japanLaborThanksgivingDay: "japan labor labour thanksgiving november 23"
+        case .koreaIndependenceMovementDay: "korea independence movement samil march 1"
+        case .koreaLiberationDay: "korea liberation gwangbok august 15"
+        case .koreaNationalFoundationDay: "korea national foundation gaecheonjeol october 3"
+        case .koreaHangulDay: "korea hangul hangeul alphabet october 9"
+        case .chinaLaborDay: "china labor workers may 1"
+        case .chinaNationalDay: "china national october 1"
         default: ""
         }
     }
@@ -290,6 +434,35 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .ourLadyOfGuadalupe: "star.circle"
         case .lasPosadas: "house.and.flag"
         case .nochebuena: "moon.stars"
+        case .franceNationalDay: "flag.fill"
+        case .franceVictoryInEuropeDay: "flag"
+        case .franceArmisticeDay: "shield"
+        case .germanLaborDay: "hammer"
+        case .germanUnityDay: "flag.fill"
+        case .germanReformationDay: "book.closed"
+        case .italianLiberationDay: "flag"
+        case .italianRepublicDay: "building.columns"
+        case .italianAssumptionDay: "sparkles"
+        case .portugalFreedomDay: "flag"
+        case .portugalDay: "flag.fill"
+        case .portugalRepublicDay: "building.columns"
+        case .russiaDefenderOfFatherlandDay: "shield"
+        case .russiaVictoryDay: "medal"
+        case .russiaDay: "flag.fill"
+        case .russiaNationalUnityDay: "person.3"
+        case .ukraineConstitutionDay: "book.closed"
+        case .ukraineIndependenceDay: "flag.fill"
+        case .ukraineDefendersDay: "shield"
+        case .japanNationalFoundationDay: "sun.max"
+        case .japanConstitutionMemorialDay: "book.closed"
+        case .japanCultureDay: "paintpalette"
+        case .japanLaborThanksgivingDay: "hands.sparkles"
+        case .koreaIndependenceMovementDay: "figure.walk"
+        case .koreaLiberationDay: "flag.fill"
+        case .koreaNationalFoundationDay: "building.columns"
+        case .koreaHangulDay: "character.book.closed"
+        case .chinaLaborDay: "hammer"
+        case .chinaNationalDay: "flag.fill"
         }
     }
 
@@ -314,6 +487,20 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
              .hispanicHeritageMonth, .diaDeLaRaza, .diaDeLosMuertos,
              .ourLadyOfGuadalupe, .lasPosadas, .nochebuena:
             TouchPointColor.coral
+        case .franceNationalDay, .franceVictoryInEuropeDay, .franceArmisticeDay,
+             .germanLaborDay, .germanUnityDay, .germanReformationDay,
+             .portugalFreedomDay, .portugalDay, .portugalRepublicDay,
+             .russiaDefenderOfFatherlandDay, .russiaVictoryDay, .russiaDay,
+             .russiaNationalUnityDay,
+             .ukraineConstitutionDay, .ukraineIndependenceDay, .ukraineDefendersDay,
+             .japanNationalFoundationDay, .japanConstitutionMemorialDay,
+             .japanCultureDay, .japanLaborThanksgivingDay,
+             .koreaIndependenceMovementDay, .koreaLiberationDay,
+             .koreaNationalFoundationDay, .koreaHangulDay,
+             .chinaLaborDay, .chinaNationalDay:
+            TouchPointColor.blue
+        case .italianLiberationDay, .italianRepublicDay, .italianAssumptionDay:
+            TouchPointColor.forest
         }
     }
 }
@@ -1060,6 +1247,20 @@ extension Occasion {
              .hispanicHeritageMonth, .diaDeLaRaza, .diaDeLosMuertos,
              .ourLadyOfGuadalupe, .lasPosadas, .nochebuena:
             "coral"
+        case .franceNationalDay, .franceVictoryInEuropeDay, .franceArmisticeDay,
+             .germanLaborDay, .germanUnityDay, .germanReformationDay,
+             .portugalFreedomDay, .portugalDay, .portugalRepublicDay,
+             .russiaDefenderOfFatherlandDay, .russiaVictoryDay, .russiaDay,
+             .russiaNationalUnityDay,
+             .ukraineConstitutionDay, .ukraineIndependenceDay, .ukraineDefendersDay,
+             .japanNationalFoundationDay, .japanConstitutionMemorialDay,
+             .japanCultureDay, .japanLaborThanksgivingDay,
+             .koreaIndependenceMovementDay, .koreaLiberationDay,
+             .koreaNationalFoundationDay, .koreaHangulDay,
+             .chinaLaborDay, .chinaNationalDay:
+            "blue"
+        case .italianLiberationDay, .italianRepublicDay, .italianAssumptionDay:
+            "forest"
         }
     }
 }

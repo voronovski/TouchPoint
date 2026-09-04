@@ -28,6 +28,7 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 personalizationSettingsSection
+                occasionGroupsSettingsSection
                 focusSettingsSection
                 remindersSettingsSection
                 aboutSettingsSection
@@ -125,6 +126,36 @@ struct SettingsView: View {
         } footer: {
             Text("Your name is used as the sender. The default language is selected automatically for every new template.")
         }
+    }
+
+    private var occasionGroupsSettingsSection: some View {
+        Section {
+            NavigationLink {
+                OccasionGroupsSettingsView()
+            } label: {
+                HStack {
+                    Label("Occasion groups", systemImage: "calendar.badge.clock")
+                    Spacer()
+                    Text("\(enabledOccasionGroupCount)/\(configurableOccasionGroupCount)")
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+        } footer: {
+            Text("Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged.")
+        }
+    }
+
+    private var configurableOccasionGroupCount: Int {
+        configurableOccasionGroups.count
+    }
+
+    private var enabledOccasionGroupCount: Int {
+        configurableOccasionGroups.filter { !preferences.disabledOccasionCategories.contains($0) }.count
+    }
+
+    private var configurableOccasionGroups: [OccasionCategory] {
+        OccasionCategory.allCases.filter { $0 != .personal }
     }
 
     private var focusSettingsSection: some View {
@@ -488,6 +519,39 @@ struct SettingsView: View {
     private func restoreRecoveredSnapshot() {
         guard !store.restoreCorruptSnapshot() else { return }
         archiveError = store.persistenceError ?? "The recovered local backup could not be restored."
+    }
+}
+
+private struct OccasionGroupsSettingsView: View {
+    @Environment(AppPreferences.self) private var preferences
+
+    private var configurableCategories: [OccasionCategory] {
+        OccasionCategory.allCases.filter { $0 != .personal }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(configurableCategories) { category in
+                    Toggle(isOn: Binding(
+                        get: { !preferences.disabledOccasionCategories.contains(category) },
+                        set: { isEnabled in
+                            if isEnabled {
+                                preferences.disabledOccasionCategories.remove(category)
+                            } else {
+                                preferences.disabledOccasionCategories.insert(category)
+                            }
+                        }
+                    )) {
+                        Text(category.title)
+                    }
+                }
+            } footer: {
+                Text("Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions.")
+            }
+        }
+        .navigationTitle("Occasion groups")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
