@@ -132,22 +132,6 @@
         }
       }
     },
-    "About" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "About"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "О приложении"
-          }
-        }
-      }
-    },
     "Add" : {
       "localizations" : {
         "en" : {
@@ -400,22 +384,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Любые отношения"
-          }
-        }
-      }
-    },
-    "App" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Приложение"
           }
         }
       }
@@ -2196,22 +2164,6 @@
         }
       }
     },
-    "Enable reminders" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enable reminders"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Включить напоминания"
-          }
-        }
-      }
-    },
     "Event context" : {
       "localizations" : {
         "en" : {
@@ -3540,22 +3492,6 @@
         }
       }
     },
-    "Local reminders" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Local reminders"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Локальные напоминания"
-          }
-        }
-      }
-    },
     "Lock" : {
       "localizations" : {
         "en" : {
@@ -4400,22 +4336,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открыть следующее поздравление"
-          }
-        }
-      }
-    },
-    "Open System Settings" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open System Settings"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открыть системные настройки"
           }
         }
       }
@@ -5268,22 +5188,6 @@
         }
       }
     },
-    "Reminders unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reminders unavailable"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Напоминания недоступны"
-          }
-        }
-      }
-    },
     "Remove %@ filter" : {
       "localizations" : {
         "en" : {
@@ -6020,38 +5924,6 @@
         }
       }
     },
-    "Sync reminders now" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sync reminders now"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Синхронизировать напоминания"
-          }
-        }
-      }
-    },
-    "Syncing reminders…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syncing reminders…"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Синхронизация напоминаний…"
-          }
-        }
-      }
-    },
     "Syncing to iCloud…" : {
       "localizations" : {
         "en" : {
@@ -6548,18 +6420,18 @@
         }
       }
     },
-    "Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you." : {
+    "Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you. You can change notification access in iOS Settings." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you."
+            "value" : "Touch Point uses on-device notifications for upcoming actions. It never sends the greeting for you. You can change notification access in iOS Settings."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touch Point использует уведомления устройства для предстоящих действий. Приложение никогда не отправляет поздравление вместо вас."
+            "value" : "Touch Point использует уведомления на устройстве для напоминания о предстоящих действиях. Приложение никогда не отправляет поздравление от вашего имени. Настройки доступа к уведомлениям можно изменить в настройках iOS."
           }
         }
       }
