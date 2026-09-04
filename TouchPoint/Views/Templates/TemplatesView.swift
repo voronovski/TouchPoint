@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct TemplatesView: View {
     @Environment(AppStore.self) private var store
@@ -14,10 +13,7 @@ struct TemplatesView: View {
     @State private var editingTemplate: GreetingTemplate?
     @State private var showingNewTemplate = false
     @State private var showingGroups = false
-    @State private var showingImporter = false
-    @State private var showingExporter = false
-    @State private var exportDocument = TemplateLibraryDocument()
-    @State private var transferError: String?
+    @State private var showingFilters = false
     @State private var templatePendingDeletion: GreetingTemplate?
 
     private var collectionTemplates: [GreetingTemplate] {
@@ -45,7 +41,8 @@ struct TemplatesView: View {
                     template.occasions.map(\.title).joined(separator: " "),
                     template.relationships.map(\.title).joined(separator: " "),
                     template.channels.map(\.title).joined(separator: " "),
-                    template.languages.joined(separator: " ")
+                    template.languages.joined(separator: " "),
+                    group(for: template)?.name ?? ""
                 ].joined(separator: " ")
                 return searchable.localizedCaseInsensitiveContains(query)
             }
@@ -71,7 +68,7 @@ struct TemplatesView: View {
     }
 
     private var hasActiveFilters: Bool {
-        !query.isEmpty || occasionFilter != nil || relationshipFilter != nil || channelFilter != nil || languageFilter != nil
+        scope != .all || !query.isEmpty || occasionFilter != nil || relationshipFilter != nil || channelFilter != nil || languageFilter != nil
     }
 
     private var hasMetadataFilters: Bool {
@@ -89,13 +86,7 @@ struct TemplatesView: View {
                     }
                 }
 
-                Section { collectionMenu }
-
-                Section {
-                    filterControls
-                } header: {
-                    Text("Filter templates")
-                }
+                Section { libraryControls }
 
                 if !visibleTemplates.isEmpty {
                     Section(scope.title(in: store)) {
@@ -198,61 +189,37 @@ struct TemplatesView: View {
             .searchable(text: $query, prompt: "Name, message, occasion, audience, channel, or language")
             .navigationTitle("Templates")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Picker("Sort templates", selection: $sort) {
-                            ForEach(TemplateSort.allCases) { option in
-                                Text(option.title).tag(option)
-                            }
-                        }
-                    } label: {
-                        Label(sort.title, systemImage: "arrow.up.arrow.down")
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button { showingGroups = true } label: {
+                        Label("Manage collections", systemImage: "folder")
                     }
-                    .accessibilityLabel("Sort templates")
-                    .accessibilityValue(sort.title)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button { showingNewTemplate = true } label: { Label("New template", systemImage: "doc.badge.plus") }
-                        Button { showingGroups = true } label: { Label("Manage collections", systemImage: "folder") }
-                        Divider()
-                        Button { showingImporter = true } label: { Label("Import library", systemImage: "square.and.arrow.down") }
-                        Button {
-                            exportDocument = TemplateLibraryDocument(templates: store.templates, groups: store.templateGroups)
-                            showingExporter = true
-                        } label: {
-                            Label("Export library", systemImage: "square.and.arrow.up")
-                        }
-                    } label: {
-                        Label("Add", systemImage: "plus")
+                    Button { showingNewTemplate = true } label: {
+                        Label("New template", systemImage: "doc.badge.plus")
                     }
                 }
             }
             .sheet(isPresented: $showingNewTemplate) {
-                TemplateEditorView(template: nil, defaultOccasion: preferences.focus.occasionPriority[0])
+                TemplateEditorView(
+                    template: nil,
+                    defaultOccasion: preferences.focus.occasionPriority[0],
+                    defaultLanguage: preferences.preferredLanguage
+                )
             }
             .sheet(item: $editingTemplate) { template in
-                TemplateEditorView(template: template, defaultOccasion: template.occasion)
+                TemplateEditorView(
+                    template: template,
+                    defaultOccasion: template.occasion,
+                    defaultLanguage: preferences.preferredLanguage
+                )
             }
             .sheet(isPresented: $showingGroups) { TemplateGroupsView() }
-            .fileImporter(isPresented: $showingImporter, allowedContentTypes: [.json]) { result in
-                importLibrary(result)
-            }
-            .fileExporter(
-                isPresented: $showingExporter,
-                document: exportDocument,
-                contentType: .json,
-                defaultFilename: "TouchPoint Templates"
-            ) { result in
-                if case .failure(let error) = result { transferError = error.localizedDescription }
-            }
-            .alert("Template library", isPresented: Binding(
-                get: { transferError != nil },
-                set: { if !$0 { transferError = nil } }
-            )) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(transferError ?? "")
+            .sheet(isPresented: $showingFilters) {
+                TemplateFiltersSheet(
+                    occasion: $occasionFilter,
+                    relationship: $relationshipFilter,
+                    channel: $channelFilter,
+                    language: $languageFilter
+                )
             }
             .confirmationDialog(
                 "Delete template?",
@@ -274,6 +241,67 @@ struct TemplatesView: View {
         }
     }
 
+    private var libraryControls: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                collectionMenu
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Divider().frame(height: 28)
+
+                Button { showingFilters = true } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: metadataFilterCount == 0 ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
+                        Text("Filters")
+                        if metadataFilterCount > 0 {
+                            Text(metadataFilterCount.formatted())
+                                .font(.caption2.weight(.bold).monospacedDigit())
+                                .padding(.horizontal, 5)
+                                .frame(minHeight: 18)
+                                .background(Color.accentColor.opacity(0.14))
+                                .clipShape(Capsule())
+                        }
+                    }
+                        .font(.subheadline.weight(.semibold))
+                }
+                .accessibilityLabel("Template filters")
+                .accessibilityValue(metadataFilterCount == 0 ? "None" : "\(metadataFilterCount) active")
+
+                Divider().frame(height: 28)
+
+                sortMenu
+            }
+
+            if hasMetadataFilters {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        if let occasionFilter {
+                            filterChip(title: occasionFilter.title, systemImage: occasionFilter.icon) {
+                                self.occasionFilter = nil
+                            }
+                        }
+                        if let relationshipFilter {
+                            filterChip(title: relationshipFilter.title, systemImage: "person.2") {
+                                self.relationshipFilter = nil
+                            }
+                        }
+                        if let channelFilter {
+                            filterChip(title: channelFilter.title, systemImage: channelFilter.icon) {
+                                self.channelFilter = nil
+                            }
+                        }
+                        if let languageFilter {
+                            filterChip(title: languageFilter, systemImage: "character.book.closed") {
+                                self.languageFilter = nil
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
     private var collectionMenu: some View {
         Menu {
             Button { scope = .all } label: { menuLabel("All templates", selected: scope == .all) }
@@ -292,112 +320,57 @@ struct TemplatesView: View {
                 }
             }
         } label: {
-            HStack {
+            HStack(spacing: 6) {
                 Label(scope.title(in: store), systemImage: scope.icon(in: store))
-                Spacer()
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.bold))
                     .foregroundStyle(.tertiary)
             }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Template collection")
-            .accessibilityValue(scope.title(in: store))
         }
+        .accessibilityLabel("Template collection")
+        .accessibilityValue(scope.title(in: store))
     }
 
-    private var filterControls: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            filterMenu(
-                title: "Occasion",
-                value: occasionFilter?.title ?? "Any occasion",
-                icon: "calendar"
-            ) {
-                Button { occasionFilter = nil } label: { menuLabel("Any occasion", selected: occasionFilter == nil) }
-                Divider()
-                ForEach(Occasion.allCases) { occasion in
-                    Button { occasionFilter = occasion } label: {
-                        menuLabel(occasion.title, selected: occasionFilter == occasion)
-                    }
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort templates", selection: $sort) {
+                ForEach(TemplateSort.allCases) { option in
+                    Text(option.title).tag(option)
                 }
             }
-
-            filterMenu(
-                title: "Audience",
-                value: relationshipFilter?.title ?? "Any relationship",
-                icon: "person.2"
-            ) {
-                Button { relationshipFilter = nil } label: {
-                    menuLabel("Any relationship", selected: relationshipFilter == nil)
-                }
-                Divider()
-                ForEach(Relationship.allCases) { relationship in
-                    Button { relationshipFilter = relationship } label: {
-                        menuLabel(relationship.title, selected: relationshipFilter == relationship)
-                    }
-                }
-            }
-
-            filterMenu(
-                title: "Channel",
-                value: channelFilter?.title ?? "Any channel",
-                icon: "arrow.up.right"
-            ) {
-                Button { channelFilter = nil } label: {
-                    menuLabel("Any channel", selected: channelFilter == nil)
-                }
-                Divider()
-                ForEach(ContactMethod.allCases) { channel in
-                    Button { channelFilter = channel } label: {
-                        menuLabel(channel.title, selected: channelFilter == channel)
-                    }
-                }
-            }
-
-            filterMenu(
-                title: "Language",
-                value: languageFilter ?? "Any language",
-                icon: "character.book.closed"
-            ) {
-                Button { languageFilter = nil } label: {
-                    menuLabel("Any language", selected: languageFilter == nil)
-                }
-                Divider()
-                ForEach(TemplateAppearance.languages, id: \.self) { language in
-                    Button { languageFilter = language } label: {
-                        menuLabel(language, selected: languageFilter == language)
-                    }
-                }
-            }
-
-            if hasMetadataFilters || !query.isEmpty {
-                Button("Clear filters", action: clearFilters)
-                    .font(.subheadline.weight(.semibold))
-                    .accessibilityHint("Removes the search and all template filters")
-            }
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    @ViewBuilder
-    private func filterMenu<Content: View>(
-        title: String,
-        value: String,
-        icon: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        LabeledContent {
-            Menu {
-                content()
-            } label: {
-                Text(value)
-                    .lineLimit(1)
-                    .multilineTextAlignment(.trailing)
-            }
-            .accessibilityLabel(title)
-            .accessibilityValue(value)
         } label: {
-            Label(title, systemImage: icon)
+            Image(systemName: "arrow.up.arrow.down")
+                .font(.subheadline.weight(.semibold))
+                .frame(width: 30, height: 30)
         }
+        .accessibilityLabel("Sort templates")
+        .accessibilityValue(sort.title)
+    }
+
+    private var metadataFilterCount: Int {
+        [occasionFilter != nil, relationshipFilter != nil, channelFilter != nil, languageFilter != nil]
+            .filter { $0 }
+            .count
+    }
+
+    private func filterChip(title: String, systemImage: String, onRemove: @escaping () -> Void) -> some View {
+        Button(action: onRemove) {
+            HStack(spacing: 5) {
+                Image(systemName: systemImage)
+                Text(title).lineLimit(1)
+                Image(systemName: "xmark")
+                    .font(.caption2.weight(.bold))
+            }
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 9)
+            .frame(height: 30)
+            .background(Color.accentColor.opacity(0.12))
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Remove \(title) filter")
     }
 
     private var emptyStateTitle: String {
@@ -419,6 +392,7 @@ struct TemplatesView: View {
     }
 
     private func clearFilters() {
+        scope = .all
         query = ""
         occasionFilter = nil
         relationshipFilter = nil
@@ -486,49 +460,6 @@ struct TemplatesView: View {
         return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
     }
 
-    private func importLibrary(_ result: Result<URL, Error>) {
-        do {
-            let url = try result.get()
-            let accessed = url.startAccessingSecurityScopedResource()
-            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-            let payload = try JSONDecoder.touchPoint.decode(TemplateLibraryPayload.self, from: Data(contentsOf: url))
-            var groupMap: [UUID: UUID] = [:]
-            for imported in payload.groups where !imported.isArchived {
-                let group = TemplateGroup(
-                    name: imported.name,
-                    iconSemantic: imported.iconSemantic,
-                    iconID: imported.iconID,
-                    colorToken: imported.colorToken,
-                    sortOrder: store.templateGroups.count
-                )
-                groupMap[imported.id] = group.id
-                store.addTemplateGroup(group)
-            }
-            for imported in payload.templates where !imported.isArchived {
-                let template = GreetingTemplate(
-                    title: imported.title,
-                    occasions: imported.occasions,
-                    body: imported.body,
-                    isFavorite: imported.isFavorite,
-                    iconSemantic: imported.iconSemantic,
-                    iconID: imported.iconID,
-                    colorToken: imported.colorToken,
-                    groupID: imported.groupID.flatMap { groupMap[$0] },
-                    relationships: imported.relationships,
-                    channels: imported.channels,
-                    languages: imported.languages,
-                    emailSubject: imported.emailSubject,
-                    isDefault: imported.isDefault
-                )
-                store.addTemplate(template)
-                if template.isDefault {
-                    _ = store.setTemplateDefault(id: template.id)
-                }
-            }
-        } catch {
-            transferError = "Could not import this library. \(error.localizedDescription)"
-        }
-    }
 }
 
 private enum TemplateScope: Hashable {
@@ -580,6 +511,108 @@ private enum TemplateSort: String, CaseIterable, Identifiable {
     }
 }
 
+private struct TemplateFiltersSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var occasion: Occasion?
+    @Binding var relationship: Relationship?
+    @Binding var channel: ContactMethod?
+    @Binding var language: String?
+    @State private var showingOccasionPicker = false
+
+    private var activeCount: Int {
+        [occasion != nil, relationship != nil, channel != nil, language != nil]
+            .filter { $0 }
+            .count
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Button { showingOccasionPicker = true } label: {
+                        HStack(spacing: 12) {
+                            IconTile(systemImage: "calendar", tint: .accentColor)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Occasion")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(occasion?.title ?? "Any occasion")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens a searchable occasion list")
+
+                    Picker(selection: $relationship) {
+                        Text("Any relationship").tag(Relationship?.none)
+                        ForEach(Relationship.allCases) { option in
+                            Text(option.title).tag(Optional(option))
+                        }
+                    } label: {
+                        Label("Audience", systemImage: "person.2")
+                    }
+
+                    Picker(selection: $channel) {
+                        Text("Any channel").tag(ContactMethod?.none)
+                        ForEach(ContactMethod.allCases) { option in
+                            Text(option.title).tag(Optional(option))
+                        }
+                    } label: {
+                        Label("Channel", systemImage: "arrow.up.right")
+                    }
+
+                    Picker(selection: $language) {
+                        Text("All languages").tag(String?.none)
+                        ForEach(TouchPointLanguage.supported, id: \.self) { option in
+                            Text(option).tag(Optional(option))
+                        }
+                    } label: {
+                        Label("Language", systemImage: "character.book.closed")
+                    }
+                } footer: {
+                    Text("Context filters combine with the selected collection and search.")
+                }
+
+                if activeCount > 0 {
+                    Section {
+                        Button("Clear context filters", role: .destructive) {
+                            occasion = nil
+                            relationship = nil
+                            channel = nil
+                            language = nil
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Filters")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .sheet(isPresented: $showingOccasionPicker) {
+                OccasionPickerSheet(
+                    selection: occasion.map { [$0] } ?? [],
+                    mode: .single,
+                    allowsEmptySelection: true
+                ) { selection in
+                    occasion = selection.first
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
 private struct TemplateRow: View {
     let template: GreetingTemplate
     let group: TemplateGroup?
@@ -597,13 +630,16 @@ private struct TemplateRow: View {
                         Image(systemName: "star.fill").font(.caption).foregroundStyle(TouchPointColor.amber)
                     }
                 }
-                HStack(spacing: 5) {
-                    TemplateStatusBadge(title: "Version \(template.revisionNumber)", systemImage: "clock.arrow.circlepath")
+                HStack(spacing: 8) {
+                    Label("Version \(template.revisionNumber)", systemImage: "clock.arrow.circlepath")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Spacer(minLength: 4)
                     if template.isApproved {
-                        TemplateStatusBadge(title: "Approved", systemImage: "checkmark.seal.fill")
+                        TemplateStateIcon(title: "Approved", systemImage: "checkmark.seal.fill", tint: TouchPointColor.forest)
                     }
                     if template.isLocked {
-                        TemplateStatusBadge(title: "Locked", systemImage: "lock.fill")
+                        TemplateStateIcon(title: "Locked", systemImage: "lock.fill", tint: .secondary)
                     }
                 }
                 Text(template.body).font(.caption).foregroundStyle(.secondary).lineLimit(2)
@@ -625,23 +661,29 @@ private struct TemplateRow: View {
     }
 }
 
-private struct TemplateStatusBadge: View {
+private struct TemplateStateIcon: View {
     let title: String
     let systemImage: String
+    let tint: Color
 
     var body: some View {
-        Label(title, systemImage: systemImage)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
+        Image(systemName: systemImage)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(tint)
+            .frame(width: 24, height: 24)
+            .background(tint.opacity(0.12))
+            .clipShape(.rect(cornerRadius: 6, style: .continuous))
             .accessibilityLabel(title)
     }
 }
 
 private struct TemplateEditorView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     @State private var draft: GreetingTemplate
     @State private var showingGenerator = false
+    @State private var showingOccasionPicker = false
     @State private var showingApprovalWarning = false
     @State private var showingSaveError = false
     @State private var saveError: String?
@@ -650,10 +692,19 @@ private struct TemplateEditorView: View {
     private let originalTemplate: GreetingTemplate?
     private let isEditing: Bool
 
-    init(template: GreetingTemplate?, defaultOccasion: Occasion) {
+    init(template: GreetingTemplate?, defaultOccasion: Occasion, defaultLanguage: String) {
         isEditing = template != nil
         originalTemplate = template
-        _draft = State(initialValue: template ?? GreetingTemplate(title: "", occasion: defaultOccasion, message: ""))
+        var initialDraft = template ?? GreetingTemplate(
+            title: "",
+            occasions: [defaultOccasion],
+            body: "",
+            languages: [TouchPointLanguage.resolved(defaultLanguage)]
+        )
+        if initialDraft.languages.isEmpty {
+            initialDraft.languages = [TouchPointLanguage.resolved(defaultLanguage)]
+        }
+        _draft = State(initialValue: initialDraft)
     }
 
     private var canSave: Bool { draft.validationErrors.isEmpty }
@@ -680,7 +731,22 @@ private struct TemplateEditorView: View {
                     }
                 }
 
-                Section("Template") {
+                Section {
+                    HStack(spacing: 12) {
+                        IconTile(systemImage: draft.iconID, tint: draft.colorToken.templateColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "Untitled template") : draft.title)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                                .lineLimit(2)
+                            Text(occasionSummary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                    }
+                    .padding(.vertical, 4)
+
                     TextField("Template name", text: $draft.title)
                     Picker("Collection", selection: $draft.groupID) {
                         Text("No collection").tag(UUID?.none)
@@ -693,27 +759,66 @@ private struct TemplateEditorView: View {
                             Label(option.title, systemImage: option.id).tag(option.id)
                         }
                     }
-                    Picker("Color", selection: $draft.colorToken) {
-                        ForEach(TemplateAppearance.colors, id: \.id) { option in
-                            HStack {
-                                Image(systemName: "circle.fill")
-                                    .foregroundStyle(option.id.templateColor)
-                                Text(option.title)
+                    LabeledContent("Color") {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 4) {
+                                ForEach(TemplateColorToken.allCases) { option in
+                                    Button {
+                                        draft.colorToken = option.rawValue
+                                    } label: {
+                                        ZStack {
+                                            Circle()
+                                                .fill(option.color)
+                                                .frame(width: 26, height: 26)
+                                            if draft.colorToken == option.rawValue {
+                                                Image(systemName: "checkmark")
+                                                    .font(.caption2.weight(.black))
+                                                    .foregroundStyle(.white)
+                                            }
+                                        }
+                                        .frame(width: 44, height: 44)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel(option.title)
+                                    .accessibilityAddTraits(draft.colorToken == option.rawValue ? .isSelected : [])
+                                }
                             }
-                            .tag(option.id)
                         }
                     }
+                } header: {
+                    Text("Template")
+                } footer: {
+                    Text("The icon and color identify this template throughout the library.")
                 }
                 .disabled(isReadOnly)
 
                 Section("Context") {
-                    multiValueMenu(title: "Occasions", summary: draft.occasions.map(\.title).joined(separator: ", ")) {
-                        ForEach(Occasion.allCases) { occasion in
-                            Button { toggleOccasion(occasion) } label: {
-                                Label(occasion.title, systemImage: draft.occasions.contains(occasion) ? "checkmark" : occasion.icon)
+                    Button {
+                        showingOccasionPicker = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconTile(systemImage: "calendar", tint: .accentColor)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Occasions")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(occasionSummary)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
                             }
+                            Spacer()
+                            Text(draft.occasions.count.formatted())
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
                         }
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens a searchable multi-select list")
                     multiValueMenu(title: "Audience", summary: draft.relationships.isEmpty ? "Any relationship" : draft.relationships.map(\.title).joined(separator: ", ")) {
                         Button("Any relationship") { draft.relationships = [] }
                         Divider()
@@ -733,8 +838,9 @@ private struct TemplateEditorView: View {
                         }
                     }
                     Picker("Language", selection: languageBinding) {
-                        Text("Any language").tag("")
-                        ForEach(TemplateAppearance.languages, id: \.self) { Text($0).tag($0) }
+                        ForEach(TouchPointLanguage.options(including: languageBinding.wrappedValue), id: \.self) {
+                            Text($0).tag($0)
+                        }
                     }
                 }
                 .disabled(isReadOnly)
@@ -802,8 +908,19 @@ private struct TemplateEditorView: View {
             .sheet(isPresented: $showingGenerator) {
                 AppleGreetingGeneratorSheet(context: generationContext) { draft.body = $0 }
             }
+            .sheet(isPresented: $showingOccasionPicker) {
+                OccasionPickerSheet(
+                    selection: draft.occasions,
+                    options: preferences.focus.occasionPriority,
+                    mode: .multiple
+                ) { draft.occasions = $0 }
+            }
             .sheet(item: $duplicateForEditing) { template in
-                TemplateEditorView(template: template, defaultOccasion: template.occasion)
+                TemplateEditorView(
+                    template: template,
+                    defaultOccasion: template.occasion,
+                    defaultLanguage: preferences.preferredLanguage
+                )
             }
             .sheet(item: $selectedRevision) { revision in
                 TemplateRevisionPreviewView(template: draft, revision: revision) { restored in
@@ -827,8 +944,16 @@ private struct TemplateEditorView: View {
     private var activeGroups: [TemplateGroup] {
         store.templateGroups.filter { !$0.isArchived }.sorted { $0.sortOrder < $1.sortOrder }
     }
+    private var occasionSummary: String {
+        let titles = draft.occasions.map(\.title)
+        guard titles.count > 2 else { return titles.joined(separator: ", ") }
+        return "\(titles[0]), \(titles[1]) +\(titles.count - 2)"
+    }
     private var languageBinding: Binding<String> {
-        Binding(get: { draft.languages.first ?? "" }, set: { draft.languages = $0.isEmpty ? [] : [$0] })
+        Binding(
+            get: { draft.languages.first ?? preferences.preferredLanguage },
+            set: { draft.languages = [TouchPointLanguage.resolved($0)] }
+        )
     }
     private var emailSubjectBinding: Binding<String> {
         Binding(get: { draft.emailSubject ?? "" }, set: { draft.emailSubject = $0.isEmpty ? nil : $0 })
@@ -839,19 +964,33 @@ private struct TemplateEditorView: View {
     }
     private var previewBody: String {
         guard !draft.body.isEmpty else { return "Your personalized preview will appear here." }
-        return store.renderedBody(for: draft, person: previewPerson, occasion: draft.occasion)
+        return store.renderedBody(
+            for: draft,
+            person: previewPerson,
+            occasion: draft.occasion,
+            senderName: preferences.senderName
+        )
     }
     private var previewSubject: String? {
-        store.renderedEmailSubject(for: draft, person: previewPerson, occasion: draft.occasion)
+        store.renderedEmailSubject(
+            for: draft,
+            person: previewPerson,
+            occasion: draft.occasion,
+            senderName: preferences.senderName
+        )
     }
     private var generationContext: GreetingGenerationContext {
         GreetingGenerationContext(
             occasion: draft.occasions.map(\.title).joined(separator: ", "),
             relationship: draft.relationships.isEmpty ? "Any relationship" : draft.relationships.map(\.title).joined(separator: ", "),
             channel: draft.channels.isEmpty ? "Any channel" : draft.channels.map(\.title).joined(separator: ", "),
-            language: draft.languages.first ?? "English",
+            language: draft.languages.first ?? preferences.preferredLanguage,
             recipientName: nil,
-            usesNamePlaceholder: true
+            usesNamePlaceholder: true,
+            occasionDetails: draft.occasions
+                .map { "\($0.title): \($0.generationContextDescription)" }
+                .joined(separator: "\n"),
+            senderName: preferences.senderName
         )
     }
 
@@ -990,12 +1129,6 @@ private struct TemplateEditorView: View {
     @ViewBuilder
     private func multiValueMenu<Content: View>(title: String, summary: String, @ViewBuilder content: () -> Content) -> some View {
         LabeledContent(title) { Menu(summary, content: content).multilineTextAlignment(.trailing) }
-    }
-    private func toggleOccasion(_ occasion: Occasion) {
-        if draft.occasions.contains(occasion) {
-            guard draft.occasions.count > 1 else { return }
-            draft.occasions.removeAll { $0 == occasion }
-        } else { draft.occasions.append(occasion) }
     }
     private func toggle<T: Equatable>(_ item: T, in items: inout [T]) {
         if let index = items.firstIndex(of: item) { items.remove(at: index) } else { items.append(item) }
@@ -1218,13 +1351,13 @@ private struct TemplateGroupEditorView: View {
                         }
                     }
                     Picker("Color", selection: $draft.colorToken) {
-                        ForEach(TemplateAppearance.colors, id: \.id) { option in
+                        ForEach(TemplateColorToken.allCases) { option in
                             HStack {
                                 Image(systemName: "circle.fill")
-                                    .foregroundStyle(option.id.templateColor)
+                                    .foregroundStyle(option.color)
                                 Text(option.title)
                             }
-                            .tag(option.id)
+                            .tag(option.rawValue)
                         }
                     }
                 }
@@ -1261,62 +1394,4 @@ private enum TemplateAppearance {
         Option(id: "briefcase", title: "Work"), Option(id: "heart", title: "Personal"),
         Option(id: "gift", title: "Holidays"), Option(id: "star", title: "VIP")
     ]
-    static let colors = [
-        Option(id: "blue", title: "Blue"), Option(id: "coral", title: "Coral"),
-        Option(id: "rose", title: "Rose"), Option(id: "amber", title: "Amber"),
-        Option(id: "forest", title: "Forest"), Option(id: "teal", title: "Teal")
-    ]
-    static let languages = ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Russian", "Ukrainian"]
-}
-
-private extension String {
-    var templateColor: Color {
-        switch self {
-        case "coral": TouchPointColor.coral
-        case "rose": TouchPointColor.rose
-        case "amber": TouchPointColor.amber
-        case "forest": TouchPointColor.forest
-        case "teal": TouchPointColor.teal
-        default: .accentColor
-        }
-    }
-}
-
-private struct TemplateLibraryPayload {
-    let version: Int
-    let templates: [GreetingTemplate]
-    let groups: [TemplateGroup]
-}
-
-nonisolated extension TemplateLibraryPayload: Codable {}
-
-private struct TemplateLibraryDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.json] }
-    var payload: TemplateLibraryPayload
-
-    init(templates: [GreetingTemplate] = [], groups: [TemplateGroup] = []) {
-        payload = TemplateLibraryPayload(version: 1, templates: templates, groups: groups)
-    }
-
-    init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
-            throw CocoaError(.fileReadCorruptFile)
-        }
-        payload = try JSONDecoder.touchPoint.decode(TemplateLibraryPayload.self, from: data)
-    }
-
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return FileWrapper(regularFileWithContents: try encoder.encode(payload))
-    }
-}
-
-private extension JSONDecoder {
-    static var touchPoint: JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }
 }

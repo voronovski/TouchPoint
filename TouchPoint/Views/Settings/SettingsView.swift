@@ -18,15 +18,21 @@ struct SettingsView: View {
     @State private var showingArchiveExporter = false
     @State private var showingArchiveImporter = false
     @State private var archiveError: String?
+    @State private var templateExportDocument = TemplateLibraryDocument()
+    @State private var showingTemplateExporter = false
+    @State private var showingTemplateImporter = false
+    @State private var templateTransferError: String?
     @State private var showingRecoveryConfirmation = false
 
     var body: some View {
         NavigationStack {
             List {
+                personalizationSettingsSection
                 focusSettingsSection
                 remindersSettingsSection
                 aboutSettingsSection
                 cloudSettingsSection
+                templateLibrarySettingsSection
                 archiveSettingsSection
             }
             .navigationTitle("Settings")
@@ -59,6 +65,14 @@ struct SettingsView: View {
             } message: {
                 Text(archiveError ?? "")
             }
+            .alert("Template library", isPresented: Binding(
+                get: { templateTransferError != nil },
+                set: { if !$0 { templateTransferError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(templateTransferError ?? "")
+            }
             .confirmationDialog("Restore recovered local backup?", isPresented: $showingRecoveryConfirmation, titleVisibility: .visible) {
                 Button("Restore backup", role: .destructive) { restoreRecoveredSnapshot() }
                 Button("Cancel", role: .cancel) {}
@@ -68,6 +82,9 @@ struct SettingsView: View {
             .fileImporter(isPresented: $showingArchiveImporter, allowedContentTypes: [.json], allowsMultipleSelection: false) { result in
                 importArchive(result)
             }
+            .fileImporter(isPresented: $showingTemplateImporter, allowedContentTypes: [.json]) { result in
+                importTemplateLibrary(result)
+            }
             .fileExporter(
                 isPresented: $showingArchiveExporter,
                 document: exportDocument,
@@ -76,6 +93,37 @@ struct SettingsView: View {
             ) { result in
                 if case .failure(let error) = result { archiveError = error.localizedDescription }
             }
+            .fileExporter(
+                isPresented: $showingTemplateExporter,
+                document: templateExportDocument,
+                contentType: .json,
+                defaultFilename: "TouchPoint Templates"
+            ) { result in
+                if case .failure(let error) = result { templateTransferError = error.localizedDescription }
+            }
+        }
+    }
+
+    private var personalizationSettingsSection: some View {
+        Section {
+            TextField("Your name", text: Binding(
+                get: { preferences.senderName },
+                set: { preferences.senderName = $0 }
+            ))
+            .textContentType(.name)
+            .textInputAutocapitalization(.words)
+            Picker("Default language", selection: Binding(
+                get: { preferences.preferredLanguage },
+                set: { preferences.preferredLanguage = $0 }
+            )) {
+                ForEach(TouchPointLanguage.supported, id: \.self) { language in
+                    Text(language).tag(language)
+                }
+            }
+        } header: {
+            Text("Personalization")
+        } footer: {
+            Text("Your name is used as the sender. The default language is selected automatically for every new template.")
         }
     }
 
@@ -218,6 +266,27 @@ struct SettingsView: View {
             Text("Local archive")
         } footer: {
             Text("An archive includes people, dates, greetings, templates, revisions, and usage history. Replacing data is validated before it is saved.")
+        }
+    }
+
+    private var templateLibrarySettingsSection: some View {
+        Section {
+            Button { showingTemplateImporter = true } label: {
+                Label("Import library", systemImage: "square.and.arrow.down")
+            }
+            Button {
+                templateExportDocument = TemplateLibraryDocument(
+                    templates: store.templates,
+                    groups: store.templateGroups
+                )
+                showingTemplateExporter = true
+            } label: {
+                Label("Export library", systemImage: "square.and.arrow.up")
+            }
+        } header: {
+            Text("Template library")
+        } footer: {
+            Text("Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history.")
         }
     }
 
@@ -369,9 +438,95 @@ struct SettingsView: View {
         }
     }
 
+    private func importTemplateLibrary(_ result: Result<URL, Error>) {
+        do {
+            let url = try result.get()
+            let accessed = url.startAccessingSecurityScopedResource()
+            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+            let payload = try JSONDecoder.templateLibrary.decode(
+                TemplateLibraryPayload.self,
+                from: Data(contentsOf: url)
+            )
+            var groupMap: [UUID: UUID] = [:]
+            for imported in payload.groups where !imported.isArchived {
+                let group = TemplateGroup(
+                    name: imported.name,
+                    iconSemantic: imported.iconSemantic,
+                    iconID: imported.iconID,
+                    colorToken: imported.colorToken,
+                    sortOrder: store.templateGroups.count
+                )
+                groupMap[imported.id] = group.id
+                store.addTemplateGroup(group)
+            }
+            for imported in payload.templates where !imported.isArchived {
+                let template = GreetingTemplate(
+                    title: imported.title,
+                    occasions: imported.occasions,
+                    body: imported.body,
+                    isFavorite: imported.isFavorite,
+                    iconSemantic: imported.iconSemantic,
+                    iconID: imported.iconID,
+                    colorToken: imported.colorToken,
+                    groupID: imported.groupID.flatMap { groupMap[$0] },
+                    relationships: imported.relationships,
+                    channels: imported.channels,
+                    languages: imported.languages,
+                    emailSubject: imported.emailSubject,
+                    isDefault: imported.isDefault
+                )
+                store.addTemplate(template)
+                if template.isDefault {
+                    _ = store.setTemplateDefault(id: template.id)
+                }
+            }
+        } catch {
+            templateTransferError = "Could not import this library. \(error.localizedDescription)"
+        }
+    }
+
     private func restoreRecoveredSnapshot() {
         guard !store.restoreCorruptSnapshot() else { return }
         archiveError = store.persistenceError ?? "The recovered local backup could not be restored."
+    }
+}
+
+private struct TemplateLibraryPayload {
+    let version: Int
+    let templates: [GreetingTemplate]
+    let groups: [TemplateGroup]
+}
+
+nonisolated extension TemplateLibraryPayload: Codable {}
+
+private struct TemplateLibraryDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+    var payload: TemplateLibraryPayload
+
+    init(templates: [GreetingTemplate] = [], groups: [TemplateGroup] = []) {
+        payload = TemplateLibraryPayload(version: 1, templates: templates, groups: groups)
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        payload = try JSONDecoder.templateLibrary.decode(TemplateLibraryPayload.self, from: data)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return FileWrapper(regularFileWithContents: try encoder.encode(payload))
+    }
+}
+
+private extension JSONDecoder {
+    static var templateLibrary: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
     }
 }
 

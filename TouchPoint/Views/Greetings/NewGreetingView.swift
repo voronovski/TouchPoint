@@ -2,6 +2,7 @@ import SwiftUI
 
 struct NewGreetingView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
 
     @State private var personID: UUID?
@@ -12,6 +13,7 @@ struct NewGreetingView: View {
     @State private var method: ContactMethod = .reminder
     @State private var message = ""
     @State private var saveError: String?
+    @State private var showingOccasionPicker = false
 
     private var selectedPerson: Person? {
         store.people.first { $0.id == personID }
@@ -41,11 +43,26 @@ struct NewGreetingView: View {
                     }
 
                     Section("Occasion") {
-                        Picker("Type", selection: $occasion) {
-                            ForEach(Occasion.allCases) { option in
-                                Text(option.title).tag(option)
+                        Button { showingOccasionPicker = true } label: {
+                            HStack(spacing: 12) {
+                                IconTile(systemImage: occasion.icon, tint: occasion.tint)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Type")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text(occasion.title)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
                             }
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Opens a searchable occasion list")
                         TextField(
                             occasion == .custom
                                 ? String(localized: "Custom occasion name")
@@ -101,6 +118,15 @@ struct NewGreetingView: View {
                 guard let person = selectedPerson else { return }
                 method = store.resolvedContactMethod(for: person, preferred: person.preferredContactMethod) ?? .reminder
             }
+            .sheet(isPresented: $showingOccasionPicker) {
+                OccasionPickerSheet(
+                    selection: [occasion],
+                    options: preferences.focus.occasionPriority,
+                    mode: .single
+                ) { selection in
+                    if let selected = selection.first { occasion = selected }
+                }
+            }
             .alert("Greeting not saved", isPresented: Binding(
                 get: { saveError != nil },
                 set: { if !$0 { saveError = nil } }
@@ -124,7 +150,8 @@ struct NewGreetingView: View {
                 person: person,
                 occasion: occasion,
                 date: date,
-                occasionName: normalizedCustomName
+                occasionName: normalizedCustomName,
+                senderName: preferences.senderName
             )
             : trimmedMessage
         let event = GreetingEvent(
@@ -140,7 +167,8 @@ struct NewGreetingView: View {
                     person: person,
                     occasion: occasion,
                     date: date,
-                    occasionName: normalizedCustomName
+                    occasionName: normalizedCustomName,
+                    senderName: preferences.senderName
                 )
             },
             sourceTemplateID: template?.id,

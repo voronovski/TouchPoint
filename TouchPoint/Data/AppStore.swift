@@ -517,11 +517,19 @@ final class AppStore {
         person: Person,
         occasion: Occasion,
         date: Date? = nil,
-        occasionName: String? = nil
+        occasionName: String? = nil,
+        senderName: String = AppPreferences.storedSenderName
     ) -> String {
         let source = template?.body
             ?? "Wishing you a wonderful \((normalizedCustomName(occasionName) ?? occasion.title).lowercased()), {{first_name}}!"
-        return renderTokens(source, person: person, occasion: occasion, date: date, occasionName: occasionName)
+        return renderTokens(
+            source,
+            person: person,
+            occasion: occasion,
+            date: date,
+            occasionName: occasionName,
+            senderName: senderName
+        )
     }
 
     func renderedEmailSubject(
@@ -529,10 +537,18 @@ final class AppStore {
         person: Person,
         occasion: Occasion,
         date: Date? = nil,
-        occasionName: String? = nil
+        occasionName: String? = nil,
+        senderName: String = AppPreferences.storedSenderName
     ) -> String? {
         guard let subject = template.emailSubject, !subject.isEmpty else { return nil }
-        return renderTokens(subject, person: person, occasion: occasion, date: date, occasionName: occasionName)
+        return renderTokens(
+            subject,
+            person: person,
+            occasion: occasion,
+            date: date,
+            occasionName: occasionName,
+            senderName: senderName
+        )
     }
 
     /// Converts literal recipient names in an edited greeting back into supported
@@ -579,7 +595,8 @@ final class AppStore {
         person: Person,
         occasion: Occasion,
         date: Date?,
-        occasionName: String? = nil
+        occasionName: String? = nil,
+        senderName: String
     ) -> String {
         let firstName = person.name.split(separator: " ").first.map(String.init) ?? person.name
         let dateText = recipientDateText(date ?? .now, person: person)
@@ -590,6 +607,7 @@ final class AppStore {
             .replacingOccurrences(of: "{{organization}}", with: person.organization)
             .replacingOccurrences(of: "{{occasion}}", with: renderedOccasion)
             .replacingOccurrences(of: "{{date}}", with: dateText)
+            .replacingOccurrences(of: "{{sender_name}}", with: senderName.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
     private func normalizedCustomName(_ name: String?) -> String? {
@@ -922,7 +940,8 @@ final class AppStore {
         method: ContactMethod,
         templateIDsByOccasion: [Occasion: UUID] = [:],
         templateIDsByPersonAndOccasion: [UUID: [Occasion: UUID]] = [:],
-        usePreferredContactMethods: Bool = false
+        usePreferredContactMethods: Bool = false,
+        senderName: String = AppPreferences.storedSenderName
     ) -> Int {
         let referenceDate = Date.now
         let previous = mutableState
@@ -982,7 +1001,8 @@ final class AppStore {
                                 person: person,
                                 occasion: occasion,
                                 date: date,
-                                occasionName: customName
+                                occasionName: customName,
+                                senderName: senderName
                             ),
                             subject: template.flatMap {
                                 renderedEmailSubject(
@@ -990,7 +1010,8 @@ final class AppStore {
                                     person: person,
                                     occasion: occasion,
                                     date: date,
-                                    occasionName: customName
+                                    occasionName: customName,
+                                    senderName: senderName
                                 )
                             },
                             sourceTemplateID: template?.id,
@@ -1136,50 +1157,123 @@ final class AppStore {
         calendar: Calendar,
         importantDate: ImportantDate? = nil
     ) -> Date? {
-        if occasion == .thanksgiving {
-            var components = DateComponents()
-            components.timeZone = calendar.timeZone
-            components.year = year
-            components.month = 11
-            components.weekday = 5
-            components.weekdayOrdinal = 4
-            components.hour = 9
-            return calendar.date(from: components)
-        }
-
-        let monthAndDay: (month: Int, day: Int)?
         switch occasion {
-        case .christmas:
-            monthAndDay = (12, 25)
         case .clientAppreciation:
             if let saved = person.importantDates.first(where: { $0.occasion == occasion }) {
-                monthAndDay = (saved.month, saved.day)
-            } else {
-                monthAndDay = (11, 5)
+                return fixedOccurrence(month: saved.month, day: saved.day, year: year, calendar: calendar)
             }
-        case .birthday, .homeAnniversary, .weddingAnniversary, .custom:
+            return fixedOccurrence(month: 11, day: 5, year: year, calendar: calendar)
+        case .birthday, .homeAnniversary, .weddingAnniversary, .workAnniversary, .custom:
             guard let saved = importantDate ?? person.importantDates.first(where: { $0.occasion == occasion }) else {
                 return nil
             }
-            monthAndDay = (saved.month, saved.day)
+            return fixedOccurrence(month: saved.month, day: saved.day, year: year, calendar: calendar)
+        case .newYearsDay:
+            return fixedOccurrence(month: 1, day: 1, year: year, calendar: calendar)
+        case .martinLutherKingJrDay:
+            return weekdayOccurrence(month: 1, weekday: 2, ordinal: 3, year: year, calendar: calendar)
+        case .presidentsDay:
+            return weekdayOccurrence(month: 2, weekday: 2, ordinal: 3, year: year, calendar: calendar)
+        case .memorialDay:
+            return lastWeekdayOccurrence(month: 5, weekday: 2, year: year, calendar: calendar)
+        case .juneteenth:
+            return fixedOccurrence(month: 6, day: 19, year: year, calendar: calendar)
+        case .independenceDay:
+            return fixedOccurrence(month: 7, day: 4, year: year, calendar: calendar)
+        case .laborDay:
+            return weekdayOccurrence(month: 9, weekday: 2, ordinal: 1, year: year, calendar: calendar)
+        case .columbusDay:
+            return weekdayOccurrence(month: 10, weekday: 2, ordinal: 2, year: year, calendar: calendar)
+        case .veteransDay:
+            return fixedOccurrence(month: 11, day: 11, year: year, calendar: calendar)
         case .thanksgiving:
-            monthAndDay = nil
+            return weekdayOccurrence(month: 11, weekday: 5, ordinal: 4, year: year, calendar: calendar)
+        case .christmas:
+            return fixedOccurrence(month: 12, day: 25, year: year, calendar: calendar)
+        case .valentinesDay:
+            return fixedOccurrence(month: 2, day: 14, year: year, calendar: calendar)
+        case .internationalWomensDay:
+            return fixedOccurrence(month: 3, day: 8, year: year, calendar: calendar)
+        case .earthDay:
+            return fixedOccurrence(month: 4, day: 22, year: year, calendar: calendar)
+        case .mothersDay:
+            return weekdayOccurrence(month: 5, weekday: 1, ordinal: 2, year: year, calendar: calendar)
+        case .fathersDay:
+            return weekdayOccurrence(month: 6, weekday: 1, ordinal: 3, year: year, calendar: calendar)
+        case .halloween:
+            return fixedOccurrence(month: 10, day: 31, year: year, calendar: calendar)
+        case .threeKingsDay:
+            return fixedOccurrence(month: 1, day: 6, year: year, calendar: calendar)
+        case .cincoDeMayo:
+            return fixedOccurrence(month: 5, day: 5, year: year, calendar: calendar)
+        case .mexicanMothersDay:
+            return fixedOccurrence(month: 5, day: 10, year: year, calendar: calendar)
+        case .mexicanIndependenceDay:
+            return fixedOccurrence(month: 9, day: 16, year: year, calendar: calendar)
+        case .hispanicHeritageMonth:
+            return fixedOccurrence(month: 9, day: 15, year: year, calendar: calendar)
+        case .diaDeLaRaza:
+            return fixedOccurrence(month: 10, day: 12, year: year, calendar: calendar)
+        case .diaDeLosMuertos:
+            return fixedOccurrence(month: 11, day: 2, year: year, calendar: calendar)
+        case .ourLadyOfGuadalupe:
+            return fixedOccurrence(month: 12, day: 12, year: year, calendar: calendar)
+        case .lasPosadas:
+            return fixedOccurrence(month: 12, day: 16, year: year, calendar: calendar)
+        case .nochebuena:
+            return fixedOccurrence(month: 12, day: 24, year: year, calendar: calendar)
         }
+    }
 
-        guard let monthAndDay else { return nil }
-        let day = validDay(
-            month: monthAndDay.month,
-            requestedDay: monthAndDay.day,
+    private func fixedOccurrence(month: Int, day: Int, year: Int, calendar: Calendar) -> Date? {
+        let resolvedDay = validDay(
+            month: month,
+            requestedDay: day,
             year: year,
             calendar: calendar
         )
         var components = DateComponents()
         components.timeZone = calendar.timeZone
         components.year = year
-        components.month = monthAndDay.month
-        components.day = day
+        components.month = month
+        components.day = resolvedDay
         components.hour = 9
         return calendar.date(from: components)
+    }
+
+    private func weekdayOccurrence(
+        month: Int,
+        weekday: Int,
+        ordinal: Int,
+        year: Int,
+        calendar: Calendar
+    ) -> Date? {
+        var components = DateComponents()
+        components.timeZone = calendar.timeZone
+        components.year = year
+        components.month = month
+        components.weekday = weekday
+        components.weekdayOrdinal = ordinal
+        components.hour = 9
+        return calendar.date(from: components)
+    }
+
+    private func lastWeekdayOccurrence(
+        month: Int,
+        weekday: Int,
+        year: Int,
+        calendar: Calendar
+    ) -> Date? {
+        var components = DateComponents()
+        components.timeZone = calendar.timeZone
+        components.year = year
+        components.month = month + 1
+        components.day = 0
+        components.hour = 9
+        guard let lastDay = calendar.date(from: components) else { return nil }
+        let currentWeekday = calendar.component(.weekday, from: lastDay)
+        let daysBack = (currentWeekday - weekday + 7) % 7
+        return calendar.date(byAdding: .day, value: -daysBack, to: lastDay)
     }
 
     private func validDay(

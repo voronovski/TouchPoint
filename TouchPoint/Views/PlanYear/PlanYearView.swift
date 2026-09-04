@@ -14,6 +14,7 @@ struct PlanYearView: View {
     /// Sparse recipient exceptions. Automatic resolution remains the default for everyone else.
     @State private var templateIDsByPersonAndOccasion: [UUID: [Occasion: UUID]] = [:]
     @State private var showingRecipientOverrides = false
+    @State private var showingOccasionPicker = false
     @State private var step = 0
     @State private var scheduledCount: Int?
     @State private var schedulingError: String?
@@ -88,6 +89,15 @@ struct PlanYearView: View {
             }
             .sheet(isPresented: $showingRecipientOverrides) {
                 recipientOverridesSheet
+            }
+            .sheet(isPresented: $showingOccasionPicker) {
+                OccasionPickerSheet(
+                    selection: orderedSelectedOccasions,
+                    options: preferences.focus.occasionPriority,
+                    mode: .multiple
+                ) { selection in
+                    updateSelectedOccasions(selection)
+                }
             }
         }
     }
@@ -176,24 +186,47 @@ struct PlanYearView: View {
 
     private var occasionsStep: some View {
         List {
-            Section("Choose occasions") {
-                ForEach(preferences.focus.occasionPriority) { occasion in
-                    Button {
-                        toggle(occasion, in: &selectedOccasions)
-                    } label: {
+            Section {
+                Button { showingOccasionPicker = true } label: {
+                    HStack(spacing: 12) {
+                        IconTile(systemImage: "calendar.badge.plus", tint: .accentColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Choose occasions")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text(selectedOccasionSummary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                        Spacer()
+                        Text(selectedOccasions.count.formatted())
+                            .font(.caption.weight(.semibold).monospacedDigit())
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens a searchable multi-select occasion list")
+            } footer: {
+                Text("Search all moments or expand Personal, U.S. holidays, Observances, and Latin American dates.")
+            }
+
+            if !orderedSelectedOccasions.isEmpty {
+                Section("Selected") {
+                    ForEach(orderedSelectedOccasions) { occasion in
                         HStack(spacing: 12) {
                             IconTile(systemImage: occasion.icon, tint: occasion.tint)
                             Text(occasion.title)
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.primary)
                             Spacer()
-                            Image(systemName: selectedOccasions.contains(occasion) ? "checkmark.circle.fill" : "circle")
-                                .font(.title3)
-                                .foregroundStyle(selectedOccasions.contains(occasion) ? Color.accentColor : Color.secondary)
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.accent)
                         }
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -397,6 +430,23 @@ struct PlanYearView: View {
         preferences.focus.occasionPriority.filter { selectedOccasions.contains($0) }
     }
 
+    private var selectedOccasionSummary: String {
+        let titles = orderedSelectedOccasions.map(\.title)
+        if titles.isEmpty { return String(localized: "No occasions selected") }
+        if titles.count <= 2 { return titles.joined(separator: ", ") }
+        return String(localized: "\(titles.prefix(2).joined(separator: ", ")) and \(titles.count - 2) more")
+    }
+
+    private func updateSelectedOccasions(_ selection: [Occasion]) {
+        let nextSelection = Set(selection)
+        selectedOccasions = nextSelection
+        templateIDsByOccasion = templateIDsByOccasion.filter { nextSelection.contains($0.key) }
+        templateIDsByPersonAndOccasion = templateIDsByPersonAndOccasion.reduce(into: [:]) { result, entry in
+            let filtered = entry.value.filter { nextSelection.contains($0.key) }
+            if !filtered.isEmpty { result[entry.key] = filtered }
+        }
+    }
+
     private var selectedPeopleInOrder: [Person] {
         store.people
             .filter { selectedPeople.contains($0.id) }
@@ -499,7 +549,12 @@ struct PlanYearView: View {
             .flatMap { id in store.templates.first(where: { $0.id == id }) }
             ?? occasionOverrideTemplate(for: occasion)
             ?? store.resolveTemplate(for: person, occasion: occasion, channel: method)
-        return store.renderedBody(for: template, person: person, occasion: occasion)
+        return store.renderedBody(
+            for: template,
+            person: person,
+            occasion: occasion,
+            senderName: preferences.senderName
+        )
     }
 
     private func recipientTemplateTitle(for person: Person, occasion: Occasion) -> String {
@@ -738,7 +793,8 @@ struct PlanYearView: View {
                         method: contactMethod,
                         templateIDsByOccasion: templateIDsByOccasion,
                         templateIDsByPersonAndOccasion: templateIDsByPersonAndOccasion,
-                        usePreferredContactMethods: usePreferredContactMethods
+                        usePreferredContactMethods: usePreferredContactMethods,
+                        senderName: preferences.senderName
                     )
                     if count == 0 {
                         schedulingError = store.persistenceError ?? "Touch Point could not save these greetings."

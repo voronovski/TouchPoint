@@ -343,7 +343,7 @@ private struct PersonEditorView: View {
     @State private var saveError: String?
 
     private let isEditing: Bool
-    private let languageOptions = ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Korean", "Chinese"]
+    private let languageOptions = TouchPointLanguage.supported
 
     init(person: Person?, defaultRelationship: Relationship = .client) {
         let draft = person ?? Person(name: "", relationship: defaultRelationship)
@@ -562,6 +562,7 @@ private struct PersonEditorView: View {
 private struct ImportantDateEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var date: ImportantDate
+    @State private var showingOccasionPicker = false
     let onSave: (ImportantDate) -> Void
 
     init(date: ImportantDate, onSave: @escaping (ImportantDate) -> Void) {
@@ -585,11 +586,26 @@ private struct ImportantDateEditorView: View {
         NavigationStack {
             Form {
                 Section("Occasion") {
-                    Picker("Occasion", selection: $date.occasion) {
-                        ForEach(Occasion.contactSpecificCases) { occasion in
-                            Text(occasion.title).tag(occasion)
+                    Button { showingOccasionPicker = true } label: {
+                        HStack(spacing: 12) {
+                            IconTile(systemImage: date.occasion.icon, tint: date.occasion.tint)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Occasion")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(date.occasion.title)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
                         }
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens a searchable occasion list")
                     TextField(date.occasion == .custom
                         ? String(localized: "Custom occasion name")
                         : String(localized: "Custom name (optional)"), text: Binding(
@@ -636,6 +652,15 @@ private struct ImportantDateEditorView: View {
             }
             .onChange(of: date.month) {
                 date.day = min(date.day, maximumDay)
+            }
+            .sheet(isPresented: $showingOccasionPicker) {
+                OccasionPickerSheet(
+                    selection: [date.occasion],
+                    options: Occasion.contactSpecificCases,
+                    mode: .single
+                ) { selection in
+                    if let selected = selection.first { date.occasion = selected }
+                }
             }
         }
     }

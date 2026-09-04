@@ -3,6 +3,7 @@ import MessageUI
 
 struct GreetingDetailView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     let eventID: UUID
     var showsDoneButton = false
@@ -94,6 +95,11 @@ struct GreetingDetailView: View {
                                 personName: person.name,
                                 relationship: person.relationship,
                                 occasion: event.occasion,
+                                occasionName: event.displayName,
+                                occasionDetails: event.occasion.generationContextDescription
+                                    + " This greeting is "
+                                    + (event.recurrence == .annual ? "an annual occurrence." : "a one-time event."),
+                                eventDate: "\(event.date.touchPointDay(in: person.timeZoneIdentifier)) at \(event.date.touchPointTime(in: person.timeZoneIdentifier)) in the recipient's time zone.",
                                 method: event.method,
                                 language: person.preferredLanguage
                             )
@@ -202,12 +208,15 @@ struct GreetingDetailView: View {
             GreetingMessageEditor(
                 message: request.message,
                 context: GreetingGenerationContext(
-                    occasion: request.occasion.title,
+                    occasion: request.occasionName,
                     relationship: request.relationship.title,
                     channel: request.method.title,
                     language: request.language,
                     recipientName: request.personName.split(separator: " ").first.map(String.init),
-                    usesNamePlaceholder: false
+                    usesNamePlaceholder: false,
+                    occasionDetails: request.occasionDetails,
+                    eventDate: request.eventDate,
+                    senderName: preferences.senderName
                 ),
                 onSave: { message in
                     if store.updateGreetingMessage(id: request.id, message: message) {
@@ -352,6 +361,9 @@ private struct MessageEditorRequest: Identifiable {
     let personName: String
     let relationship: Relationship
     let occasion: Occasion
+    let occasionName: String
+    let occasionDetails: String
+    let eventDate: String
     let method: ContactMethod
     let language: String
 }

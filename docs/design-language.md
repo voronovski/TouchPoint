@@ -118,6 +118,7 @@ The first launch offers `Work`, `Personal`, and `All` as starting focuses.
 - Back preserves the draft within the flow. Cancel discards it.
 - Disable the primary action only when a visible prerequisite is missing.
 - Show a concise success result with the number of greetings created.
+- The Apple Intelligence generator follows the same hierarchy: model status, direction, collapsible context, and editable output use surface cards; `Generate message` is the full-width primary action anchored above the sheet safe area, while refinement remains secondary.
 
 ### Collections
 
@@ -134,11 +135,16 @@ Collection states are explicit:
 ### Template library
 
 - Search and filters are independent: occasion, relationship audience, channel, language, and collection can be combined.
+- Keep collection scope, context-filter entry, and sorting in one compact native control row above the results. Show applied context filters as removable chips; the searchable navigation field remains the dedicated text-search surface.
+- Template creation shows a compact identity preview, uses the shared semantic color-token palette, and opens occasions in a large searchable multi-select sheet grouped into Personal moments, U.S. holidays, Observances, and Latin American dates.
+- The shared occasion sheet uses collapsible category rows and expands matching categories while searching. Use single-select for event/date/filter fields and staged multi-select with `Cancel`/`Done` for templates and yearly planning.
+- Every new template has one explicit language. Preselect the user's `Default language` preference (English on a fresh install); do not offer `Any language` as a template value.
 - Smart collections include Favorites, Recently used, Most used, Ungrouped, Archived, and contexts Missing default.
 - Recommended sorting prefers defaults and favorites; explicit Name, Most used, and Recently updated sorts remain available.
 - Automatic template resolution uses recipient relationship, preferred channel, and language. A per-recipient exception overrides an occasion-wide choice, which overrides automatic resolution.
 - Content edits create a local template revision. Favorite, default, archive, approval, lock, and usage changes do not create content revisions.
 - Approval and locking are local organization aids, not team permissions or a security boundary. Built-in templates are approved and locked; duplicate one to customize it.
+- In template rows, keep version as written metadata and show approval/lock as separate trailing icons with complete accessibility labels.
 - Usage statistics describe TouchPoint actions such as scheduled, composer opened, completed, skipped, and message edited. Never reinterpret these as delivery or recipient-open analytics.
 
 ### Person editor

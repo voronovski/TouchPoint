@@ -62,14 +62,15 @@ enum Focus: String, CaseIterable, Identifiable {
     }
 
     var occasionPriority: [Occasion] {
-        switch self {
+        let prioritized: [Occasion] = switch self {
         case .work:
-            [.clientAppreciation, .homeAnniversary, .birthday, .custom, .christmas, .thanksgiving, .weddingAnniversary]
+            [.clientAppreciation, .workAnniversary, .homeAnniversary, .birthday, .custom, .christmas, .thanksgiving, .weddingAnniversary]
         case .personal:
-            [.birthday, .weddingAnniversary, .custom, .christmas, .thanksgiving, .homeAnniversary, .clientAppreciation]
+            [.birthday, .weddingAnniversary, .custom, .christmas, .thanksgiving, .homeAnniversary, .workAnniversary, .clientAppreciation]
         case .all:
-            [.birthday, .clientAppreciation, .weddingAnniversary, .homeAnniversary, .custom, .christmas, .thanksgiving]
+            [.birthday, .clientAppreciation, .weddingAnniversary, .homeAnniversary, .workAnniversary, .custom, .christmas, .thanksgiving]
         }
+        return prioritized + Occasion.allCases.filter { !prioritized.contains($0) }
     }
 
     var relationships: Set<Relationship> {
@@ -103,6 +104,8 @@ final class AppPreferences {
         static let reminderHour = "TouchPoint.ReminderHour"
         static let reminderMinute = "TouchPoint.ReminderMinute"
         static let hideReminderNames = "TouchPoint.HideReminderNames"
+        static let senderName = "TouchPoint.SenderName"
+        static let preferredLanguage = "TouchPoint.PreferredLanguage"
     }
 
     private let defaults: UserDefaults
@@ -162,6 +165,36 @@ final class AppPreferences {
         }
     }
 
+    /// The app user's name, used by `{{sender_name}}` and as generation context.
+    var senderName: String {
+        didSet {
+            defaults.set(senderName, forKey: Key.senderName)
+            cloudDefaults.set(senderName, forKey: Key.senderName)
+            cloudDefaults.synchronize()
+        }
+    }
+
+    /// Default language for newly created templates and language-aware generation.
+    var preferredLanguage: String {
+        didSet {
+            let value = TouchPointLanguage.resolved(preferredLanguage)
+            if value != preferredLanguage {
+                preferredLanguage = value
+                return
+            }
+            defaults.set(value, forKey: Key.preferredLanguage)
+            cloudDefaults.set(value, forKey: Key.preferredLanguage)
+            cloudDefaults.synchronize()
+        }
+    }
+
+    /// Rendering performed by AppStore can happen outside a view, so it reads the
+    /// current production preference through this narrow accessor by default.
+    static var storedSenderName: String {
+        UserDefaults.standard.string(forKey: Key.senderName)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    }
+
     /// Last reconciliation error is transient and is shown in Settings.
     var notificationSyncError: String?
 
@@ -206,16 +239,27 @@ final class AppPreferences {
         hideReminderNames = cloudDefaults.object(forKey: Key.hideReminderNames) == nil
             ? defaults.bool(forKey: Key.hideReminderNames)
             : cloudDefaults.bool(forKey: Key.hideReminderNames)
+        senderName = cloudDefaults.string(forKey: Key.senderName)
+            ?? defaults.string(forKey: Key.senderName)
+            ?? ""
+        preferredLanguage = TouchPointLanguage.resolved(
+            cloudDefaults.string(forKey: Key.preferredLanguage)
+                ?? defaults.string(forKey: Key.preferredLanguage)
+        )
         notificationSyncError = nil
         if shouldPersistMigration {
             defaults.set(resolvedFocus.rawValue, forKey: Key.focus)
         }
+        defaults.set(senderName, forKey: Key.senderName)
+        defaults.set(preferredLanguage, forKey: Key.preferredLanguage)
         if cloudDefaults.object(forKey: Key.focus) == nil { cloudDefaults.set(focus.rawValue, forKey: Key.focus) }
         if cloudDefaults.object(forKey: Key.completedOnboarding) == nil { cloudDefaults.set(hasCompletedOnboarding, forKey: Key.completedOnboarding) }
         if cloudDefaults.object(forKey: Key.reminderLeadTimes) == nil { cloudDefaults.set(Array(reminderLeadTimes).sorted(), forKey: Key.reminderLeadTimes) }
         if cloudDefaults.object(forKey: Key.reminderHour) == nil { cloudDefaults.set(reminderHour, forKey: Key.reminderHour) }
         if cloudDefaults.object(forKey: Key.reminderMinute) == nil { cloudDefaults.set(reminderMinute, forKey: Key.reminderMinute) }
         if cloudDefaults.object(forKey: Key.hideReminderNames) == nil { cloudDefaults.set(hideReminderNames, forKey: Key.hideReminderNames) }
+        if cloudDefaults.object(forKey: Key.senderName) == nil { cloudDefaults.set(senderName, forKey: Key.senderName) }
+        if cloudDefaults.object(forKey: Key.preferredLanguage) == nil { cloudDefaults.set(preferredLanguage, forKey: Key.preferredLanguage) }
         cloudDefaults.synchronize()
         let observerTarget = WeakPreferencesBox(self)
         cloudObserver = NotificationCenter.default.addObserver(
@@ -250,6 +294,13 @@ final class AppPreferences {
         if cloudDefaults.object(forKey: Key.hideReminderNames) != nil {
             let value = cloudDefaults.bool(forKey: Key.hideReminderNames)
             if value != hideReminderNames { hideReminderNames = value }
+        }
+        if let value = cloudDefaults.string(forKey: Key.senderName), value != senderName {
+            senderName = value
+        }
+        if let value = cloudDefaults.string(forKey: Key.preferredLanguage) {
+            let resolved = TouchPointLanguage.resolved(value)
+            if resolved != preferredLanguage { preferredLanguage = resolved }
         }
     }
 

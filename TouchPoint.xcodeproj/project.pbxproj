@@ -8,17 +8,41 @@
 
 /* Begin PBXBuildFile section */
 		FAD18B2C3048DB4100D3927C /* TouchPointWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD18B233048DB4100D3927C /* TouchPointWidget.swift */; };
-		FAD18B2D3048DB4100D3927C /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD18B2E3048DB4100D3927C /* WidgetSnapshot.swift */; };
+		FAD18B2D3048DB4100D3927C /* TouchPoint/Platform/WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD18B2E3048DB4100D3927C /* TouchPoint/Platform/WidgetSnapshot.swift */; };
 		FAD18B2F3048DB4100D3927C /* TouchPointWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FAD18B213048DB4100D3927C /* TouchPointWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FAD18B343048DB4100D3927C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FAD18B333048DB4100D3927C /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		FAD18B313048DB4100D3927C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAD18B093048DB4100D3927C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FAD18B253048DB4100D3927C;
+			remoteInfo = TouchPointWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FAD18B303048DB4100D3927C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FAD18B2F3048DB4100D3927C /* TouchPointWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		FAD18B113048DB4100D3927C /* TouchPoint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TouchPoint.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FAD18B213048DB4100D3927C /* TouchPointWidget.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = TouchPointWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAD18B213048DB4100D3927C /* TouchPointWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TouchPointWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD18B233048DB4100D3927C /* TouchPointWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchPointWidget.swift; sourceTree = "<group>"; };
 		FAD18B243048DB4100D3927C /* TouchPointWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TouchPointWidget.entitlements; sourceTree = "<group>"; };
-		FAD18B2E3048DB4100D3927C /* WidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchPoint/Platform/WidgetSnapshot.swift; sourceTree = "<group>"; };
+		FAD18B2E3048DB4100D3927C /* TouchPoint/Platform/WidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchPoint/Platform/WidgetSnapshot.swift; sourceTree = "<group>"; };
 		FAD18B333048DB4100D3927C /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		FAD18B353048DB4100D3927C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -48,30 +72,6 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		FAD18B303048DB4100D3927C /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				FAD18B2F3048DB4100D3927C /* TouchPointWidget.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
-/* Begin PBXContainerItemProxy section */
-		FAD18B313048DB4100D3927C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FAD18B093048DB4100D3927C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = FAD18B253048DB4100D3927C;
-			remoteInfo = TouchPointWidget;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXGroup section */
 		FAD18B083048DB4100D3927C = {
 			isa = PBXGroup;
@@ -79,7 +79,17 @@
 				FAD18B133048DB4100D3927C /* TouchPoint */,
 				FAD18B223048DB4100D3927C /* TouchPointWidget */,
 				FAD18B123048DB4100D3927C /* Products */,
+				FAD18EDE304A117A00D3927C /* Recovered References */,
 			);
+			sourceTree = "<group>";
+		};
+		FAD18B123048DB4100D3927C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAD18B113048DB4100D3927C /* TouchPoint.app */,
+				FAD18B213048DB4100D3927C /* TouchPointWidget.appex */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		FAD18B223048DB4100D3927C /* TouchPointWidget */ = {
@@ -93,13 +103,12 @@
 			path = TouchPointWidget;
 			sourceTree = "<group>";
 		};
-		FAD18B123048DB4100D3927C /* Products */ = {
+		FAD18EDE304A117A00D3927C /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				FAD18B113048DB4100D3927C /* TouchPoint.app */,
-				FAD18B213048DB4100D3927C /* TouchPointWidget.appex */,
+				FAD18B2E3048DB4100D3927C /* TouchPoint/Platform/WidgetSnapshot.swift */,
 			);
-			name = Products;
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -213,14 +222,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		FAD18B323048DB4100D3927C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = FAD18B253048DB4100D3927C /* TouchPointWidget */;
-			targetProxy = FAD18B313048DB4100D3927C /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXSourcesBuildPhase section */
 		FAD18B0D3048DB4100D3927C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -234,11 +235,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAD18B2C3048DB4100D3927C /* TouchPointWidget.swift in Sources */,
-				FAD18B2D3048DB4100D3927C /* WidgetSnapshot.swift in Sources */,
+				FAD18B2D3048DB4100D3927C /* TouchPoint/Platform/WidgetSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FAD18B323048DB4100D3927C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FAD18B253048DB4100D3927C /* TouchPointWidget */;
+			targetProxy = FAD18B313048DB4100D3927C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		FAD18B1A3048DB4300D3927C /* Debug */ = {

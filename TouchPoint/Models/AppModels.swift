@@ -49,14 +49,65 @@ enum Relationship: String, CaseIterable, Identifiable, StableStringCodable {
     }
 }
 
+enum OccasionCategory: String, CaseIterable, Identifiable {
+    case personal
+    case usHolidays
+    case observances
+    case latinAmerican
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .personal: String(localized: "Personal moments")
+        case .usHolidays: String(localized: "U.S. holidays")
+        case .observances: String(localized: "Observances")
+        case .latinAmerican: String(localized: "Latin American dates")
+        }
+    }
+}
+
 enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
     case birthday
     case homeAnniversary = "home_anniversary"
     case weddingAnniversary = "wedding_anniversary"
-    case thanksgiving
-    case christmas
+    case workAnniversary = "work_anniversary"
     case clientAppreciation = "client_appreciation"
     case custom
+
+    // U.S. federal holidays.
+    case newYearsDay = "new_years_day"
+    case martinLutherKingJrDay = "martin_luther_king_jr_day"
+    case presidentsDay = "presidents_day"
+    case memorialDay = "memorial_day"
+    case juneteenth
+    case independenceDay = "independence_day"
+    case laborDay = "labor_day"
+    case columbusDay = "columbus_day"
+    case veteransDay = "veterans_day"
+    case thanksgiving
+    case christmas
+
+    // Widely used personal and community observances.
+    case valentinesDay = "valentines_day"
+    case internationalWomensDay = "international_womens_day"
+    case earthDay = "earth_day"
+    case mothersDay = "mothers_day"
+    case fathersDay = "fathers_day"
+    case halloween
+
+    // Dates commonly celebrated across Latin American communities. Country-
+    // specific names stay explicit rather than implying one universal calendar.
+    case threeKingsDay = "three_kings_day"
+    case cincoDeMayo = "cinco_de_mayo"
+    case mexicanMothersDay = "mexican_mothers_day"
+    case mexicanIndependenceDay = "mexican_independence_day"
+    case hispanicHeritageMonth = "hispanic_heritage_month"
+    case diaDeLaRaza = "dia_de_la_raza"
+    case diaDeLosMuertos = "dia_de_los_muertos"
+    case ourLadyOfGuadalupe = "our_lady_of_guadalupe"
+    case lasPosadas = "las_posadas"
+    case nochebuena
 
     var id: Self { self }
 
@@ -64,10 +115,20 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         "Birthday": .birthday,
         "Home anniversary": .homeAnniversary,
         "Wedding anniversary": .weddingAnniversary,
+        "Work anniversary": .workAnniversary,
+        "Client appreciation": .clientAppreciation,
+        "Custom occasion": .custom,
         "Thanksgiving": .thanksgiving,
         "Christmas": .christmas,
-        "Client appreciation": .clientAppreciation,
-        "Custom occasion": .custom
+        "New Year's Day": .newYearsDay,
+        "Martin Luther King Jr. Day": .martinLutherKingJrDay,
+        "Presidents' Day": .presidentsDay,
+        "Memorial Day": .memorialDay,
+        "Juneteenth": .juneteenth,
+        "Independence Day": .independenceDay,
+        "Labor Day": .laborDay,
+        "Columbus Day": .columbusDay,
+        "Veterans Day": .veteransDay
     ]
 
     var title: String {
@@ -75,10 +136,113 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .birthday: String(localized: "Birthday")
         case .homeAnniversary: String(localized: "Home anniversary")
         case .weddingAnniversary: String(localized: "Wedding anniversary")
-        case .thanksgiving: String(localized: "Thanksgiving")
-        case .christmas: String(localized: "Christmas")
+        case .workAnniversary: String(localized: "Work anniversary")
         case .clientAppreciation: String(localized: "Client appreciation")
         case .custom: String(localized: "Custom occasion")
+        case .newYearsDay: String(localized: "New Year's Day")
+        case .martinLutherKingJrDay: String(localized: "Martin Luther King Jr. Day")
+        case .presidentsDay: String(localized: "Presidents' Day")
+        case .memorialDay: String(localized: "Memorial Day")
+        case .juneteenth: String(localized: "Juneteenth")
+        case .independenceDay: String(localized: "Independence Day")
+        case .laborDay: String(localized: "Labor Day")
+        case .columbusDay: String(localized: "Columbus Day")
+        case .veteransDay: String(localized: "Veterans Day")
+        case .thanksgiving: String(localized: "Thanksgiving")
+        case .christmas: String(localized: "Christmas")
+        case .valentinesDay: String(localized: "Valentine's Day")
+        case .internationalWomensDay: String(localized: "International Women's Day")
+        case .earthDay: String(localized: "Earth Day")
+        case .mothersDay: String(localized: "Mother's Day")
+        case .fathersDay: String(localized: "Father's Day")
+        case .halloween: String(localized: "Halloween")
+        case .threeKingsDay: String(localized: "Three Kings Day")
+        case .cincoDeMayo: String(localized: "Cinco de Mayo")
+        case .mexicanMothersDay: String(localized: "Mexican Mother's Day")
+        case .mexicanIndependenceDay: String(localized: "Mexican Independence Day")
+        case .hispanicHeritageMonth: String(localized: "Hispanic Heritage Month")
+        case .diaDeLaRaza: String(localized: "Día de la Raza")
+        case .diaDeLosMuertos: String(localized: "Día de los Muertos")
+        case .ourLadyOfGuadalupe: String(localized: "Our Lady of Guadalupe")
+        case .lasPosadas: String(localized: "Las Posadas")
+        case .nochebuena: String(localized: "Nochebuena")
+        }
+    }
+
+    var category: OccasionCategory {
+        switch self {
+        case .birthday, .homeAnniversary, .weddingAnniversary, .workAnniversary, .clientAppreciation, .custom:
+            .personal
+        case .newYearsDay, .martinLutherKingJrDay, .presidentsDay, .memorialDay,
+             .juneteenth, .independenceDay, .laborDay, .columbusDay, .veteransDay,
+             .thanksgiving, .christmas:
+            .usHolidays
+        case .valentinesDay, .internationalWomensDay, .earthDay, .mothersDay,
+             .fathersDay, .halloween:
+            .observances
+        case .threeKingsDay, .cincoDeMayo, .mexicanMothersDay, .mexicanIndependenceDay,
+             .hispanicHeritageMonth, .diaDeLaRaza, .diaDeLosMuertos,
+             .ourLadyOfGuadalupe, .lasPosadas, .nochebuena:
+            .latinAmerican
+        }
+    }
+
+    var searchTerms: String {
+        switch self {
+        case .newYearsDay: "new year federal january"
+        case .martinLutherKingJrDay: "mlk civil rights federal january"
+        case .presidentsDay: "washington birthday federal february"
+        case .memorialDay: "military remembrance federal may"
+        case .juneteenth: "freedom emancipation federal june"
+        case .independenceDay: "fourth july federal usa"
+        case .laborDay: "workers federal september"
+        case .columbusDay: "indigenous peoples federal october"
+        case .veteransDay: "military service federal november"
+        case .thanksgiving: "gratitude federal november"
+        case .christmas: "holiday federal december"
+        case .valentinesDay: "love february"
+        case .internationalWomensDay: "women march 8"
+        case .earthDay: "environment april 22"
+        case .mothersDay: "mom mother may"
+        case .fathersDay: "dad father june"
+        case .halloween: "october 31"
+        case .threeKingsDay: "día de reyes dia de reyes epiphany enero january"
+        case .cincoDeMayo: "méxico mexico mayo may"
+        case .mexicanMothersDay: "día de las madres dia madres méxico mexico mayo may"
+        case .mexicanIndependenceDay: "independencia méxico mexico septiembre september"
+        case .hispanicHeritageMonth: "latino heritage september septiembre"
+        case .diaDeLaRaza: "día dia raza octubre october"
+        case .diaDeLosMuertos: "day of the dead muertos noviembre november"
+        case .ourLadyOfGuadalupe: "virgen guadalupe diciembre december"
+        case .lasPosadas: "posadas diciembre december"
+        case .nochebuena: "christmas eve víspera navidad diciembre december"
+        default: ""
+        }
+    }
+
+    /// Disambiguates occasion labels for the on-device language model. This is
+    /// intentionally explicit for labels such as "Home anniversary", which can
+    /// otherwise be interpreted as an unspecified anniversary.
+    var generationContextDescription: String {
+        switch self {
+        case .birthday:
+            "The recipient's birthday. Celebrate the recipient personally."
+        case .homeAnniversary:
+            "The anniversary of the recipient buying or moving into their home. Celebrate that home milestone; this is not a wedding, relationship, or work anniversary."
+        case .weddingAnniversary:
+            "The recipient's wedding anniversary. Celebrate their marriage without inventing a year count or spouse details."
+        case .workAnniversary:
+            "The anniversary of the recipient starting a job or professional role. Celebrate the work milestone without inventing a year count."
+        case .clientAppreciation:
+            "A message thanking the recipient as a client. Do not imply a birthday or anniversary."
+        case .custom:
+            "A custom occasion. Follow the provided occasion label and event context exactly; do not replace it with a generic anniversary."
+        case .thanksgiving:
+            "A Thanksgiving greeting appropriate to the recipient and relationship."
+        case .christmas:
+            "A Christmas greeting appropriate to the recipient and relationship."
+        default:
+            "A greeting for \(title). Respect the cultural meaning of the date and do not invent personal details."
         }
     }
 
@@ -86,6 +250,7 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         .birthday,
         .homeAnniversary,
         .weddingAnniversary,
+        .workAnniversary,
         .clientAppreciation,
         .custom
     ]
@@ -95,10 +260,36 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .birthday: "birthday.cake"
         case .homeAnniversary: "house"
         case .weddingAnniversary: "heart"
-        case .thanksgiving: "leaf"
-        case .christmas: "gift"
+        case .workAnniversary: "briefcase"
         case .clientAppreciation: "hands.sparkles"
         case .custom: "star"
+        case .newYearsDay: "sparkles"
+        case .martinLutherKingJrDay: "person.crop.circle.badge.checkmark"
+        case .presidentsDay: "building.columns"
+        case .memorialDay: "flag"
+        case .juneteenth: "sun.max"
+        case .independenceDay: "flag.fill"
+        case .laborDay: "hammer"
+        case .columbusDay: "map"
+        case .veteransDay: "medal"
+        case .thanksgiving: "leaf"
+        case .christmas: "gift"
+        case .valentinesDay: "heart.fill"
+        case .internationalWomensDay: "figure.dress.line.vertical.figure"
+        case .earthDay: "globe.americas.fill"
+        case .mothersDay: "camera.macro"
+        case .fathersDay: "person.crop.circle"
+        case .halloween: "moon.stars.fill"
+        case .threeKingsDay: "crown"
+        case .cincoDeMayo: "party.popper"
+        case .mexicanMothersDay: "camera.macro"
+        case .mexicanIndependenceDay: "flag.fill"
+        case .hispanicHeritageMonth: "person.3.fill"
+        case .diaDeLaRaza: "globe.americas"
+        case .diaDeLosMuertos: "flame"
+        case .ourLadyOfGuadalupe: "star.circle"
+        case .lasPosadas: "house.and.flag"
+        case .nochebuena: "moon.stars"
         }
     }
 
@@ -107,10 +298,22 @@ enum Occasion: String, CaseIterable, Identifiable, StableStringCodable {
         case .birthday: TouchPointColor.coral
         case .homeAnniversary: .accentColor
         case .weddingAnniversary: TouchPointColor.rose
-        case .thanksgiving: TouchPointColor.amber
-        case .christmas: TouchPointColor.forest
+        case .workAnniversary: TouchPointColor.teal
         case .clientAppreciation: TouchPointColor.teal
         case .custom: .accentColor
+        case .newYearsDay, .martinLutherKingJrDay, .presidentsDay, .memorialDay,
+             .juneteenth, .independenceDay, .laborDay, .columbusDay, .veteransDay:
+            TouchPointColor.blue
+        case .thanksgiving: TouchPointColor.amber
+        case .christmas: TouchPointColor.forest
+        case .valentinesDay, .internationalWomensDay, .mothersDay, .fathersDay:
+            TouchPointColor.rose
+        case .earthDay: TouchPointColor.forest
+        case .halloween: TouchPointColor.amber
+        case .threeKingsDay, .cincoDeMayo, .mexicanMothersDay, .mexicanIndependenceDay,
+             .hispanicHeritageMonth, .diaDeLaRaza, .diaDeLosMuertos,
+             .ourLadyOfGuadalupe, .lasPosadas, .nochebuena:
+            TouchPointColor.coral
         }
     }
 }
@@ -142,6 +345,31 @@ enum ContactMethod: String, CaseIterable, Identifiable, StableStringCodable {
         case .email: "envelope"
         case .reminder: "bell"
         }
+    }
+}
+
+enum TouchPointLanguage {
+    static let defaultLanguage = "English"
+    static let supported = [
+        "English", "Spanish", "French", "German", "Italian", "Portuguese",
+        "Russian", "Ukrainian", "Japanese", "Korean", "Chinese"
+    ]
+
+    static func resolved(_ value: String?) -> String {
+        guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              let match = supported.first(where: { $0.caseInsensitiveCompare(value) == .orderedSame }) else {
+            return defaultLanguage
+        }
+        return match
+    }
+
+    static func options(including value: String) -> [String] {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty,
+              !supported.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) else {
+            return supported
+        }
+        return [trimmed] + supported
     }
 }
 
@@ -605,7 +833,7 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
     }
 
     /// The supported interpolation tokens, without braces.
-    static let supportedTokens: Set<String> = ["first_name", "name", "organization", "occasion", "date"]
+    static let supportedTokens: Set<String> = ["first_name", "name", "organization", "occasion", "date", "sender_name"]
 
     var validationErrors: [String] {
         var errors: [String] = []
@@ -816,10 +1044,22 @@ extension Occasion {
         case .birthday: "coral"
         case .homeAnniversary: "blue"
         case .weddingAnniversary: "rose"
-        case .thanksgiving: "amber"
-        case .christmas: "forest"
+        case .workAnniversary: "teal"
         case .clientAppreciation: "teal"
         case .custom: "indigo"
+        case .newYearsDay, .martinLutherKingJrDay, .presidentsDay, .memorialDay,
+             .juneteenth, .independenceDay, .laborDay, .columbusDay, .veteransDay:
+            "blue"
+        case .thanksgiving: "amber"
+        case .christmas: "forest"
+        case .valentinesDay, .internationalWomensDay, .mothersDay, .fathersDay:
+            "rose"
+        case .earthDay: "forest"
+        case .halloween: "amber"
+        case .threeKingsDay, .cincoDeMayo, .mexicanMothersDay, .mexicanIndependenceDay,
+             .hispanicHeritageMonth, .diaDeLaRaza, .diaDeLosMuertos,
+             .ourLadyOfGuadalupe, .lasPosadas, .nochebuena:
+            "coral"
         }
     }
 }

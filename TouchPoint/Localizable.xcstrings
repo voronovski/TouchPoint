@@ -1,12 +1,58 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "{{%@}}" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "{{%@}}"
+          }
+        }
+      }
+    },
+    "%@ and %lld more" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ и ещё %lld"
+          }
+        }
+      }
+    },
+    "%lld active" : {
+
+    },
+    "%lld greetings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld поздравлений"
+          }
+        }
+      }
+    },
+    "%lld selected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрано: %lld"
+          }
+        }
+      }
+    },
+    "1 greeting" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 поздравление"
           }
         }
       }
@@ -47,6 +93,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавить"
+          }
+        }
+      }
+    },
+    "Add a greeting or plan the year to build your calendar." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте поздравление или запланируйте год, чтобы наполнить календарь."
           }
         }
       }
@@ -101,12 +157,25 @@
         }
       }
     },
+    "All languages" : {
+
+    },
     "All relationships" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все отношения"
+          }
+        }
+      }
+    },
+    "Amber" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Янтарный"
           }
         }
       }
@@ -151,12 +220,12 @@
         }
       }
     },
-    "Any language" : {
+    "Any occasion" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Любой язык"
+            "value" : "Любой повод"
           }
         }
       }
@@ -307,17 +376,6 @@
         }
       }
     },
-    "Before scheduling" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перед планированием"
-          }
-        }
-      }
-    },
     "Birthday" : {
       "localizations" : {
         "ru" : {
@@ -328,13 +386,12 @@
         }
       }
     },
-    "Brief" : {
-      "extractionState" : "stale",
+    "Blue" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Краткий"
+            "value" : "Синий"
           }
         }
       }
@@ -459,15 +516,18 @@
         }
       }
     },
-    "Choose occasions" : {
+    "Choose date range" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Выберите поводы"
+            "value" : "Выбрать диапазон дат"
           }
         }
       }
+    },
+    "Choose occasions" : {
+
     },
     "Christmas" : {
       "localizations" : {
@@ -475,6 +535,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Рождество"
+          }
+        }
+      }
+    },
+    "Cinco de Mayo" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синко де Майо"
           }
         }
       }
@@ -499,12 +569,32 @@
         }
       }
     },
+    "Clear context filters" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистить контекстные фильтры"
+          }
+        }
+      }
+    },
     "Clear filters" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Очистить фильтры"
+          }
+        }
+      }
+    },
+    "Clear status filter" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сбросить фильтр статуса"
           }
         }
       }
@@ -599,6 +689,16 @@
         }
       }
     },
+    "Columbus Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Колумба"
+          }
+        }
+      }
+    },
     "Completed" : {
       "localizations" : {
         "ru" : {
@@ -649,13 +749,22 @@
         }
       }
     },
-    "Continue" : {
-      "extractionState" : "stale",
+    "Context filters combine with the selected collection and search." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Продолжить"
+            "value" : "Контекстные фильтры сочетаются с выбранной коллекцией и поиском."
+          }
+        }
+      }
+    },
+    "Coral" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коралловый"
           }
         }
       }
@@ -770,6 +879,36 @@
         }
       }
     },
+    "Date or timing (optional)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата или время (необязательно)"
+          }
+        }
+      }
+    },
+    "Date range" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Диапазон дат"
+          }
+        }
+      }
+    },
+    "Date Range" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Диапазон дат"
+          }
+        }
+      }
+    },
     "Dates repeat every year. The year is intentionally not stored." : {
       "localizations" : {
         "ru" : {
@@ -806,6 +945,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "По умолчанию для этого контекста"
+          }
+        }
+      }
+    },
+    "Default language" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Язык по умолчанию"
           }
         }
       }
@@ -880,6 +1029,26 @@
         }
       }
     },
+    "Día de la Raza" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día de la Raza"
+          }
+        }
+      }
+    },
+    "Día de los Muertos" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День мёртвых"
+          }
+        }
+      }
+    },
     "Direction" : {
       "localizations" : {
         "ru" : {
@@ -950,6 +1119,16 @@
         }
       }
     },
+    "Earth Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Земли"
+          }
+        }
+      }
+    },
     "Edit" : {
       "localizations" : {
         "ru" : {
@@ -976,17 +1155,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Изменить сообщение"
-          }
-        }
-      }
-    },
-    "Edit person" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Изменить человека"
           }
         }
       }
@@ -1061,13 +1229,12 @@
         }
       }
     },
-    "English" : {
-      "extractionState" : "stale",
+    "Event context" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Английский"
+            "value" : "Контекст события"
           }
         }
       }
@@ -1142,6 +1309,16 @@
         }
       }
     },
+    "Father's Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День отца"
+          }
+        }
+      }
+    },
     "Favorite" : {
       "localizations" : {
         "ru" : {
@@ -1172,12 +1349,12 @@
         }
       }
     },
-    "Filter templates" : {
+    "Filters" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Фильтровать шаблоны"
+            "value" : "Фильтры"
           }
         }
       }
@@ -1202,13 +1379,12 @@
         }
       }
     },
-    "French" : {
-      "extractionState" : "stale",
+    "Forest" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Французский"
+            "value" : "Лесной"
           }
         }
       }
@@ -1223,13 +1399,12 @@
         }
       }
     },
-    "Friendly" : {
-      "extractionState" : "stale",
+    "From" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дружеский"
+            "value" : "От"
           }
         }
       }
@@ -1334,17 +1509,6 @@
         }
       }
     },
-    "Greeting templates" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Шаблоны поздравлений"
-          }
-        }
-      }
-    },
     "Greeting unavailable" : {
       "localizations" : {
         "ru" : {
@@ -1365,13 +1529,12 @@
         }
       }
     },
-    "Heartfelt" : {
-      "extractionState" : "stale",
+    "Halloween" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "От всего сердца"
+            "value" : "Хэллоуин"
           }
         }
       }
@@ -1382,6 +1545,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Скрывать имена в уведомлениях"
+          }
+        }
+      }
+    },
+    "Hispanic Heritage Month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Месяц латиноамериканского наследия"
           }
         }
       }
@@ -1446,6 +1619,16 @@
         }
       }
     },
+    "Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импорт добавляет шаблоны и коллекции в текущую библиотеку. Экспорт сохраняет библиотеку шаблонов без людей, поздравлений и истории использования."
+          }
+        }
+      }
+    },
     "Import from Contacts" : {
       "localizations" : {
         "ru" : {
@@ -1496,12 +1679,42 @@
         }
       }
     },
+    "Independence Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День независимости США"
+          }
+        }
+      }
+    },
+    "Indigo" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Индиго"
+          }
+        }
+      }
+    },
     "Insert variables with the buttons above. Generation happens on device when Apple Intelligence is available." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавляйте переменные кнопками выше. Генерация выполняется на устройстве, если доступна Apple Intelligence."
+          }
+        }
+      }
+    },
+    "International Women's Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Международный женский день"
           }
         }
       }
@@ -1516,12 +1729,32 @@
         }
       }
     },
+    "Juneteenth" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Джунтинс"
+          }
+        }
+      }
+    },
     "Keep every relationship in view. You can change this focus anytime." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все отношения остаются в поле зрения. Фокус можно изменить в любое время."
+          }
+        }
+      }
+    },
+    "Labor Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День труда в США"
           }
         }
       }
@@ -1542,6 +1775,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Языки"
+          }
+        }
+      }
+    },
+    "Las Posadas" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лас-Посадас"
           }
         }
       }
@@ -1572,6 +1815,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Последнее использование"
+          }
+        }
+      }
+    },
+    "Latin American dates" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Латиноамериканские даты"
           }
         }
       }
@@ -1666,6 +1919,26 @@
         }
       }
     },
+    "Martin Luther King Jr. Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Мартина Лютера Кинга-младшего"
+          }
+        }
+      }
+    },
+    "Memorial Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День памяти"
+          }
+        }
+      }
+    },
     "Message" : {
       "localizations" : {
         "ru" : {
@@ -1676,13 +1949,22 @@
         }
       }
     },
-    "Messages" : {
-      "extractionState" : "stale",
+    "Mexican Independence Day" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сообщения"
+            "value" : "День независимости Мексики"
+          }
+        }
+      }
+    },
+    "Mexican Mother's Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День матери в Мексике"
           }
         }
       }
@@ -1703,6 +1985,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Часто используемые"
+          }
+        }
+      }
+    },
+    "Mother's Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День матери"
           }
         }
       }
@@ -1777,13 +2069,12 @@
         }
       }
     },
-    "Next action" : {
-      "extractionState" : "stale",
+    "New Year's Day" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Следующее действие"
+            "value" : "Новый год"
           }
         }
       }
@@ -1794,6 +2085,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Следующее поздравление"
+          }
+        }
+      }
+    },
+    "Next month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующий месяц"
           }
         }
       }
@@ -1848,6 +2149,16 @@
         }
       }
     },
+    "No greetings yet" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет поздравлений"
+          }
+        }
+      }
+    },
     "No important dates yet" : {
       "localizations" : {
         "ru" : {
@@ -1858,12 +2169,45 @@
         }
       }
     },
+    "No occasions selected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поводы не выбраны"
+          }
+        }
+      }
+    },
+    "Nochebuena" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ночебуэна"
+          }
+        }
+      }
+    },
+    "None" : {
+
+    },
     "Nothing scheduled" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ничего не запланировано"
+          }
+        }
+      }
+    },
+    "Observances" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Памятные даты"
           }
         }
       }
@@ -2018,6 +2362,36 @@
         }
       }
     },
+    "Opens a searchable multi-select list" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает список с поиском и множественным выбором"
+          }
+        }
+      }
+    },
+    "Opens a searchable multi-select occasion list" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает список поводов с поиском и множественным выбором"
+          }
+        }
+      }
+    },
+    "Opens a searchable occasion list" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывает список поводов с поиском"
+          }
+        }
+      }
+    },
     "Option %lld" : {
       "localizations" : {
         "ru" : {
@@ -2044,6 +2418,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Организация (необязательно)"
+          }
+        }
+      }
+    },
+    "Our Lady of Guadalupe" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День Девы Гваделупской"
           }
         }
       }
@@ -2104,6 +2488,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Личное сообщение"
+          }
+        }
+      }
+    },
+    "Personal moments" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Личные даты"
+          }
+        }
+      }
+    },
+    "Personalization" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Персонализация"
           }
         }
       }
@@ -2228,12 +2632,32 @@
         }
       }
     },
+    "Presidents' Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День президентов"
+          }
+        }
+      }
+    },
     "Preview" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Предпросмотр"
+          }
+        }
+      }
+    },
+    "Previous month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предыдущий месяц"
           }
         }
       }
@@ -2284,17 +2708,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Личные заметки об этом человеке"
-          }
-        }
-      }
-    },
-    "Professional" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Профессиональный"
           }
         }
       }
@@ -2409,6 +2822,9 @@
         }
       }
     },
+    "Remove %@ filter" : {
+
+    },
     "Remove approval" : {
       "localizations" : {
         "ru" : {
@@ -2429,16 +2845,6 @@
         }
       }
     },
-    "Removes the search and all template filters" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удаляет поиск и все фильтры шаблонов"
-          }
-        }
-      }
-    },
     "Repeats annually" : {
       "localizations" : {
         "ru" : {
@@ -2455,6 +2861,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Заменить архивом…"
+          }
+        }
+      }
+    },
+    "Reset to current month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сбросить до текущего месяца"
           }
         }
       }
@@ -2559,23 +2975,22 @@
         }
       }
     },
-    "Review plan" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проверить план"
-          }
-        }
-      }
-    },
     "Rewrite" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Переписать"
+          }
+        }
+      }
+    },
+    "Rose" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розовый"
           }
         }
       }
@@ -2650,13 +3065,22 @@
         }
       }
     },
-    "Search" : {
-      "extractionState" : "stale",
+    "Search all moments or expand Personal, U.S. holidays, Observances, and Latin American dates." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Поиск"
+            "value" : "Найдите нужный повод или раскройте категории «Личные события», «Праздники США», «Памятные даты» и «Латиноамериканские даты»."
+          }
+        }
+      }
+    },
+    "Search occasions" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск поводов"
           }
         }
       }
@@ -2671,12 +3095,35 @@
         }
       }
     },
+    "Select at least one occasion" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите хотя бы один повод"
+          }
+        }
+      }
+    },
+    "Selected" : {
+
+    },
     "Selected people" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбранные люди"
+          }
+        }
+      }
+    },
+    "Sender (optional)" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправитель (необязательно)"
           }
         }
       }
@@ -2697,6 +3144,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сократить"
+          }
+        }
+      }
+    },
+    "Show nearest greeting" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать ближайшее поздравление"
           }
         }
       }
@@ -2757,17 +3214,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сортировать шаблоны"
-          }
-        }
-      }
-    },
-    "Spanish" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Испанский"
           }
         }
       }
@@ -2858,6 +3304,16 @@
         }
       }
     },
+    "Teal" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бирюзовый"
+          }
+        }
+      }
+    },
     "Template" : {
       "localizations" : {
         "ru" : {
@@ -2874,6 +3330,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Коллекция шаблонов"
+          }
+        }
+      }
+    },
+    "Template filters" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фильтры шаблонов"
           }
         }
       }
@@ -2938,12 +3404,42 @@
         }
       }
     },
+    "The icon and color identify this template throughout the library." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Иконка и цвет помогают узнать этот шаблон во всей библиотеке."
+          }
+        }
+      }
+    },
     "The recovered file will replace the current in-memory data only after it passes validation and saves successfully." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Найденный файл заменит текущие данные в памяти только после проверки и успешного сохранения."
+          }
+        }
+      }
+    },
+    "There are no greetings in the selected period." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В выбранном периоде нет поздравлений."
+          }
+        }
+      }
+    },
+    "There are no greetings with this status in the selected period." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В выбранном периоде нет поздравлений с этим статусом."
           }
         }
       }
@@ -2964,6 +3460,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Это точный текст, который TouchPoint поместит в Сообщения или Почту."
+          }
+        }
+      }
+    },
+    "This month" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот месяц"
           }
         }
       }
@@ -2998,6 +3504,16 @@
         }
       }
     },
+    "Three Kings Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День трёх королей"
+          }
+        }
+      }
+    },
     "Time zone" : {
       "localizations" : {
         "ru" : {
@@ -3018,13 +3534,12 @@
         }
       }
     },
-    "Today" : {
-      "extractionState" : "stale",
+    "To" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сегодня"
+            "value" : "До"
           }
         }
       }
@@ -3079,22 +3594,22 @@
         }
       }
     },
-    "Try another status filter or plan new greetings." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Попробуйте другой фильтр статуса или запланируйте новые поздравления."
-          }
-        }
-      }
-    },
     "Type" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тип"
+          }
+        }
+      }
+    },
+    "U.S. holidays" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Праздники США"
           }
         }
       }
@@ -3139,6 +3654,16 @@
         }
       }
     },
+    "Untitled template" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблон без названия"
+          }
+        }
+      }
+    },
     "Upcoming" : {
       "localizations" : {
         "ru" : {
@@ -3179,6 +3704,16 @@
         }
       }
     },
+    "Valentine's Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День святого Валентина"
+          }
+        }
+      }
+    },
     "Variant" : {
       "localizations" : {
         "ru" : {
@@ -3209,23 +3744,22 @@
         }
       }
     },
+    "Veterans Day" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "День ветеранов"
+          }
+        }
+      }
+    },
     "View details" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Просмотреть детали"
-          }
-        }
-      }
-    },
-    "Warm" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тёплый"
           }
         }
       }
@@ -3250,6 +3784,16 @@
         }
       }
     },
+    "Work anniversary" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Годовщина работы"
+          }
+        }
+      }
+    },
     "Year planned" : {
       "localizations" : {
         "ru" : {
@@ -3270,6 +3814,16 @@
         }
       }
     },
+    "You can adjust this context for the generated text. The event, person, and template are not changed." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот контекст можно изменить для генерации текста. Событие, человек и шаблон не изменятся."
+          }
+        }
+      }
+    },
     "Your local data remains available while sync runs." : {
       "localizations" : {
         "ru" : {
@@ -3280,13 +3834,22 @@
         }
       }
     },
-    "Your time" : {
-      "extractionState" : "stale",
+    "Your name" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ваше время"
+            "value" : "Ваше имя"
+          }
+        }
+      }
+    },
+    "Your name is used as the sender. The default language is selected automatically for every new template." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имя используется как имя отправителя. Язык по умолчанию автоматически выбирается для каждого нового шаблона."
           }
         }
       }
