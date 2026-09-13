@@ -167,6 +167,7 @@ Template collections use the shared semantic appearance palette. A saved color t
 - Search and filters are independent: occasion, relationship audience, channel, language, and collection can be combined.
 - Keep collection scope, context-filter entry, and sorting in one compact native control row above the results. Show applied context filters as removable chips; the searchable navigation field remains the dedicated text-search surface.
 - Template creation shows a compact identity preview, uses the shared semantic color-token palette, and opens occasions in a large searchable multi-select sheet grouped into Personal moments, U.S. holidays, Observances, and Latin American dates.
+- Template creation and editing share the detail/editor surface contract: grouped-background `ScrollView`, `SurfaceSection`, persistent caption labels, neutral field icons, and inset dividers. Group settings under Template, Context, and Message; keep preview, library preferences, and history in separate sections. Icon and color rows open native selection lists with an accent checkmark; the identity preview retains the saved semantic color. Message variations, variables, and generation actions remain inside the Message card, with supporting explanations below it.
 - The shared occasion sheet uses collapsible category rows and expands matching categories while searching. Use single-select for event/date/filter fields and staged multi-select with `Cancel`/`Done` for templates and yearly planning.
 - Every new template has one explicit language. Preselect the user's `Default language` preference (English on a fresh install); do not offer `Any language` as a template value.
 - Template collections include Favorites, Ungrouped, and Archived.
@@ -215,6 +216,7 @@ Template collections use the shared semantic appearance palette. A saved color t
 
 ### Important dates
 
+- The important-date editor uses the shared detail/editor cards, persistent caption labels, neutral field icons, and native month/day menus. Keep naming and template guidance below the related card in secondary footnote text. Show an attached template in an Automatic greeting section, with its scheduling explanation below the card.
 - Birthdays, home anniversaries, wedding anniversaries, and similar annual events store `month` and `day`, never a midnight timestamp.
 - The editor uses explicit month/day controls and does not show or persist a fake year.
 - Validate the day against the selected month. February 29 is valid; in non-leap years its annual action resolves to February 28 in the recipient's time zone.

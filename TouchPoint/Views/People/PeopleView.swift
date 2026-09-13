@@ -836,6 +836,17 @@ private struct ImportantDateEditorView: View {
         self.onSave = onSave
     }
 
+    private var customNameLabel: LocalizedStringKey {
+        date.occasion == .custom ? "Custom occasion name" : "Custom name (optional)"
+    }
+
+    private func editorFootnote(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, TouchPointMetric.screenPadding)
+    }
+
     private var maximumDay: Int {
         var components = DateComponents()
         components.calendar = .current
@@ -850,63 +861,75 @@ private struct ImportantDateEditorView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Occasion") {
-                    Button { showingOccasionPicker = true } label: {
-                        HStack(spacing: 12) {
-                            IconTile(systemImage: date.occasion.icon, tint: date.occasion.tint)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Occasion")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                Text(node?.title ?? date.occasion.title)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
+                    VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+                        SurfaceSection(title: "Occasion") {
+                            Button { showingOccasionPicker = true } label: {
+                                FormValueRow(title: "Occasion", value: node?.title ?? date.occasion.title,
+                                             systemImage: node?.icon ?? date.occasion.icon, showsDisclosure: true)
                             }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Opens a searchable occasion list")
+                            SurfaceRowDivider()
+                            FormFieldRow(title: customNameLabel, systemImage: "textformat") {
+                                TextField(customNameLabel, text: Binding(
+                                    get: { date.customName ?? "" },
+                                    set: { date.customName = $0.isEmpty ? nil : $0 }
+                                ))
+                                .textInputAutocapitalization(.sentences)
+                            }
                         }
-                        .contentShape(Rectangle())
+                        if date.occasion == .custom && date.customName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
+                            editorFootnote("A custom occasion needs a name.")
+                        }
+                        if store.attachedTemplate(for: node) == nil {
+                            editorFootnote("Attach a template in Occasions to automatically plan a greeting when adding this date.")
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens a searchable occasion list")
-                    TextField(date.occasion == .custom
-                        ? String(localized: "Custom occasion name")
-                        : String(localized: "Custom name (optional)"), text: Binding(
-                        get: { date.customName ?? "" },
-                        set: { date.customName = $0.isEmpty ? nil : $0 }
-                    ))
-                    if date.occasion == .custom && date.customName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
-                        Text("A custom occasion needs a name.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
 
-                Section {
+                    SurfaceSection(title: "Annual date") {
+                        Menu {
+                            Picker("Month", selection: $date.month) {
+                                ForEach(1...12, id: \.self) { month in
+                                    Text(Calendar.current.monthSymbols[month - 1]).tag(month)
+                                }
+                            }
+                        } label: {
+                            FormValueRow(title: "Month", value: Calendar.current.monthSymbols[date.month - 1],
+                                         systemImage: "calendar", showsDisclosure: node?.dateRule != .calendar)
+                        }
+                        .buttonStyle(.plain)
+                        SurfaceRowDivider()
+                        Menu {
+                            Picker("Day", selection: $date.day) {
+                                ForEach(1...maximumDay, id: \.self) { day in
+                                    Text(day.formatted()).tag(day)
+                                }
+                            }
+                        } label: {
+                            FormValueRow(title: "Day", value: date.day.formatted(),
+                                         systemImage: "number", showsDisclosure: node?.dateRule != .calendar)
+                                .monospacedDigit()
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .disabled(node?.dateRule == .calendar)
+
                     if let template = store.attachedTemplate(for: node) {
-                        LabeledContent("Template", value: template.title)
-                        Text("Saving this person will automatically plan an annual greeting using this template.")
-                    } else {
-                        Text("Attach a template in Occasions to automatically plan a greeting when adding this date.")
-                    }
-                }
-                Section("Annual date") {
-                    Picker("Month", selection: $date.month) {
-                        ForEach(1...12, id: \.self) { month in
-                            Text(Calendar.current.monthSymbols[month - 1]).tag(month)
-                        }
-                    }
-                    Picker("Day", selection: $date.day) {
-                        ForEach(1...maximumDay, id: \.self) { day in
-                            Text(day.formatted()).tag(day)
+                        VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+                            SurfaceSection(title: "Automatic greeting") {
+                                FormValueRow(title: "Template", value: template.title, systemImage: "doc.text")
+                            }
+                            editorFootnote("Saving this person will automatically plan an annual greeting using this template.")
                         }
                     }
                 }
-                .disabled(node?.dateRule == .calendar)
+                .padding(.horizontal, TouchPointMetric.screenPadding)
+                .padding(.vertical, TouchPointMetric.scrollPadding)
             }
+            .background(Color(.systemGroupedBackground))
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Important date")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

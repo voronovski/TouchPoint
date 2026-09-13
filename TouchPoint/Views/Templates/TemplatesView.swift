@@ -610,201 +610,43 @@ private struct TemplateEditorView: View {
     private var canSave: Bool { draft.validationErrors.isEmpty }
     var body: some View {
         NavigationStack {
-            Form {
+            ScrollView {
+                VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
+                    templateSection
+                    contextSection
+                    messageSection
+                    previewSection
 
-                Section {
-                    HStack(spacing: 12) {
-                        IconTile(systemImage: draft.iconID, tint: draft.colorToken.templateColor)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "Untitled template") : draft.title)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.primary)
-                                .lineLimit(2)
-                            Text(occasionSummary)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(2)
-                        }
-                    }
-                    .padding(.vertical, 4)
-
-                    TextField("Template name", text: $draft.title)
-                    Picker("Collection", selection: $draft.groupID) {
-                        Text("No collection").tag(UUID?.none)
-                        ForEach(activeGroups) { group in
-                            Label(group.name, systemImage: group.iconID).tag(Optional(group.id))
-                        }
-                    }
-                    Picker("Icon", selection: $draft.iconID) {
-                        ForEach(TemplateAppearance.icons, id: \.id) { option in
-                            Label(option.title, systemImage: option.id).tag(option.id)
-                        }
-                    }
-                    LabeledContent("Color") {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 4) {
-                                ForEach(TemplateColorToken.allCases) { option in
-                                    Button {
-                                        draft.colorToken = option.rawValue
-                                    } label: {
-                                        ZStack {
-                                            Circle()
-                                                .fill(option.color)
-                                                .frame(width: 26, height: 26)
-                                            if draft.colorToken == option.rawValue {
-                                                Image(systemName: "checkmark")
-                                                    .font(.caption2.weight(.black))
-                                                    .foregroundStyle(.white)
-                                            }
-                                        }
-                                        .frame(width: 44, height: 44)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel(option.title)
-                                    .accessibilityAddTraits(draft.colorToken == option.rawValue ? .isSelected : [])
-                                }
+                    if !draft.validationErrors.isEmpty {
+                        SurfaceSection(title: "Needs attention") {
+                            ForEach(draft.validationErrors, id: \.self) { error in
+                                Label(error, systemImage: "exclamationmark.triangle.fill")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.red)
+                                    .padding(TouchPointMetric.cardPadding)
                             }
                         }
                     }
-                } header: {
-                    Text("Template")
-                } footer: {
-                    Text("The icon and color identify this template throughout the library.")
-                }
 
-                Section("Context") {
-                    Button {
-                        showingOccasionPicker = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            IconTile(systemImage: "calendar", tint: .accentColor)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Occasions")
+                    SurfaceSection(title: "Library") {
+                        Toggle(isOn: $draft.isFavorite) {
+                            HStack(spacing: 12) {
+                                FormIconTile(systemImage: "star")
+                                Text("Favorite")
                                     .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                Text(occasionSummary)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-                            Spacer()
-                            Text(draft.occasions.count.formatted())
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens a searchable multi-select list")
-                    multiValueMenu(title: "Audience", summary: draft.relationships.isEmpty ? "Any relationship" : draft.relationships.map(\.title).joined(separator: ", ")) {
-                        Button("Any relationship") { draft.relationships = [] }
-                        Divider()
-                        ForEach(Relationship.allCases) { relationship in
-                            Button { toggle(relationship, in: &draft.relationships) } label: {
-                                Label(relationship.title, systemImage: draft.relationships.contains(relationship) ? "checkmark" : "person")
                             }
                         }
+                        .tint(.accentColor)
+                        .padding(TouchPointMetric.cardPadding)
                     }
-                    multiValueMenu(title: "Channels", summary: draft.channels.isEmpty ? "Any channel" : draft.channels.map(\.title).joined(separator: ", ")) {
-                        Button("Any channel") { draft.channels = [] }
-                        Divider()
-                        ForEach(ContactMethod.allCases) { channel in
-                            Button { toggle(channel, in: &draft.channels) } label: {
-                                Label(channel.title, systemImage: draft.channels.contains(channel) ? "checkmark" : channel.icon)
-                            }
-                        }
-                    }
-                    Picker("Language", selection: languageBinding) {
-                        ForEach(TouchPointLanguage.options(including: languageBinding.wrappedValue), id: \.self) {
-                            Text($0).tag($0)
-                        }
-                    }
-                }
 
-                Section {
-                    if draft.channels.isEmpty || draft.channels.contains(.email) {
-                        TextField("Email subject (optional)", text: emailSubjectBinding)
-                    }
-                    Picker("Variation", selection: $selectedVariation) {
-                        ForEach(draft.messageBodies.indices, id: \.self) { index in
-                            Text("Variation \(index + 1)").tag(index)
-                        }
-                    }
-                    TextEditor(text: variationBodyBinding)
-                        .frame(minHeight: 150)
-                        .accessibilityLabel(Text("Variation \(selectedVariation + 1)"))
-                    Button {
-                        draft.bodyVariations.append("")
-                        selectedVariation = draft.bodyVariations.count
-                    } label: {
-                        Label("Add variation", systemImage: "plus")
-                    }
-                    if !draft.bodyVariations.isEmpty {
-                        Button(role: .destructive) {
-                            removeSelectedVariation()
-                        } label: {
-                            Label { Text("Delete variation") } icon: { TouchPointTrashIcon() }
-                        }
-                    }
-                    WrappingTokenLayout(horizontalSpacing: 8, verticalSpacing: 4) {
-                        ForEach(GreetingTemplate.supportedTokens.sorted(), id: \.self) { token in
-                            Button {
-                                appendToken(token)
-                            } label: {
-                                Text(token)
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .background(Color(.tertiarySystemFill), in: Capsule())
-                            }
-                            .buttonStyle(.plain)
-                            .frame(minHeight: 44)
-                            .accessibilityLabel("Insert \(token) variable")
-                        }
-                    }
-                    Button { showingGenerator = true } label: {
-                        Label("Generate with Apple Intelligence", systemImage: "apple.intelligence")
-                    }
-                    .buttonStyle(TouchPointTertiaryButtonStyle())
-                    .disabled(!isGeneratorAvailable)
-                } header: {
-                    Text("Message")
-                } footer: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Each saved greeting uses the next variation in order, then starts again from the first.")
-                        Text("Insert variables with the buttons above.")
-                        Text(generatorAvailabilityExplanation)
-                    }
+                    if isEditing { historySection }
                 }
-
-                Section("Preview") {
-                    if let subject = previewSubject {
-                        LabeledContent("Subject", value: subject)
-                    }
-                    Text(previewBody).frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundStyle(variationBodyBinding.wrappedValue.isEmpty ? .secondary : .primary)
-                }
-
-                if !draft.validationErrors.isEmpty {
-                    Section("Needs attention") {
-                        ForEach(draft.validationErrors, id: \.self) { error in
-                            Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red)
-                        }
-                    }
-                }
-
-                Section("Library") {
-                    Toggle("Favorite", isOn: $draft.isFavorite)
-                }
-
-                if isEditing {
-                    historySection
-                }
+                .padding(.horizontal, TouchPointMetric.screenPadding)
+                .padding(.vertical, TouchPointMetric.scrollPadding)
             }
+            .background(Color(.systemGroupedBackground))
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(isEditing ? "Edit template" : "New template")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -836,6 +678,212 @@ private struct TemplateEditorView: View {
             }
 
         }
+    }
+
+    private var templateSection: some View {
+        VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+            SurfaceSection(title: "Template") {
+                HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
+                    IconTile(systemImage: draft.iconID, tint: draft.colorToken.templateColor)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                             ? String(localized: "Untitled template") : draft.title)
+                            .font(.subheadline.weight(.semibold))
+                        Text(occasionSummary)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(TouchPointMetric.cardPadding)
+                SurfaceRowDivider()
+                FormFieldRow(title: "Template name", systemImage: "textformat") {
+                    TextField("Template name", text: $draft.title)
+                        .textInputAutocapitalization(.sentences)
+                }
+                SurfaceRowDivider()
+                Menu {
+                    Picker("Collection", selection: $draft.groupID) {
+                        Text("No collection").tag(UUID?.none)
+                        ForEach(activeGroups) { group in
+                            Label(group.name, systemImage: group.iconID).tag(Optional(group.id))
+                        }
+                    }
+                } label: {
+                    FormValueRow(title: "Collection",
+                                 value: activeGroups.first(where: { $0.id == draft.groupID })?.name ?? String(localized: "No collection"),
+                                 systemImage: "folder", showsDisclosure: true)
+                }
+                .buttonStyle(.plain)
+                SurfaceRowDivider()
+                NavigationLink {
+                    CollectionIconPickerView(selection: $draft.iconID, colorToken: draft.colorToken,
+                                             options: TemplateAppearance.icons)
+                } label: {
+                    FormValueRow(title: "Icon",
+                                 value: TemplateAppearance.icons.first(where: { $0.id == draft.iconID })?.title ?? String(localized: "Icon"),
+                                 systemImage: draft.iconID, showsDisclosure: true)
+                }
+                .buttonStyle(.plain)
+                SurfaceRowDivider()
+                NavigationLink {
+                    CollectionColorPickerView(selection: $draft.colorToken, iconID: draft.iconID)
+                } label: {
+                    FormValueRow(title: "Color",
+                                 value: (TemplateColorToken(rawValue: draft.colorToken) ?? .indigo).title,
+                                 systemImage: "paintpalette", showsDisclosure: true)
+                }
+                .buttonStyle(.plain)
+            }
+            sectionFootnote("The icon and color identify this template throughout the library.")
+        }
+    }
+
+    private var contextSection: some View {
+        SurfaceSection(title: "Context") {
+            Button { showingOccasionPicker = true } label: {
+                FormValueRow(title: "Occasions", value: occasionSummary,
+                             systemImage: "calendar", showsDisclosure: true)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens a searchable multi-select list")
+            SurfaceRowDivider()
+            multiValueMenu(title: "Audience", summary: draft.relationships.isEmpty ? "Any relationship" : draft.relationships.map(\.title).joined(separator: ", "), systemImage: "person.2") {
+                Button("Any relationship") { draft.relationships = [] }
+                Divider()
+                ForEach(Relationship.allCases) { relationship in
+                    Button { toggle(relationship, in: &draft.relationships) } label: {
+                        Label(relationship.title, systemImage: draft.relationships.contains(relationship) ? "checkmark" : "person")
+                    }
+                }
+            }
+            SurfaceRowDivider()
+            multiValueMenu(title: "Channels", summary: draft.channels.isEmpty ? "Any channel" : draft.channels.map(\.title).joined(separator: ", "), systemImage: "bubble.left.and.bubble.right") {
+                Button("Any channel") { draft.channels = [] }
+                Divider()
+                ForEach(ContactMethod.allCases) { channel in
+                    Button { toggle(channel, in: &draft.channels) } label: {
+                        Label(channel.title, systemImage: draft.channels.contains(channel) ? "checkmark" : channel.icon)
+                    }
+                }
+            }
+            SurfaceRowDivider()
+            Menu {
+                Picker("Language", selection: languageBinding) {
+                    ForEach(TouchPointLanguage.options(including: languageBinding.wrappedValue), id: \.self) {
+                        Text($0).tag($0)
+                    }
+                }
+            } label: {
+                FormValueRow(title: "Language", value: languageBinding.wrappedValue,
+                             systemImage: "globe", showsDisclosure: true)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var messageSection: some View {
+        VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+            SurfaceSection(title: "Message") {
+                if draft.channels.isEmpty || draft.channels.contains(.email) {
+                    FormFieldRow(title: "Email subject (optional)", systemImage: "envelope") {
+                        TextField("Email subject (optional)", text: emailSubjectBinding)
+                    }
+                    SurfaceRowDivider()
+                }
+                Menu {
+                    Picker("Variation", selection: $selectedVariation) {
+                        ForEach(draft.messageBodies.indices, id: \.self) { index in
+                            Text("Variation \(index + 1)").tag(index)
+                        }
+                    }
+                } label: {
+                    FormValueRow(title: "Variation", value: String(localized: "Variation \(selectedVariation + 1)"),
+                                 systemImage: "text.badge.plus", showsDisclosure: true)
+                }
+                .buttonStyle(.plain)
+                SurfaceRowDivider()
+                FormFieldRow(title: "Message", systemImage: "text.alignleft",
+                             alignment: TouchPointMetric.multilineTextFieldAlignment) {
+                    TextEditor(text: variationBodyBinding)
+                        .scrollContentBackground(.hidden)
+                        .frame(minHeight: 150)
+                        .accessibilityLabel(Text("Variation \(selectedVariation + 1)"))
+                }
+                SurfaceRowDivider()
+                Button {
+                    draft.bodyVariations.append("")
+                    selectedVariation = draft.bodyVariations.count
+                } label: {
+                    Label("Add variation", systemImage: "plus")
+                }
+                .buttonStyle(TouchPointTertiaryButtonStyle())
+                .padding(TouchPointMetric.cardPadding)
+                if !draft.bodyVariations.isEmpty {
+                    SurfaceRowDivider()
+                    Button(role: .destructive) { removeSelectedVariation() } label: {
+                        Label { Text("Delete variation") } icon: { TouchPointTrashIcon() }
+                    }
+                    .buttonStyle(TouchPointTertiaryButtonStyle(tint: .red))
+                    .padding(TouchPointMetric.cardPadding)
+                }
+                SurfaceRowDivider()
+                FormFieldRow(title: "Variables", systemImage: "curlybraces") {
+                    WrappingTokenLayout(horizontalSpacing: 8, verticalSpacing: 4) {
+                        ForEach(GreetingTemplate.supportedTokens.sorted(), id: \.self) { token in
+                            Button { appendToken(token) } label: {
+                                Text(token)
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.accent)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color(.tertiarySystemFill), in: Capsule())
+                                    .frame(minWidth: 44, minHeight: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Insert \(token) variable")
+                        }
+                    }
+                }
+                SurfaceRowDivider()
+                Button { showingGenerator = true } label: {
+                    Label("Generate with Apple Intelligence", systemImage: "apple.intelligence")
+                }
+                .buttonStyle(TouchPointTertiaryButtonStyle())
+                .disabled(!isGeneratorAvailable)
+                .padding(TouchPointMetric.cardPadding)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Each saved greeting uses the next variation in order, then starts again from the first.")
+                Text("Insert variables with the buttons above.")
+                Text(generatorAvailabilityExplanation)
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, TouchPointMetric.screenPadding)
+        }
+    }
+
+    private var previewSection: some View {
+        SurfaceSection(title: "Preview") {
+            if let subject = previewSubject {
+                FormValueRow(title: "Subject", value: subject, systemImage: "envelope")
+                SurfaceRowDivider()
+            }
+            Text(previewBody)
+                .font(.subheadline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(variationBodyBinding.wrappedValue.isEmpty ? .secondary : .primary)
+                .padding(TouchPointMetric.screenPadding)
+        }
+    }
+
+    private func sectionFootnote(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, TouchPointMetric.screenPadding)
     }
 
     private var activeGroups: [TemplateGroup] {
@@ -934,43 +982,33 @@ private struct TemplateEditorView: View {
     }
 
     private var historySection: some View {
-        Section {
-            LabeledContent("Current version", value: "Version \(draft.revisionNumber)")
-            LabeledContent("Last updated", value: draft.updatedAt.formatted(date: .abbreviated, time: .shortened))
-
-            if revisions.isEmpty {
-                Text("No earlier versions yet.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            } else {
-                ForEach(revisions) { revision in
-                    Button {
-                        selectedRevision = revision
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Version \(revision.number)")
-                                    .font(.subheadline.weight(.semibold))
-                                Text(revision.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+        VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+            SurfaceSection(title: "History") {
+                FormValueRow(title: "Current version", value: "Version \(draft.revisionNumber)",
+                             systemImage: "clock.arrow.circlepath")
+                SurfaceRowDivider()
+                FormValueRow(title: "Last updated", value: draft.updatedAt.formatted(date: .abbreviated, time: .shortened),
+                             systemImage: "clock")
+                SurfaceRowDivider()
+                if revisions.isEmpty {
+                    Label("No earlier versions yet.", systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .padding(TouchPointMetric.cardPadding)
+                } else {
+                    ForEach(revisions) { revision in
+                        if revision.id != revisions.first?.id { SurfaceRowDivider() }
+                        Button { selectedRevision = revision } label: {
+                            FormValueRow(title: LocalizedStringKey("Version \(revision.number)"),
+                                         value: revision.createdAt.formatted(date: .abbreviated, time: .shortened),
+                                         systemImage: "doc.text", showsDisclosure: true)
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Double-tap to preview this version")
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Version \(revision.number)")
-                    .accessibilityValue(revision.createdAt.formatted(date: .abbreviated, time: .shortened))
-                    .accessibilityHint("Double-tap to preview this version")
                 }
             }
-        } header: {
-            Text("History")
-        } footer: {
-            Text("Restoring a version creates a new version and keeps the existing history.")
+            sectionFootnote("Restoring a version creates a new version and keeps the existing history.")
         }
     }
 
@@ -980,8 +1018,11 @@ private struct TemplateEditorView: View {
     }
 
     @ViewBuilder
-    private func multiValueMenu<Content: View>(title: String, summary: String, @ViewBuilder content: () -> Content) -> some View {
-        LabeledContent(title) { Menu(summary, content: content).multilineTextAlignment(.trailing) }
+    private func multiValueMenu<Content: View>(title: LocalizedStringKey, summary: String, systemImage: String, @ViewBuilder content: () -> Content) -> some View {
+        Menu(content: content) {
+            FormValueRow(title: title, value: summary, systemImage: systemImage, showsDisclosure: true)
+        }
+        .buttonStyle(.plain)
     }
     private func toggle<T: Equatable>(_ item: T, in items: inout [T]) {
         if let index = items.firstIndex(of: item) { items.remove(at: index) } else { items.append(item) }
@@ -1482,9 +1523,10 @@ private struct CollectionIconPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selection: String
     let colorToken: String
+    var options: [TemplateAppearance.Option] = TemplateAppearance.groupIcons
 
     var body: some View {
-        List(TemplateAppearance.groupIcons, id: \.id) { option in
+        List(options, id: \.id) { option in
             Button {
                 selection = option.id
                 dismiss()

@@ -1,70 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Create a template in the Templates tab to attach it to an occasion." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create a template in the Templates tab to attach it to an occasion."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Создайте шаблон на вкладке «Шаблоны», чтобы прикрепить его к поводу."
-          }
-        }
-      }
-    },
-    "No templates" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No templates"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нет шаблонов"
-          }
-        }
-      }
-    },
-    "Search groups" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search groups"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поиск групп"
-          }
-        }
-      }
-    },
-    "Position" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Position"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Позиция"
-          }
-        }
-      }
-    },
     "" : {
       "shouldTranslate" : false
     },
@@ -965,6 +901,9 @@
         }
       }
     },
+    "Channels" : {
+
+    },
     "Checking account and private database status." : {
       "localizations" : {
         "en" : {
@@ -1670,6 +1609,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не удалось сохранить шаблон"
+          }
+        }
+      }
+    },
+    "Create a template in the Templates tab to attach it to an occasion." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a template in the Templates tab to attach it to an occasion."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создайте шаблон на вкладке «Шаблоны», чтобы прикрепить его к поводу."
           }
         }
       }
@@ -4582,6 +4537,22 @@
         }
       }
     },
+    "No templates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No templates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет шаблонов"
+          }
+        }
+      }
+    },
     "Nochebuena" : {
       "localizations" : {
         "en" : {
@@ -5450,6 +5421,22 @@
         }
       }
     },
+    "Position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позиция"
+          }
+        }
+      }
+    },
     "Position: %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6235,6 +6222,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Найдите нужный повод или раскройте категории «Личные события», «Праздники США», «Памятные даты» и «Латиноамериканские даты»."
+          }
+        }
+      }
+    },
+    "Search groups" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search groups"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск групп"
           }
         }
       }
@@ -7306,6 +7309,9 @@
           }
         }
       }
+    },
+    "Variables" : {
+
     },
     "Variant" : {
       "localizations" : {
