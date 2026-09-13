@@ -42,14 +42,16 @@ enum LocalNotificationScheduler {
     ) async throws -> LocalNotificationSyncResult {
         let center = UNUserNotificationCenter.current()
         let status = await center.notificationSettings().authorizationStatus
-        guard status.allowsScheduling else {
-            return LocalNotificationSyncResult(scheduledCount: 0, droppedCount: 0)
-        }
+        try Task.checkCancellation()
 
         let existingIdentifiers = await center.pendingNotificationRequests()
             .map(\.identifier)
             .filter { $0.hasPrefix(identifierPrefix) }
+        try Task.checkCancellation()
         center.removePendingNotificationRequests(withIdentifiers: existingIdentifiers)
+        guard status.allowsScheduling else {
+            return LocalNotificationSyncResult(scheduledCount: 0, droppedCount: 0)
+        }
         center.setNotificationCategories([
             UNNotificationCategory(
                 identifier: categoryIdentifier,
@@ -68,7 +70,7 @@ enum LocalNotificationScheduler {
             // the actual delivery time is still in the future.
             .filter { ![.completed, .skipped].contains($0.status) }
             .flatMap { event -> [(GreetingEvent, Person, Date, Int)] in
-                guard let person = peopleByID[event.personID] else { return [] }
+                guard let person = peopleByID[event.personID], !person.communicationStopped else { return [] }
                 return resolvedSettings.leadTimesDays.compactMap { leadDays -> (GreetingEvent, Person, Date, Int)? in
                     let fireDate = reminderDate(
                         eventDate: event.date,
@@ -88,6 +90,7 @@ enum LocalNotificationScheduler {
 
         let retained = candidates.prefix(maximumPendingNotifications)
         for (event, person, fireDate, leadDays) in retained {
+            try Task.checkCancellation()
             let content = UNMutableNotificationContent()
             content.title = title(for: event, person: person, hidesName: resolvedSettings.hidesNames)
             content.body = notificationBody(for: event, person: person, hidesName: resolvedSettings.hidesNames, leadDays: leadDays)

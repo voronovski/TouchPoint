@@ -15,9 +15,13 @@ struct ContactsPicker: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> CNContactPickerViewController {
         let picker = CNContactPickerViewController()
         picker.delegate = context.coordinator
+        picker.predicateForEnablingContact = NSPredicate(
+            format: "phoneNumbers.@count > 0 OR emailAddresses.@count > 0"
+        )
         picker.displayedPropertyKeys = [
             CNContactGivenNameKey,
             CNContactFamilyNameKey,
+            CNContactNicknameKey,
             CNContactOrganizationNameKey,
             CNContactPhoneNumbersKey,
             CNContactEmailAddressesKey
@@ -61,12 +65,21 @@ struct ContactsPicker: UIViewControllerRepresentable {
                 ?? [contact.givenName, contact.familyName]
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")
-            let email = contact.emailAddresses.first?.value as String? ?? ""
-            let phone = contact.phoneNumbers.first?.value.stringValue ?? ""
+            let email = contact.emailAddresses
+                .map { ($0.value as String).trimmingCharacters(in: .whitespacesAndNewlines) }
+                .first { !$0.isEmpty } ?? ""
+            let phone = contact.phoneNumbers
+                .map { $0.value.stringValue.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .first { !$0.isEmpty } ?? ""
             let relationship: Relationship = .friend
             let method: ContactMethod = !phone.isEmpty ? .sms : (!email.isEmpty ? .email : .reminder)
+            let givenNames = [contact.givenName, contact.middleName].filter { !$0.isEmpty }.joined(separator: " ")
+            let hasStructuredName = !givenNames.isEmpty || !contact.familyName.isEmpty
             return Person(
                 name: fullName.isEmpty ? "Unnamed contact" : fullName,
+                firstName: hasStructuredName ? givenNames : nil,
+                preferredName: contact.nickname,
+                lastName: hasStructuredName ? contact.familyName : nil,
                 email: email,
                 phone: phone,
                 organization: contact.organizationName,

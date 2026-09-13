@@ -3,22 +3,36 @@ import SwiftUI
 struct QuickAddPersonView: View {
     @Environment(AppStore.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
+    @State private var firstName = ""
+    @State private var preferredName = ""
+    @State private var lastName = ""
     @State private var email = ""
     @State private var phone = ""
     @State private var relationship: Relationship = .friend
     @State private var validationMessage: String?
 
+    private var canSave: Bool {
+        (!firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            && Person.hasContactInfo(phone: phone, email: email)
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section("Person") {
-                    TextField("Name", text: $name)
-                        .textContentType(.name)
-                    TextField("Email (optional)", text: $email)
+                    TextField("First name", text: $firstName)
+                        .textContentType(.givenName)
+                    TextField("Preferred name (optional)", text: $preferredName)
+                        .textContentType(.nickname)
+                    TextField("Last name", text: $lastName)
+                        .textContentType(.familyName)
+                    TextField("Email", text: $email)
                         .textContentType(.emailAddress)
                         .keyboardType(.emailAddress)
-                    TextField("Phone (optional)", text: $phone)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    TextField("Phone", text: $phone)
                         .textContentType(.telephoneNumber)
                         .keyboardType(.phonePad)
                     Picker("Relationship", selection: $relationship) {
@@ -28,6 +42,9 @@ struct QuickAddPersonView: View {
                     }
                 }
                 Section {
+                    Text("Enter a phone number or email address.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     Text("You can add birthdays and other important dates later from People.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -39,7 +56,7 @@ struct QuickAddPersonView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
-                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(!canSave)
                 }
             }
             .alert("Person not saved", isPresented: Binding(
@@ -54,13 +71,16 @@ struct QuickAddPersonView: View {
     }
 
     private func save() {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
+        let trimmedFirstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedFirstName.isEmpty || !trimmedLastName.isEmpty else {
             validationMessage = "Enter a name to add this person."
             return
         }
         let didSave = store.addPerson(Person(
-            name: trimmedName,
+            firstName: trimmedFirstName,
+            preferredName: preferredName.trimmingCharacters(in: .whitespacesAndNewlines),
+            lastName: trimmedLastName,
             email: email.trimmingCharacters(in: .whitespacesAndNewlines),
             phone: phone.trimmingCharacters(in: .whitespacesAndNewlines),
             relationship: relationship

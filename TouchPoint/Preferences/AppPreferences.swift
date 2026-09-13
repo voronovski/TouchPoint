@@ -131,7 +131,13 @@ final class AppPreferences {
     /// Zero means the configured reminder time on the recipient date.
     var reminderLeadTimes: Set<Int> {
         didSet {
-            reminderLeadTimes = Set(reminderLeadTimes.filter { (0...30).contains($0) })
+            let normalized = Set(reminderLeadTimes.filter { (0...30).contains($0) })
+            // @Observable routes assignment through the setter again. Only write
+            // back when normalization changes the value, or didSet recurses forever.
+            if normalized != reminderLeadTimes {
+                reminderLeadTimes = normalized
+                return
+            }
             defaults.set(Array(reminderLeadTimes).sorted(), forKey: Key.reminderLeadTimes)
             cloudDefaults.set(Array(reminderLeadTimes).sorted(), forKey: Key.reminderLeadTimes)
         }

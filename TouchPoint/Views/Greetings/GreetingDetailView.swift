@@ -173,8 +173,10 @@ struct GreetingDetailView: View {
                     Button("Edit schedule", systemImage: "calendar.badge.clock") {
                         showingScheduleEditor = true
                     }
-                    Button("Delete greeting", systemImage: "trash", role: .destructive) {
+                    Button(role: .destructive) {
                         showingDeleteConfirmation = true
+                    } label: {
+                        Label { Text("Delete greeting") } icon: { TouchPointTrashIcon() }
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -316,6 +318,10 @@ struct GreetingDetailView: View {
     }
 
     private func beginContact(for event: GreetingEvent, person: Person) {
+        guard store.people.first(where: { $0.id == person.id })?.communicationStopped == false else {
+            composerError = String(localized: "Communication with this person is stopped. Turn off Stop communication in their profile before planning greetings.")
+            return
+        }
         switch event.method {
         case .sms:
             guard !person.phone.isEmpty else {
@@ -326,7 +332,6 @@ struct GreetingDetailView: View {
                 composerError = "Messages is not available on this device. Try again on an iPhone with messaging configured."
                 return
             }
-            store.recordComposerOpened(eventID: event.id)
             composerRequest = ComposerRequest(
                 kind: .message,
                 recipient: person.phone,
@@ -342,7 +347,6 @@ struct GreetingDetailView: View {
                 composerError = "Mail is not configured on this device. Add a Mail account and try again."
                 return
             }
-            store.recordComposerOpened(eventID: event.id)
             composerRequest = ComposerRequest(
                 kind: .email,
                 recipient: person.email,

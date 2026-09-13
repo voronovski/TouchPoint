@@ -9,7 +9,7 @@ struct TemplatesView: View {
     @State private var relationshipFilter: Relationship?
     @State private var channelFilter: ContactMethod?
     @State private var languageFilter: String?
-    @State private var sort: TemplateSort = .recommended
+    @State private var sort: TemplateSort = .name
     @State private var editingTemplate: GreetingTemplate?
     @State private var showingNewTemplate = false
     @State private var showingGroups = false
@@ -22,12 +22,9 @@ struct TemplatesView: View {
                 switch scope {
                 case .all: !template.isArchived
                 case .favorites: !template.isArchived && template.isFavorite
-                case .recent: !template.isArchived && template.lastUsedAt != nil
                 case .ungrouped: !template.isArchived && template.groupID == nil
                 case .archived: template.isArchived
                 case .group(let id): !template.isArchived && template.groupID == id
-                case .mostUsed: !template.isArchived && template.usageCount > 0
-                case .missingDefault: !template.isArchived && isMissingDefault(template)
                 }
             }
     }
@@ -37,7 +34,7 @@ struct TemplatesView: View {
             .filter { template in
                 guard !query.isEmpty else { return true }
                 let searchable = [
-                    template.title, template.body, template.emailSubject ?? "",
+                    template.title, template.messageBodies.joined(separator: " "), template.emailSubject ?? "",
                     template.occasions.map(\.title).joined(separator: " "),
                     template.relationships.map(\.title).joined(separator: " "),
                     template.channels.map(\.title).joined(separator: " "),
@@ -122,51 +119,32 @@ struct TemplatesView: View {
                                         }
                                         .tint(.accentColor)
 
-                                        Button(role: .destructive) {
-                                            if template.isBuiltIn || template.isLocked {
-                                                store.archiveTemplate(id: template.id)
-                                            } else {
-                                                templatePendingDeletion = template
-                                            }
-                                        } label: {
-                                            let archivesInsteadOfDeleting = template.isBuiltIn || template.isLocked
-                                            Label(
-                                                archivesInsteadOfDeleting ? "Archive" : "Delete",
-                                                systemImage: archivesInsteadOfDeleting ? "archivebox" : "trash"
-                                            )
-                                        }
+                                    }
+                                    Button(role: .destructive) {
+                                        templatePendingDeletion = template
+                                    } label: {
+                                        Label { Text("Delete") } icon: { TouchPointTrashIcon() }
                                     }
                                 }
                                 .contextMenu {
                                     Button { editingTemplate = template } label: {
-                                        Label(template.isLocked ? "View details" : "Edit", systemImage: template.isLocked ? "doc.text.magnifyingglass" : "pencil")
+                                        Label("Edit", systemImage: "pencil")
                                     }
                                     Button { _ = store.duplicateTemplate(template) } label: { Label("Duplicate", systemImage: "plus.square.on.square") }
                                     Button { store.toggleTemplateFavorite(id: template.id) } label: {
                                         Label(template.isFavorite ? "Unfavorite" : "Favorite", systemImage: "star")
                                     }
                                     Divider()
-                                    if template.isApproved {
-                                        if !template.isBuiltIn {
-                                            Button { _ = store.setTemplateApproval(id: template.id, approved: false) } label: {
-                                                Label("Remove approval", systemImage: "checkmark.seal.slash")
-                                            }
-                                        }
-                                    } else {
-                                        Button { _ = store.setTemplateApproval(id: template.id, approved: true) } label: {
-                                            Label("Approve", systemImage: "checkmark.seal")
-                                        }
+                                    Button {
+                                        store.archiveTemplate(id: template.id, archived: !template.isArchived)
+                                    } label: {
+                                        Label(template.isArchived ? "Restore" : "Archive",
+                                              systemImage: template.isArchived ? "arrow.uturn.backward" : "archivebox")
                                     }
-                                    if template.isLocked {
-                                        if !template.isBuiltIn {
-                                            Button { _ = store.setTemplateLock(id: template.id, locked: false) } label: {
-                                                Label("Unlock", systemImage: "lock.open")
-                                            }
-                                        }
-                                    } else {
-                                        Button { _ = store.setTemplateLock(id: template.id, locked: true) } label: {
-                                            Label("Lock", systemImage: "lock")
-                                        }
+                                    Button(role: .destructive) {
+                                        templatePendingDeletion = template
+                                    } label: {
+                                        Label { Text("Delete") } icon: { TouchPointTrashIcon() }
                                     }
                                 }
                         }
@@ -183,7 +161,7 @@ struct TemplatesView: View {
                         if hasActiveFilters {
                             Button("Clear filters") { clearFilters() }
                                 .buttonStyle(.bordered)
-                        } else if scope != .archived && scope != .mostUsed {
+                        } else if scope != .archived {
                             Button("Create template") { showingNewTemplate = true }
                                 .buttonStyle(.borderedProminent)
                         }
@@ -310,13 +288,8 @@ struct TemplatesView: View {
         Menu {
             Button { scope = .all } label: { menuLabel("All templates", selected: scope == .all) }
             Button { scope = .favorites } label: { menuLabel("Favorites", selected: scope == .favorites) }
-            Button { scope = .recent } label: { menuLabel("Recently used", selected: scope == .recent) }
             Button { scope = .ungrouped } label: { menuLabel("Ungrouped", selected: scope == .ungrouped) }
             Button { scope = .archived } label: { menuLabel("Archived", selected: scope == .archived) }
-            Divider()
-            Text("Smart scopes")
-            Button { scope = .mostUsed } label: { menuLabel("Most used", selected: scope == .mostUsed) }
-            Button { scope = .missingDefault } label: { menuLabel("Missing default", selected: scope == .missingDefault) }
             if !activeGroups.isEmpty {
                 Divider()
                 ForEach(activeGroups) { group in
@@ -379,20 +352,12 @@ struct TemplatesView: View {
 
     private var emptyStateTitle: String {
         if hasActiveFilters { return "No matching templates" }
-        switch scope {
-        case .mostUsed: return "No used templates yet"
-        case .missingDefault: return "Every context has a default"
-        default: return "No templates here"
-        }
+        return "No templates here"
     }
 
     private var emptyStateDescription: String {
         if hasActiveFilters { return "Try removing a filter or changing your search." }
-        switch scope {
-        case .mostUsed: return "Templates will appear here after you use them."
-        case .missingDefault: return "Every active template context has at least one default."
-        default: return "Create a reusable message or choose another collection."
-        }
+        return "Create a reusable message or choose another collection."
     }
 
     private func clearFilters() {
@@ -402,23 +367,6 @@ struct TemplatesView: View {
         relationshipFilter = nil
         channelFilter = nil
         languageFilter = nil
-    }
-
-    private func isMissingDefault(_ template: GreetingTemplate) -> Bool {
-        let relationships = Set(template.relationships)
-        let channels = Set(template.channels)
-        let languages = Set(template.languages.map { $0.lowercased() })
-
-        return template.occasions.contains { occasion in
-            !store.templates.contains { candidate in
-                !candidate.isArchived
-                    && candidate.isDefault
-                    && candidate.occasions.contains(occasion)
-                    && Set(candidate.relationships) == relationships
-                    && Set(candidate.channels) == channels
-                    && Set(candidate.languages.map { $0.lowercased() }) == languages
-            }
-        }
     }
 
     @ViewBuilder
@@ -437,27 +385,9 @@ struct TemplatesView: View {
 
     private func templateSort(_ lhs: GreetingTemplate, _ rhs: GreetingTemplate) -> Bool {
         switch sort {
-        case .recommended:
-            // Preserve the established Recently used ordering while making the
-            // smart Most used scope useful at a glance as well.
-            if scope == .recent, lhs.lastUsedAt != rhs.lastUsedAt {
-                return (lhs.lastUsedAt ?? .distantPast) > (rhs.lastUsedAt ?? .distantPast)
-            }
-            if scope == .mostUsed, lhs.usageCount != rhs.usageCount {
-                return lhs.usageCount > rhs.usageCount
-            }
-            if lhs.isDefault != rhs.isDefault { return lhs.isDefault }
-            if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite }
-            if lhs.usageCount != rhs.usageCount { return lhs.usageCount > rhs.usageCount }
-            if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
         case .name:
             let comparison = lhs.title.localizedStandardCompare(rhs.title)
             if comparison != .orderedSame { return comparison == .orderedAscending }
-        case .mostUsed:
-            if lhs.usageCount != rhs.usageCount { return lhs.usageCount > rhs.usageCount }
-            if lhs.lastUsedAt != rhs.lastUsedAt {
-                return (lhs.lastUsedAt ?? .distantPast) > (rhs.lastUsedAt ?? .distantPast)
-            }
         case .recentlyUpdated:
             if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
         }
@@ -467,19 +397,16 @@ struct TemplatesView: View {
 }
 
 private enum TemplateScope: Hashable {
-    case all, favorites, recent, ungrouped, archived, mostUsed, missingDefault
+    case all, favorites, ungrouped, archived
     case group(UUID)
 
     func title(in store: AppStore) -> String {
         switch self {
         case .all: "All templates"
         case .favorites: "Favorites"
-        case .recent: "Recently used"
         case .ungrouped: "Ungrouped"
         case .archived: "Archived"
         case .group(let id): store.templateGroups.first(where: { $0.id == id })?.name ?? "Collection"
-        case .mostUsed: "Most used"
-        case .missingDefault: "Missing default"
         }
     }
 
@@ -487,29 +414,22 @@ private enum TemplateScope: Hashable {
         switch self {
         case .all: "rectangle.stack"
         case .favorites: "star"
-        case .recent: "clock.arrow.circlepath"
         case .ungrouped: "tray"
         case .archived: "archivebox"
         case .group(let id): store.templateGroups.first(where: { $0.id == id })?.iconID ?? "folder"
-        case .mostUsed: "chart.bar.fill"
-        case .missingDefault: "checkmark.shield"
         }
     }
 }
 
 private enum TemplateSort: String, CaseIterable, Identifiable {
-    case recommended
     case name
-    case mostUsed
     case recentlyUpdated
 
     var id: Self { self }
 
     var title: String {
         switch self {
-        case .recommended: String(localized: "Recommended")
         case .name: String(localized: "Name")
-        case .mostUsed: String(localized: "Most used")
         case .recentlyUpdated: String(localized: "Recently updated")
         }
     }
@@ -633,33 +553,22 @@ private struct TemplateRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 5) {
                     Text(template.title).font(.subheadline.weight(.semibold))
-                    if template.isDefault {
-                        Text("DEFAULT").font(.caption2.weight(.bold)).foregroundStyle(.accent)
-                    }
                     if template.isFavorite {
                         Image(systemName: "star.fill").font(.caption).foregroundStyle(TouchPointColor.amber)
                     }
                 }
-                HStack(spacing: 8) {
-                    Label("Version \(template.revisionNumber)", systemImage: "clock.arrow.circlepath")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    Spacer(minLength: 4)
-                    if template.isApproved {
-                        TemplateStateIcon(title: "Approved", systemImage: "checkmark.seal.fill", tint: TouchPointColor.forest)
-                    }
-                    if template.isLocked {
-                        TemplateStateIcon(title: "Locked", systemImage: "lock.fill", tint: .secondary)
-                    }
-                }
                 Text(template.body).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                if !template.bodyVariations.isEmpty {
+                    Text("\(template.messageBodies.count) variations")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
                 Text(metadata).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
             }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityHint(template.isLocked ? "Double-tap to view this locked template" : "Double-tap to edit this template")
+        .accessibilityHint("Double-tap to edit this template")
     }
 
     private var metadata: String {
@@ -671,40 +580,21 @@ private struct TemplateRow: View {
     }
 }
 
-private struct TemplateStateIcon: View {
-    let title: String
-    let systemImage: String
-    let tint: Color
-
-    var body: some View {
-        Image(systemName: systemImage)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(tint)
-            .frame(width: 24, height: 24)
-            .background(tint.opacity(0.12))
-            .clipShape(.rect(cornerRadius: 6, style: .continuous))
-            .accessibilityLabel(title)
-    }
-}
-
 private struct TemplateEditorView: View {
     @Environment(AppStore.self) private var store
     @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     @State private var draft: GreetingTemplate
+    @State private var selectedVariation = 0
     @State private var showingGenerator = false
     @State private var showingOccasionPicker = false
-    @State private var showingApprovalWarning = false
     @State private var showingSaveError = false
     @State private var saveError: String?
-    @State private var duplicateForEditing: GreetingTemplate?
     @State private var selectedRevision: TemplateRevision?
-    private let originalTemplate: GreetingTemplate?
     private let isEditing: Bool
 
     init(template: GreetingTemplate?, defaultOccasion: Occasion, defaultLanguage: String) {
         isEditing = template != nil
-        originalTemplate = template
         var initialDraft = template ?? GreetingTemplate(
             title: "",
             occasions: [defaultOccasion],
@@ -718,29 +608,9 @@ private struct TemplateEditorView: View {
     }
 
     private var canSave: Bool { draft.validationErrors.isEmpty }
-    private var isReadOnly: Bool { isEditing && draft.isLocked }
-    private var hasContentChanges: Bool {
-        guard let originalTemplate else { return false }
-        return TemplateContentSnapshot(template: originalTemplate) != TemplateContentSnapshot(template: draft)
-    }
-
     var body: some View {
         NavigationStack {
             Form {
-                if isReadOnly {
-                    Section {
-                        Label("This template is locked and read-only.", systemImage: "lock.fill")
-                            .foregroundStyle(.secondary)
-                        Button {
-                            duplicateForEditing = store.duplicateTemplate(draft)
-                        } label: {
-                            Label("Duplicate to edit", systemImage: "plus.square.on.square")
-                        }
-                        .buttonStyle(TouchPointTertiaryButtonStyle())
-                    } footer: {
-                        Text("The duplicate is an unlocked copy. Approval and locking are local controls on this device.")
-                    }
-                }
 
                 Section {
                     HStack(spacing: 12) {
@@ -801,7 +671,6 @@ private struct TemplateEditorView: View {
                 } footer: {
                     Text("The icon and color identify this template throughout the library.")
                 }
-                .disabled(isReadOnly)
 
                 Section("Context") {
                     Button {
@@ -854,13 +723,32 @@ private struct TemplateEditorView: View {
                         }
                     }
                 }
-                .disabled(isReadOnly)
 
                 Section {
                     if draft.channels.isEmpty || draft.channels.contains(.email) {
                         TextField("Email subject (optional)", text: emailSubjectBinding)
                     }
-                    TextEditor(text: $draft.body).frame(minHeight: 150)
+                    Picker("Variation", selection: $selectedVariation) {
+                        ForEach(draft.messageBodies.indices, id: \.self) { index in
+                            Text("Variation \(index + 1)").tag(index)
+                        }
+                    }
+                    TextEditor(text: variationBodyBinding)
+                        .frame(minHeight: 150)
+                        .accessibilityLabel(Text("Variation \(selectedVariation + 1)"))
+                    Button {
+                        draft.bodyVariations.append("")
+                        selectedVariation = draft.bodyVariations.count
+                    } label: {
+                        Label("Add variation", systemImage: "plus")
+                    }
+                    if !draft.bodyVariations.isEmpty {
+                        Button(role: .destructive) {
+                            removeSelectedVariation()
+                        } label: {
+                            Label { Text("Delete variation") } icon: { TouchPointTrashIcon() }
+                        }
+                    }
                     WrappingTokenLayout(horizontalSpacing: 8, verticalSpacing: 4) {
                         ForEach(GreetingTemplate.supportedTokens.sorted(), id: \.self) { token in
                             Button {
@@ -887,18 +775,18 @@ private struct TemplateEditorView: View {
                     Text("Message")
                 } footer: {
                     VStack(alignment: .leading, spacing: 4) {
+                        Text("Each saved greeting uses the next variation in order, then starts again from the first.")
                         Text("Insert variables with the buttons above.")
                         Text(generatorAvailabilityExplanation)
                     }
                 }
-                .disabled(isReadOnly)
 
                 Section("Preview") {
                     if let subject = previewSubject {
                         LabeledContent("Subject", value: subject)
                     }
                     Text(previewBody).frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundStyle(draft.body.isEmpty ? .secondary : .primary)
+                        .foregroundStyle(variationBodyBinding.wrappedValue.isEmpty ? .secondary : .primary)
                 }
 
                 if !draft.validationErrors.isEmpty {
@@ -911,13 +799,9 @@ private struct TemplateEditorView: View {
 
                 Section("Library") {
                     Toggle("Favorite", isOn: $draft.isFavorite)
-                    Toggle("Default for this context", isOn: $draft.isDefault)
                 }
-                .disabled(isReadOnly)
 
                 if isEditing {
-                    governanceSection
-                    usageSection
                     historySection
                 }
             }
@@ -926,11 +810,11 @@ private struct TemplateEditorView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { requestSave() }.disabled(!canSave || isReadOnly)
+                    Button("Save") { requestSave() }.disabled(!canSave)
                 }
             }
             .sheet(isPresented: $showingGenerator) {
-                AppleGreetingGeneratorSheet(context: generationContext) { draft.body = $0 }
+                AppleGreetingGeneratorSheet(context: generationContext) { variationBodyBinding.wrappedValue = $0 }
             }
             .sheet(isPresented: $showingOccasionPicker) {
                 OccasionPickerSheet(
@@ -939,16 +823,10 @@ private struct TemplateEditorView: View {
                     mode: .multiple
                 ) { draft.occasions = $0 }
             }
-            .sheet(item: $duplicateForEditing) { template in
-                TemplateEditorView(
-                    template: template,
-                    defaultOccasion: template.occasion,
-                    defaultLanguage: preferences.preferredLanguage
-                )
-            }
             .sheet(item: $selectedRevision) { revision in
                 TemplateRevisionPreviewView(template: draft, revision: revision) { restored in
                     draft = restored
+                    selectedVariation = 0
                 }
             }
             .alert("Could not save template", isPresented: $showingSaveError) {
@@ -956,12 +834,7 @@ private struct TemplateEditorView: View {
             } message: {
                 Text(saveError ?? "The template could not be saved. It remains open so you can try again.")
             }
-            .confirmationDialog("Remove local approval?", isPresented: $showingApprovalWarning, titleVisibility: .visible) {
-                Button("Save and remove approval") { performSave() }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Changing this approved template will remove its approval on this device and create a new version.")
-            }
+
         }
     }
 
@@ -982,17 +855,44 @@ private struct TemplateEditorView: View {
     private var emailSubjectBinding: Binding<String> {
         Binding(get: { draft.emailSubject ?? "" }, set: { draft.emailSubject = $0.isEmpty ? nil : $0 })
     }
+    private var variationBodyBinding: Binding<String> {
+        Binding(
+            get: {
+                guard selectedVariation > 0,
+                      draft.bodyVariations.indices.contains(selectedVariation - 1) else { return draft.body }
+                return draft.bodyVariations[selectedVariation - 1]
+            },
+            set: { text in
+                if selectedVariation > 0, draft.bodyVariations.indices.contains(selectedVariation - 1) {
+                    draft.bodyVariations[selectedVariation - 1] = text
+                } else {
+                    draft.body = text
+                }
+            }
+        )
+    }
+
+    private func removeSelectedVariation() {
+        guard !draft.bodyVariations.isEmpty else { return }
+        if selectedVariation == 0 {
+            draft.body = draft.bodyVariations.removeFirst()
+        } else {
+            draft.bodyVariations.remove(at: selectedVariation - 1)
+        }
+        selectedVariation = min(selectedVariation, draft.bodyVariations.count)
+    }
     private var previewPerson: Person {
         store.people.first(where: { draft.relationships.isEmpty || draft.relationships.contains($0.relationship) })
             ?? Person(name: "Recipient", organization: "Organization", relationship: draft.relationships.first ?? .friend)
     }
     private var previewBody: String {
-        guard !draft.body.isEmpty else { return "Your personalized preview will appear here." }
+        guard !variationBodyBinding.wrappedValue.isEmpty else { return "Your personalized preview will appear here." }
         return store.renderedBody(
             for: draft,
             person: previewPerson,
             occasion: draft.occasion,
-            senderName: preferences.senderName
+            senderName: preferences.senderName,
+            variationIndex: selectedVariation
         )
     }
     private var previewSubject: String? {
@@ -1030,71 +930,6 @@ private struct TemplateEditorView: View {
             String(localized: "Apple Intelligence generation happens privately on this device.")
         case .unavailable(let reason):
             reason
-        }
-    }
-
-    @ViewBuilder
-    private var governanceSection: some View {
-        Section("Governance") {
-            Text("Approval and locking are local controls on this device, not team approval.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
-            LabeledContent("Approval", value: draft.isApproved ? "Approved" : "Not approved")
-            if draft.isApproved {
-                if draft.isBuiltIn {
-                    Label("Built-in approval cannot be removed.", systemImage: "checkmark.seal.fill")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Button {
-                        setApproval(false)
-                    } label: {
-                        Label("Remove approval", systemImage: "checkmark.seal.slash")
-                    }
-                    .buttonStyle(TouchPointTertiaryButtonStyle())
-                }
-            } else {
-                Button {
-                    setApproval(true)
-                } label: {
-                    Label("Approve on this device", systemImage: "checkmark.seal")
-                }
-                .buttonStyle(TouchPointTertiaryButtonStyle())
-            }
-
-            LabeledContent("Editing", value: draft.isLocked ? "Locked" : "Unlocked")
-            if draft.isLocked {
-                if draft.isBuiltIn {
-                    Label("Built-in templates cannot be unlocked.", systemImage: "lock.fill")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Button {
-                        unlockForEditing()
-                    } label: {
-                        Label("Unlock to edit", systemImage: "lock.open")
-                    }
-                    .buttonStyle(TouchPointTertiaryButtonStyle())
-                }
-            } else {
-                Button {
-                    lockTemplate()
-                } label: {
-                    Label("Lock template", systemImage: "lock")
-                }
-                .buttonStyle(TouchPointTertiaryButtonStyle())
-            }
-        }
-    }
-
-    private var usageSection: some View {
-        Section("Usage") {
-            LabeledContent("Lifetime schedules", value: draft.usageCount.formatted())
-            LabeledContent("Last used", value: lastUsedText)
-            ForEach(TemplateUsageKind.allCases) { kind in
-                LabeledContent(usageTitle(kind), value: usageCount(for: kind).formatted())
-            }
         }
     }
 
@@ -1144,32 +979,6 @@ private struct TemplateEditorView: View {
         return store.templateRevisions(for: draft.id)
     }
 
-    private var usageRecords: [TemplateUsageRecord] {
-        guard isEditing else { return [] }
-        return store.usageRecords(for: draft.id)
-    }
-
-    private var lastUsedText: String {
-        guard let lastUsedAt = draft.lastUsedAt else { return "Never" }
-        return lastUsedAt.formatted(date: .abbreviated, time: .shortened)
-    }
-
-    private func usageCount(for kind: TemplateUsageKind) -> Int {
-        usageRecords.reduce(into: 0) { count, record in
-            if record.kind == kind { count += 1 }
-        }
-    }
-
-    private func usageTitle(_ kind: TemplateUsageKind) -> String {
-        switch kind {
-        case .scheduled: "Tracked schedules"
-        case .composerOpened: "Composer opened"
-        case .completed: "Completed"
-        case .skipped: "Skipped"
-        case .messageEdited: "Message edited"
-        }
-    }
-
     @ViewBuilder
     private func multiValueMenu<Content: View>(title: String, summary: String, @ViewBuilder content: () -> Content) -> some View {
         LabeledContent(title) { Menu(summary, content: content).multilineTextAlignment(.trailing) }
@@ -1178,59 +987,38 @@ private struct TemplateEditorView: View {
         if let index = items.firstIndex(of: item) { items.remove(at: index) } else { items.append(item) }
     }
     private func appendToken(_ token: String) {
-        if !draft.body.isEmpty && !draft.body.hasSuffix(" ") { draft.body.append(" ") }
-        draft.body.append("{{\(token)}}")
+        var text = variationBodyBinding.wrappedValue
+        if !text.isEmpty && !text.hasSuffix(" ") { text.append(" ") }
+        text.append("{{\(token)}}")
+        variationBodyBinding.wrappedValue = text
     }
     private func requestSave() {
         draft.title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
         draft.body = draft.body.trimmingCharacters(in: .whitespacesAndNewlines)
+        draft.bodyVariations = draft.bodyVariations.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         draft.emailSubject = draft.emailSubject?.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canSave else { return }
-        if isEditing && draft.isApproved && hasContentChanges {
-            showingApprovalWarning = true
-        } else {
-            performSave()
-        }
+        performSave()
     }
 
     private func performSave() {
         if isEditing {
             guard store.updateTemplateResult(draft) else {
-                saveError = "This template could not be saved. It may be locked or no longer available."
+                saveError = "This template could not be saved. It may no longer be available."
                 showingSaveError = true
                 return
             }
         } else {
-            store.addTemplate(draft)
+            guard store.addTemplate(draft) else {
+                saveError = store.persistenceError
+                showingSaveError = true
+                return
+            }
         }
-        if draft.isDefault { _ = store.setTemplateDefault(id: draft.id) }
         dismiss()
     }
 
-    private func setApproval(_ approved: Bool) {
-        guard store.setTemplateApproval(id: draft.id, approved: approved) else { return }
-        draft.isApproved = approved
-        draft.approvedAt = approved ? .now : nil
-    }
 
-    private func unlockForEditing() {
-        guard !draft.isBuiltIn else { return }
-        guard store.setTemplateLock(id: draft.id, locked: false) else {
-            saveError = "This template could not be unlocked."
-            showingSaveError = true
-            return
-        }
-        draft.isLocked = false
-    }
-
-    private func lockTemplate() {
-        guard store.setTemplateLock(id: draft.id, locked: true) else {
-            saveError = "This template could not be locked. It may no longer be available."
-            showingSaveError = true
-            return
-        }
-        draft.isLocked = true
-    }
 }
 
 private struct TemplateRevisionPreviewView: View {
@@ -1239,7 +1027,6 @@ private struct TemplateRevisionPreviewView: View {
     let template: GreetingTemplate
     let revision: TemplateRevision
     let onRestored: (GreetingTemplate) -> Void
-    @State private var showingApprovalWarning = false
     @State private var restoreError: String?
 
     var body: some View {
@@ -1255,6 +1042,13 @@ private struct TemplateRevisionPreviewView: View {
                     Text(revision.snapshot.body)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .textSelection(.enabled)
+                    ForEach(Array((revision.snapshot.bodyVariations ?? []).enumerated()), id: \.offset) { index, body in
+                        LabeledContent {
+                            Text(body).textSelection(.enabled)
+                        } label: {
+                            Text("Variation \(index + 2)")
+                        }
+                    }
                     if !revision.snapshot.occasions.isEmpty {
                         LabeledContent("Occasions", value: revision.snapshot.occasions.map(\.title).joined(separator: ", "))
                     }
@@ -1264,18 +1058,12 @@ private struct TemplateRevisionPreviewView: View {
                 }
 
                 Section {
-                    if template.isLocked {
-                        Label("Unlock the template before restoring a version.", systemImage: "lock.fill")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Button {
-                            requestRestore()
-                        } label: {
-                            Label("Restore this version", systemImage: "arrow.uturn.backward")
-                        }
-                        .buttonStyle(TouchPointTertiaryButtonStyle())
+                    Button {
+                        performRestore()
+                    } label: {
+                        Label("Restore this version", systemImage: "arrow.uturn.backward")
                     }
+                    .buttonStyle(TouchPointTertiaryButtonStyle())
                 } footer: {
                     Text("Restoring is additive: it creates a new current version and keeps this version in history.")
                 }
@@ -1286,12 +1074,6 @@ private struct TemplateRevisionPreviewView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
-            }
-            .confirmationDialog("Remove local approval?", isPresented: $showingApprovalWarning, titleVisibility: .visible) {
-                Button("Restore and remove approval") { performRestore() }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Restoring this version changes the approved template and removes its approval on this device.")
             }
             .alert("Could not restore version", isPresented: Binding(
                 get: { restoreError != nil },
@@ -1304,19 +1086,10 @@ private struct TemplateRevisionPreviewView: View {
         }
     }
 
-    private func requestRestore() {
-        guard !template.isLocked else { return }
-        if template.isApproved {
-            showingApprovalWarning = true
-        } else {
-            performRestore()
-        }
-    }
-
     private func performRestore() {
         guard store.restoreTemplateRevision(templateID: template.id, revisionID: revision.id),
               let restored = store.templates.first(where: { $0.id == template.id }) else {
-            restoreError = "This version could not be restored. The template may be locked or no longer available."
+            restoreError = "This version could not be restored. The template may no longer be available."
             return
         }
         onRestored(restored)

@@ -60,6 +60,8 @@ extension String {
 enum TouchPointMetric {
     static let screenPadding: CGFloat = 16
     static let sectionSpacing: CGFloat = 16
+    static let scrollPadding: CGFloat = 18
+    static let sectionHeadingSpacing: CGFloat = 10
     static let cardPadding: CGFloat = 12
     static let cardRadius: CGFloat = 16
     static let iconSize: CGFloat = 28
@@ -69,6 +71,100 @@ enum TouchPointMetric {
     /// the row's content. Reserve top alignment for a multiline text input.
     static let rowContentAlignment: VerticalAlignment = .center
     static let multilineTextFieldAlignment: VerticalAlignment = .top
+}
+
+/// Desk-style section for detail and editor screens. Collection screens keep
+/// their native List; these cards group related values and draft controls.
+struct SurfaceSection<Content: View>: View {
+    let title: LocalizedStringKey
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, TouchPointMetric.screenPadding)
+                .accessibilityAddTraits(.isHeader)
+            SurfaceCard {
+                VStack(alignment: .leading, spacing: 0) {
+                    content
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+}
+
+struct SurfaceRowDivider: View {
+    var body: some View {
+        Divider()
+            .padding(.leading, TouchPointMetric.cardPadding * 2 + TouchPointMetric.iconSize)
+    }
+}
+
+/// Neutral icon surfaces are for fields and metadata; occasion identity keeps
+/// the semantic color treatment supplied by IconTile.
+struct FormIconTile: View {
+    let systemImage: String
+
+    var body: some View {
+        Image(systemName: systemImage)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .frame(width: TouchPointMetric.iconSize, height: TouchPointMetric.iconSize)
+            .background(Color(.tertiarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 7, style: .continuous))
+            .accessibilityHidden(true)
+    }
+}
+
+struct FormFieldRow<Content: View>: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    var alignment: VerticalAlignment = TouchPointMetric.rowContentAlignment
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        HStack(alignment: alignment, spacing: 12) {
+            FormIconTile(systemImage: systemImage)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                content
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(TouchPointMetric.cardPadding)
+    }
+}
+
+struct FormValueRow: View {
+    let title: LocalizedStringKey
+    let value: String
+    let systemImage: String
+    var showsDisclosure = false
+
+    var body: some View {
+        HStack(spacing: 0) {
+            FormFieldRow(title: title, systemImage: systemImage) {
+                Text(value)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if showsDisclosure {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+                    .padding(.trailing, TouchPointMetric.cardPadding)
+                    .accessibilityHidden(true)
+            }
+        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+    }
 }
 
 struct SurfaceCard<Content: View>: View {
@@ -168,16 +264,45 @@ struct StatusPill: View {
 }
 
 struct TouchPointPrimaryButtonStyle: ButtonStyle {
+    var tint: Color = .accentColor
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.body)
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: TouchPointMetric.buttonHeight)
-            .background(Color.accentColor.opacity(configuration.isPressed ? 0.78 : 1))
+            .background(tint.opacity(configuration.isPressed ? 0.78 : 1))
             .clipShape(.rect(cornerRadius: TouchPointMetric.cardRadius, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.snappy(duration: 0.18), value: configuration.isPressed)
+    }
+}
+
+/// Shared trash symbol scale for deletion actions throughout the app.
+struct TouchPointTrashIcon: View {
+    var body: some View {
+        Image(systemName: "trash")
+            .imageScale(.large)
+    }
+}
+
+/// Final entity deletion action, shared by person and occasion editors.
+/// Keep confirmation and persistence in the caller; place outside surface cards.
+struct TouchPointDeleteButton: View {
+    let title: LocalizedStringKey
+    let action: () -> Void
+
+    var body: some View {
+        Button(role: .destructive, action: action) {
+            Label {
+                Text(title)
+            } icon: {
+                TouchPointTrashIcon()
+                    .font(.caption)
+            }
+        }
+        .buttonStyle(TouchPointPrimaryButtonStyle(tint: .red))
     }
 }
 

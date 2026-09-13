@@ -587,7 +587,9 @@ enum GreetingStatus: String, CaseIterable, Identifiable, StableStringCodable {
 
 struct Person: Identifiable, Hashable, Codable {
     let id: UUID
-    var name: String
+    var firstName: String
+    var preferredName: String
+    var lastName: String
     var email: String
     var phone: String
     var organization: String
@@ -599,10 +601,23 @@ struct Person: Identifiable, Hashable, Codable {
     /// Free-form context kept with a person. Missing fields decode as empty for legacy data.
     var notes: String
     var tags: [String]
+    var communicationStopped: Bool
+
+    var hasContactInfo: Bool {
+        Self.hasContactInfo(phone: phone, email: email)
+    }
+
+    static func hasContactInfo(phone: String, email: String) -> Bool {
+        !phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     init(
         id: UUID = UUID(),
-        name: String,
+        name: String = "",
+        firstName: String? = nil,
+        preferredName: String = "",
+        lastName: String? = nil,
         email: String = "",
         phone: String = "",
         organization: String = "",
@@ -612,10 +627,14 @@ struct Person: Identifiable, Hashable, Codable {
         timeZoneIdentifier: String = "America/Los_Angeles",
         importantDates: [ImportantDate] = [],
         notes: String = "",
-        tags: [String] = []
+        tags: [String] = [],
+        communicationStopped: Bool = false
     ) {
         self.id = id
-        self.name = name
+        let legacyName = Self.splitLegacyName(name)
+        self.firstName = firstName ?? legacyName.first
+        self.preferredName = preferredName
+        self.lastName = lastName ?? legacyName.last
         self.email = email
         self.phone = phone
         self.organization = organization
@@ -626,17 +645,21 @@ struct Person: Identifiable, Hashable, Codable {
         self.importantDates = importantDates
         self.notes = notes
         self.tags = tags
+        self.communicationStopped = communicationStopped
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, email, phone, organization, relationship, preferredContactMethod
-        case preferredLanguage, timeZoneIdentifier, importantDates, notes, tags
+        case id, name, firstName, preferredName, lastName, email, phone, organization, relationship, preferredContactMethod
+        case preferredLanguage, timeZoneIdentifier, importantDates, notes, tags, communicationStopped
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
-        name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+        let legacyName = Self.splitLegacyName(try container.decodeIfPresent(String.self, forKey: .name) ?? "")
+        firstName = try container.decodeIfPresent(String.self, forKey: .firstName) ?? legacyName.first
+        preferredName = try container.decodeIfPresent(String.self, forKey: .preferredName) ?? ""
+        lastName = try container.decodeIfPresent(String.self, forKey: .lastName) ?? legacyName.last
         email = try container.decodeIfPresent(String.self, forKey: .email) ?? ""
         phone = try container.decodeIfPresent(String.self, forKey: .phone) ?? ""
         organization = try container.decodeIfPresent(String.self, forKey: .organization) ?? ""
@@ -646,6 +669,7 @@ struct Person: Identifiable, Hashable, Codable {
         timeZoneIdentifier = try container.decodeIfPresent(String.self, forKey: .timeZoneIdentifier) ?? "America/Los_Angeles"
         importantDates = try container.decodeIfPresent([ImportantDate].self, forKey: .importantDates) ?? []
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        communicationStopped = try container.decodeIfPresent(Bool.self, forKey: .communicationStopped) ?? false
         tags = (try container.decodeIfPresent([String].self, forKey: .tags) ?? [])
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
@@ -654,6 +678,9 @@ struct Person: Identifiable, Hashable, Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id); try container.encode(name, forKey: .name)
+        try container.encode(firstName, forKey: .firstName)
+        try container.encode(preferredName, forKey: .preferredName)
+        try container.encode(lastName, forKey: .lastName)
         try container.encode(email, forKey: .email); try container.encode(phone, forKey: .phone)
         try container.encode(organization, forKey: .organization); try container.encode(relationship, forKey: .relationship)
         try container.encode(preferredContactMethod, forKey: .preferredContactMethod)
@@ -661,6 +688,32 @@ struct Person: Identifiable, Hashable, Codable {
         try container.encode(timeZoneIdentifier, forKey: .timeZoneIdentifier)
         try container.encode(importantDates, forKey: .importantDates)
         try container.encode(notes, forKey: .notes); try container.encode(tags, forKey: .tags)
+        try container.encode(communicationStopped, forKey: .communicationStopped)
+    }
+
+    /// Keep the existing full-name token and consumers compatible.
+    var name: String {
+        [firstName, lastName]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+
+    var displayName: String {
+        let preferred = preferredName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return [firstName, preferred.isEmpty ? "" : "\"\(preferred)\"", lastName]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+
+    /// Legacy full names have no reliable boundaries beyond the first word.
+    /// Preserve all remaining words, including compound surnames.
+    private static func splitLegacyName(_ name: String) -> (first: String, last: String) {
+        let parts = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(maxSplits: 1, whereSeparator: { $0.isWhitespace })
+        return (parts.first.map(String.init) ?? "",
+                parts.dropFirst().first.map(String.init) ?? "")
     }
 
     var initials: String {
@@ -673,6 +726,56 @@ struct Person: Identifiable, Hashable, Codable {
     }
 }
 
+/// Persisted library identity is independent of the built-in calendar calculation.
+struct OccasionNode: Identifiable, Hashable, Codable {
+    var id: String = UUID().uuidString
+    var name: String = ""
+    var parentID: String?
+    var isGroup: Bool = false
+    var builtInOccasion: Occasion?
+    var builtInCategoryID: String?
+    var templateID: UUID?
+    var dateRule: OccasionDateRule = .personDate
+    var month: Int = 1
+    var day: Int = 1
+    var sortOrder: Int = 0
+
+    var occasion: Occasion { builtInOccasion ?? .custom }
+    var title: String {
+        if !name.isEmpty { return name }
+        if let builtInOccasion { return builtInOccasion.title }
+        return OccasionCategory(rawValue: builtInCategoryID ?? "")?.title ?? ""
+    }
+    var icon: String { isGroup ? "folder" : occasion.icon }
+
+    static func defaults() -> [OccasionNode] {
+        let groups = OccasionCategory.allCases.enumerated().map { index, category in
+            OccasionNode(id: "group:" + category.rawValue, isGroup: true,
+                         builtInCategoryID: category.rawValue, sortOrder: index)
+        }
+        let occasions = Occasion.allCases.map { occasion in
+            OccasionNode(id: "occasion:" + occasion.rawValue,
+                         parentID: "group:" + occasion.category.rawValue,
+                         builtInOccasion: occasion,
+                         dateRule: Occasion.contactSpecificCases.contains(occasion) ? .personDate : .calendar,
+                         sortOrder: Occasion.allCases.filter { $0.category == occasion.category }.firstIndex(of: occasion) ?? 0)
+        }
+        return groups + occasions
+    }
+}
+
+enum OccasionDateRule: String, Codable, CaseIterable, Identifiable {
+    case personDate, fixedDate, calendar
+    var id: Self { self }
+    var title: String {
+        switch self {
+        case .personDate: String(localized: "Date set for each person")
+        case .fixedDate: String(localized: "Same date every year")
+        case .calendar: String(localized: "Holiday calendar")
+        }
+    }
+}
+
 struct ImportantDate: Identifiable, Hashable, Codable {
     let id: UUID
     var occasion: Occasion
@@ -680,16 +783,18 @@ struct ImportantDate: Identifiable, Hashable, Codable {
     var day: Int
     /// Optional label for a custom event represented by this date.
     var customName: String?
+    var occasionID: String?
 
-    init(id: UUID = UUID(), occasion: Occasion, month: Int, day: Int, customName: String? = nil) {
+    init(id: UUID = UUID(), occasion: Occasion, month: Int, day: Int, customName: String? = nil, occasionID: String? = nil) {
         self.id = id
         self.occasion = occasion
         self.month = month
         self.day = day
         self.customName = customName
+        self.occasionID = occasionID
     }
 
-    private enum CodingKeys: String, CodingKey { case id, occasion, month, day, customName }
+    private enum CodingKeys: String, CodingKey { case id, occasion, month, day, customName, occasionID }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -698,6 +803,7 @@ struct ImportantDate: Identifiable, Hashable, Codable {
         month = try c.decodeIfPresent(Int.self, forKey: .month) ?? 1
         day = try c.decodeIfPresent(Int.self, forKey: .day) ?? 1
         customName = try c.decodeIfPresent(String.self, forKey: .customName)
+        occasionID = try c.decodeIfPresent(String.self, forKey: .occasionID)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -705,6 +811,7 @@ struct ImportantDate: Identifiable, Hashable, Codable {
         try c.encode(id, forKey: .id); try c.encode(occasion, forKey: .occasion)
         try c.encode(month, forKey: .month); try c.encode(day, forKey: .day)
         try c.encodeIfPresent(customName, forKey: .customName)
+        try c.encodeIfPresent(occasionID, forKey: .occasionID)
     }
 
     var formatted: String {
@@ -738,7 +845,9 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
     var sourceTemplateRevision: Int?
     /// Optional user-facing name for an event that does not fit the built-in occasions.
     var customName: String?
+    var occasionID: String?
     var recurrence: EventRecurrence
+    var sourceImportantDateID: UUID?
 
     init(
         id: UUID = UUID(),
@@ -752,7 +861,9 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         sourceTemplateID: UUID? = nil,
         sourceTemplateRevision: Int? = nil,
         customName: String? = nil,
-        recurrence: EventRecurrence = .annual
+        recurrence: EventRecurrence = .annual,
+        occasionID: String? = nil,
+        sourceImportantDateID: UUID? = nil
     ) {
         self.id = id
         self.personID = personID
@@ -765,12 +876,14 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         self.sourceTemplateID = sourceTemplateID
         self.sourceTemplateRevision = sourceTemplateRevision
         self.customName = customName
+        self.occasionID = occasionID
         self.recurrence = recurrence
+        self.sourceImportantDateID = sourceImportantDateID
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, personID, occasion, date, method, status, message, subject
-        case sourceTemplateID, sourceTemplateRevision, customName, recurrence
+        case sourceTemplateID, sourceTemplateRevision, customName, recurrence, occasionID, sourceImportantDateID
     }
 
     init(from decoder: Decoder) throws {
@@ -786,6 +899,8 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         sourceTemplateID = try c.decodeIfPresent(UUID.self, forKey: .sourceTemplateID)
         sourceTemplateRevision = try c.decodeIfPresent(Int.self, forKey: .sourceTemplateRevision)
         customName = try c.decodeIfPresent(String.self, forKey: .customName)
+        occasionID = try c.decodeIfPresent(String.self, forKey: .occasionID)
+        sourceImportantDateID = try c.decodeIfPresent(UUID.self, forKey: .sourceImportantDateID)
         recurrence = try c.decodeIfPresent(EventRecurrence.self, forKey: .recurrence) ?? .annual
     }
 
@@ -798,6 +913,8 @@ struct GreetingEvent: Identifiable, Hashable, Codable {
         try c.encodeIfPresent(sourceTemplateID, forKey: .sourceTemplateID)
         try c.encodeIfPresent(sourceTemplateRevision, forKey: .sourceTemplateRevision)
         try c.encodeIfPresent(customName, forKey: .customName)
+        try c.encodeIfPresent(occasionID, forKey: .occasionID)
+        try c.encodeIfPresent(sourceImportantDateID, forKey: .sourceImportantDateID)
         try c.encode(recurrence, forKey: .recurrence)
     }
 
@@ -880,6 +997,16 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
     /// The occasions this template can be used for. `occasion` remains available for the current UI.
     var occasions: [Occasion]
     var body: String
+    /// Additional messages in order; the legacy body is always variation one.
+    var bodyVariations: [String]
+    /// The next suggestion, advanced only when a greeting is committed.
+    var nextVariationIndex: Int
+
+    var messageBodies: [String] { [body] + bodyVariations }
+
+    mutating func advanceVariation() {
+        nextVariationIndex = (max(0, nextVariationIndex) % messageBodies.count + 1) % messageBodies.count
+    }
     var isFavorite: Bool
     var iconSemantic: String
     var iconID: String
@@ -889,20 +1016,12 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
     var channels: [ContactMethod]
     var languages: [String]
     var emailSubject: String?
-    var isDefault: Bool
     var isBuiltIn: Bool
     var isArchived: Bool
     let createdAt: Date
     var updatedAt: Date
-    var usageCount: Int
-    var lastUsedAt: Date?
     /// Monotonically increasing local content revision. Starts at one for legacy templates.
     var revisionNumber: Int
-    /// Approval and locking are local, single-user library controls, not team permissions.
-    var isApproved: Bool
-    var approvedAt: Date?
-    var isLocked: Bool
-
     /// The legacy single-occasion API used by the existing views.
     var occasion: Occasion {
         get { occasions.first ?? .birthday }
@@ -967,6 +1086,7 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         title: String,
         occasions: [Occasion],
         body: String,
+        bodyVariations: [String] = [],
         isFavorite: Bool = false,
         iconSemantic: String = "occasion",
         iconID: String? = nil,
@@ -976,17 +1096,11 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         channels: [ContactMethod] = [],
         languages: [String] = [],
         emailSubject: String? = nil,
-        isDefault: Bool = false,
         isBuiltIn: Bool = false,
         isArchived: Bool = false,
         createdAt: Date = .now,
         updatedAt: Date = .now,
-        usageCount: Int = 0,
-        lastUsedAt: Date? = nil,
-        revisionNumber: Int = 1,
-        isApproved: Bool? = nil,
-        approvedAt: Date? = nil,
-        isLocked: Bool? = nil
+        revisionNumber: Int = 1
     ) {
         var normalizedOccasions: [Occasion] = []
         for occasion in occasions where !normalizedOccasions.contains(occasion) {
@@ -997,6 +1111,8 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         self.title = title
         self.occasions = normalizedOccasions
         self.body = body
+        self.bodyVariations = bodyVariations
+        self.nextVariationIndex = 0
         self.isFavorite = isFavorite
         self.iconSemantic = iconSemantic
         self.iconID = iconID ?? normalizedOccasions.first?.icon ?? "text.quote"
@@ -1006,29 +1122,26 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         self.channels = channels
         self.languages = languages
         self.emailSubject = emailSubject
-        self.isDefault = isDefault
         self.isBuiltIn = isBuiltIn
         self.isArchived = isArchived
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.usageCount = max(0, usageCount)
-        self.lastUsedAt = lastUsedAt
         self.revisionNumber = max(1, revisionNumber)
-        self.isApproved = isApproved ?? isBuiltIn
-        self.approvedAt = approvedAt ?? (isBuiltIn ? createdAt : nil)
-        self.isLocked = isLocked ?? isBuiltIn
     }
 
     /// The supported interpolation tokens, without braces.
-    static let supportedTokens: Set<String> = ["first_name", "name", "organization", "occasion", "date", "sender_name"]
+    static let supportedTokens: Set<String> = ["first_name", "preferred_name", "last_name", "name", "organization", "occasion", "date", "sender_name"]
 
     var validationErrors: [String] {
         var errors: [String] = []
         if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { errors.append("A title is required.") }
         if body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { errors.append("A body is required.") }
+        if bodyVariations.contains(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            errors.append(String(localized: "Every variation needs a message."))
+        }
         if occasions.isEmpty { errors.append("At least one occasion is required.") }
         let tokenPattern = #"\{\{([A-Za-z0-9_]+)\}\}"#
-        for source in [body, emailSubject ?? ""] where !source.isEmpty {
+        for source in messageBodies + [emailSubject ?? ""] where !source.isEmpty {
             let openingCount = source.components(separatedBy: "{{").count - 1
             let closingCount = source.components(separatedBy: "}}").count - 1
             if openingCount != closingCount {
@@ -1052,10 +1165,11 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, title, occasion, occasions, body, message, isFavorite
+        case bodyVariations, nextVariationIndex
         case iconSemantic, iconID, icon, colorToken, groupID
         case relationships, relationshipAudiences, channels, channelAudiences, languages
-        case emailSubject, isDefault, isBuiltIn, isArchived, createdAt, updatedAt, usageCount, lastUsedAt
-        case revisionNumber, isApproved, approvedAt, isLocked
+        case emailSubject, isBuiltIn, isArchived, createdAt, updatedAt
+        case revisionNumber
     }
 
     init(from decoder: Decoder) throws {
@@ -1068,6 +1182,9 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         body = try container.decodeIfPresent(String.self, forKey: .body)
             ?? container.decodeIfPresent(String.self, forKey: .message)
             ?? ""
+        bodyVariations = try container.decodeIfPresent([String].self, forKey: .bodyVariations) ?? []
+        nextVariationIndex = max(0, try container.decodeIfPresent(Int.self, forKey: .nextVariationIndex) ?? 0)
+            % (bodyVariations.count + 1)
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         iconSemantic = try container.decodeIfPresent(String.self, forKey: .iconSemantic) ?? "occasion"
         iconID = try container.decodeIfPresent(String.self, forKey: .iconID)
@@ -1086,18 +1203,11 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
             ?? []
         languages = try container.decodeIfPresent([String].self, forKey: .languages) ?? []
         emailSubject = try container.decodeIfPresent(String.self, forKey: .emailSubject)
-        isDefault = try container.decodeIfPresent(Bool.self, forKey: .isDefault) ?? false
         isBuiltIn = try container.decodeIfPresent(Bool.self, forKey: .isBuiltIn) ?? false
         isArchived = try container.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
         updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
-        usageCount = max(0, try container.decodeIfPresent(Int.self, forKey: .usageCount) ?? 0)
-        lastUsedAt = try container.decodeIfPresent(Date.self, forKey: .lastUsedAt)
         revisionNumber = max(1, try container.decodeIfPresent(Int.self, forKey: .revisionNumber) ?? 1)
-        isApproved = try container.decodeIfPresent(Bool.self, forKey: .isApproved) ?? isBuiltIn
-        approvedAt = try container.decodeIfPresent(Date.self, forKey: .approvedAt)
-            ?? (isApproved && isBuiltIn ? createdAt : nil)
-        isLocked = try container.decodeIfPresent(Bool.self, forKey: .isLocked) ?? isBuiltIn
     }
 
     func encode(to encoder: Encoder) throws {
@@ -1107,6 +1217,8 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         try container.encode(occasion, forKey: .occasion)
         try container.encode(occasions, forKey: .occasions)
         try container.encode(body, forKey: .body)
+        try container.encode(bodyVariations, forKey: .bodyVariations)
+        try container.encode(nextVariationIndex, forKey: .nextVariationIndex)
         // Keep writing `message` so an older build can still read newly saved data.
         try container.encode(body, forKey: .message)
         try container.encode(isFavorite, forKey: .isFavorite)
@@ -1118,25 +1230,21 @@ struct GreetingTemplate: Identifiable, Hashable, Codable {
         try container.encode(channels, forKey: .channels)
         try container.encode(languages, forKey: .languages)
         try container.encodeIfPresent(emailSubject, forKey: .emailSubject)
-        try container.encode(isDefault, forKey: .isDefault)
         try container.encode(isBuiltIn, forKey: .isBuiltIn)
         try container.encode(isArchived, forKey: .isArchived)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
-        try container.encode(usageCount, forKey: .usageCount)
-        try container.encodeIfPresent(lastUsedAt, forKey: .lastUsedAt)
         try container.encode(revisionNumber, forKey: .revisionNumber)
-        try container.encode(isApproved, forKey: .isApproved)
-        try container.encodeIfPresent(approvedAt, forKey: .approvedAt)
-        try container.encode(isLocked, forKey: .isLocked)
     }
 }
 
-/// The user-editable portion of a template, kept separate from usage and governance state.
+/// The user-editable portion of a template, used by version history.
 struct TemplateContentSnapshot: Codable, Hashable {
     var title: String
     var occasions: [Occasion]
     var body: String
+    /// Optional so revision history from older backups continues to decode.
+    var bodyVariations: [String]?
     var iconSemantic: String
     var iconID: String
     var colorToken: String
@@ -1150,6 +1258,7 @@ struct TemplateContentSnapshot: Codable, Hashable {
         title = template.title
         occasions = template.occasions
         body = template.body
+        bodyVariations = template.bodyVariations.isEmpty ? nil : template.bodyVariations
         iconSemantic = template.iconSemantic
         iconID = template.iconID
         colorToken = template.colorToken
@@ -1180,48 +1289,6 @@ struct TemplateRevision: Identifiable, Codable, Hashable {
         self.number = max(1, number)
         self.createdAt = createdAt
         self.snapshot = snapshot
-    }
-}
-
-enum TemplateUsageKind: String, CaseIterable, Codable, Hashable, Identifiable {
-    case scheduled
-    case composerOpened
-    case completed
-    case skipped
-    case messageEdited
-
-    var id: Self { self }
-}
-
-/// Metadata-only usage event. Deliberately contains no person or message content.
-struct TemplateUsageRecord: Identifiable, Codable, Hashable {
-    let id: UUID
-    let templateID: UUID
-    let templateRevision: Int?
-    let eventID: UUID?
-    let occurredAt: Date
-    let kind: TemplateUsageKind
-    let occasion: Occasion?
-    let channel: ContactMethod?
-
-    init(
-        id: UUID = UUID(),
-        templateID: UUID,
-        templateRevision: Int? = nil,
-        eventID: UUID? = nil,
-        occurredAt: Date = .now,
-        kind: TemplateUsageKind,
-        occasion: Occasion? = nil,
-        channel: ContactMethod? = nil
-    ) {
-        self.id = id
-        self.templateID = templateID
-        self.templateRevision = templateRevision
-        self.eventID = eventID
-        self.occurredAt = occurredAt
-        self.kind = kind
-        self.occasion = occasion
-        self.channel = channel
     }
 }
 
@@ -1268,15 +1335,21 @@ extension Occasion {
 enum PlanningHorizon: String, CaseIterable, Identifiable {
     case today = "Today"
     case week = "7 days"
-    case month = "30 days"
+    case month = "1 month"
+    case sixMonths = "6 months"
+    case year = "1 year"
+    case twoYears = "2 years"
 
     var id: Self { self }
 
-    var days: Int {
+    var dateComponents: DateComponents {
         switch self {
-        case .today: 1
-        case .week: 7
-        case .month: 30
+        case .today: DateComponents(day: 1)
+        case .week: DateComponents(day: 7)
+        case .month: DateComponents(month: 1)
+        case .sixMonths: DateComponents(month: 6)
+        case .year: DateComponents(year: 1)
+        case .twoYears: DateComponents(year: 2)
         }
     }
 }

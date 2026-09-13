@@ -3,7 +3,7 @@ import Observation
 
 @Observable
 final class AppStore {
-    static let currentPersistenceVersion = 7
+    static let currentPersistenceVersion = 12
     static let maximumArchiveBytes = 25 * 1_024 * 1_024
     private static let recoveryBackupPathKey = "TouchPoint.RecoveryBackupPath"
 
@@ -13,8 +13,7 @@ final class AppStore {
     var templateGroups: [TemplateGroup]
     /// Previous content snapshots, kept outside templates so the active library stays small.
     var templateRevisions: [TemplateRevision]
-    /// Metadata-only usage events; no message text or person identifiers are stored here.
-    var templateUsage: [TemplateUsageRecord]
+    var occasionNodes: [OccasionNode]
     /// Short alias for clients that refer to groups simply as `groups`.
     var groups: [TemplateGroup] {
         get { templateGroups }
@@ -32,8 +31,10 @@ final class AppStore {
     /// Distinguishes a fresh built-in-only workspace from meaningful local content
     /// when a device performs its first CloudKit reconciliation.
     var hasUserContent: Bool {
-        if !people.isEmpty || !events.isEmpty || !templateRevisions.isEmpty || !templateUsage.isEmpty { return true }
+        if occasionNodes != OccasionNode.defaults() { return true }
+        if !people.isEmpty || !events.isEmpty || !templateRevisions.isEmpty { return true }
         if templates.contains(where: { !$0.isBuiltIn }) { return true }
+        if templates.count != Self.builtInTemplateLibrary().templates.count { return true }
         let builtInGroupIDs = Set(templates.filter(\.isBuiltIn).compactMap(\.groupID))
         return templateGroups.contains { !builtInGroupIDs.contains($0.id) }
     }
@@ -44,7 +45,7 @@ final class AppStore {
         templates: [GreetingTemplate],
         templateGroups: [TemplateGroup] = [],
         templateRevisions: [TemplateRevision] = [],
-        templateUsage: [TemplateUsageRecord] = [],
+        occasionNodes: [OccasionNode] = OccasionNode.defaults(),
         persistenceURL: URL? = nil,
         persistenceError: String? = nil,
         corruptSnapshotBackupURL: URL? = nil,
@@ -56,7 +57,7 @@ final class AppStore {
         self.templates = templates
         self.templateGroups = templateGroups
         self.templateRevisions = templateRevisions
-        self.templateUsage = templateUsage
+        self.occasionNodes = occasionNodes
         self.persistenceURL = persistenceURL
         self.allowsEphemeralPersistence = allowsEphemeralPersistence
         self.persistenceError = persistenceError
@@ -68,10 +69,52 @@ final class AppStore {
         people.first { $0.id == event.personID }
     }
 
+    var contactablePeople: [Person] { people.filter { !$0.communicationStopped } }
+
+    func peopleMissingDates(focus: Focus) -> [Person] {
+        people
+            .filter { focus.includes($0.relationship) && $0.importantDates.isEmpty }
+            .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
+    }
+
+    private func canPlanGreeting(for personID: UUID) -> Bool {
+        guard let person = people.first(where: { $0.id == personID }) else {
+            persistenceError = "The selected person is no longer available."
+            return false
+        }
+        guard !person.communicationStopped else {
+            persistenceError = String(localized: "Communication with this person is stopped. Turn off Stop communication in their profile before planning greetings.")
+            return false
+        }
+        return true
+    }
+
+    /// The opt-out and queue removal are saved together, with rollback on failure.
+    @discardableResult
+    func setCommunicationStopped(_ stopped: Bool, personID: UUID) -> Bool {
+        guard let index = people.firstIndex(where: { $0.id == personID }) else { return false }
+        let previous = mutableState
+        people[index].communicationStopped = stopped
+        if stopped {
+            let removedIDs = Set(events.filter {
+                $0.personID == personID && ![.completed, .skipped].contains($0.status)
+            }.map(\.id))
+            events.removeAll { removedIDs.contains($0.id) }
+        }
+        guard save() else { restore(previous); return false }
+        return true
+    }
+
     @discardableResult
     func addPerson(_ person: Person) -> Bool {
+        guard person.hasContactInfo else {
+            persistenceError = String(localized: "Enter a phone number or email address.")
+            return false
+        }
+        let previous = mutableState
         people.append(person)
-        guard save() else { people.removeLast(); return false }
+        synchronizeOccasionGreetings(for: person, previous: nil)
+        guard save() else { restore(previous); return false }
         return true
     }
 
@@ -80,8 +123,13 @@ final class AppStore {
     @discardableResult
     func addPeople(_ newPeople: [Person]) -> Int {
         guard !newPeople.isEmpty else { return 0 }
+        guard newPeople.allSatisfy(\.hasContactInfo) else {
+            persistenceError = String(localized: "Each person must have a phone number or email address.")
+            return 0
+        }
         let previous = mutableState
         people.append(contentsOf: newPeople)
+        for person in newPeople { synchronizeOccasionGreetings(for: person, previous: nil) }
         guard save() else { restore(previous); return 0 }
         return newPeople.count
     }
@@ -89,25 +137,23 @@ final class AppStore {
     @discardableResult
     func updatePerson(_ person: Person) -> Bool {
         guard let index = people.firstIndex(where: { $0.id == person.id }) else { return false }
+        let state = mutableState
         let previous = people[index]
         people[index] = person
-        guard save() else { people[index] = previous; return false }
+        // A stale editor must not undo a separately confirmed communication choice.
+        people[index].communicationStopped = previous.communicationStopped
+        synchronizeOccasionGreetings(for: people[index], previous: previous)
+        guard save() else { restore(state); return false }
         return true
     }
 
-    /// Removes a person and all greetings scheduled for them. Usage records tied to
-    /// those greetings are removed as well; unrelated template history is retained.
+    /// Removes a person and all greetings scheduled for them.
     @discardableResult
     func deletePerson(id: UUID) -> Bool {
         guard let index = people.firstIndex(where: { $0.id == id }) else { return false }
         let previous = mutableState
-        let eventIDs = Set(events.filter { $0.personID == id }.map(\.id))
         people.remove(at: index)
         events.removeAll { $0.personID == id }
-        templateUsage.removeAll { record in
-            guard let eventID = record.eventID else { return false }
-            return eventIDs.contains(eventID)
-        }
         guard save() else { restore(previous); return false }
         return true
     }
@@ -121,13 +167,14 @@ final class AppStore {
     /// A transaction snapshot used to roll back mutations when the on-disk commit fails.
     private var mutableState: MutableState {
         MutableState(people: people, events: events, templates: templates,
-                     groups: templateGroups, revisions: templateRevisions, usage: templateUsage,
+                     groups: templateGroups, revisions: templateRevisions, occasionNodes: occasionNodes,
                      lastModifiedAt: lastModifiedAt)
     }
 
     private func restore(_ state: MutableState) {
         people = state.people; events = state.events; templates = state.templates
-        templateGroups = state.groups; templateRevisions = state.revisions; templateUsage = state.usage
+        templateGroups = state.groups; templateRevisions = state.revisions
+        occasionNodes = state.occasionNodes
         lastModifiedAt = state.lastModifiedAt
     }
 
@@ -135,11 +182,6 @@ final class AppStore {
     func addTemplate(_ template: GreetingTemplate) -> Bool {
         let previous = mutableState
         var inserted = template
-        if inserted.isBuiltIn {
-            inserted.isApproved = true
-            inserted.approvedAt = inserted.approvedAt ?? inserted.createdAt
-            inserted.isLocked = true
-        }
         inserted.revisionNumber = max(1, inserted.revisionNumber)
         templates.append(inserted)
         guard save() else { restore(previous); return false }
@@ -152,7 +194,6 @@ final class AppStore {
     }
 
     /// Updates a template while preserving source compatibility with the original void API.
-    /// Returns false when the template is locked/built-in and its content was changed.
     @discardableResult
     func updateTemplateResult(_ template: GreetingTemplate) -> Bool {
         guard let index = templates.firstIndex(where: { $0.id == template.id }) else { return false }
@@ -162,17 +203,11 @@ final class AppStore {
         let incomingContent = TemplateContentSnapshot(template: template)
         let contentChanged = currentContent != incomingContent
 
-        guard !contentChanged || (!current.isLocked && !current.isBuiltIn) else { return false }
-
         var updated = template
         // These fields are owned by the store and must not be overwritten by a stale editor draft.
         updated.isBuiltIn = current.isBuiltIn
-        updated.usageCount = current.usageCount
-        updated.lastUsedAt = current.lastUsedAt
+        updated.nextVariationIndex = current.nextVariationIndex % updated.messageBodies.count
         updated.revisionNumber = current.revisionNumber
-        updated.isApproved = current.isApproved
-        updated.approvedAt = current.approvedAt
-        updated.isLocked = current.isLocked
         if contentChanged {
             templateRevisions.append(
                 TemplateRevision(
@@ -183,15 +218,6 @@ final class AppStore {
             )
             retainTemplateRevisionLimit(for: current.id)
             updated.revisionNumber = current.revisionNumber + 1
-            updated.isApproved = false
-            updated.approvedAt = nil
-        }
-        if current.isBuiltIn {
-            // Shipped templates are immutable starter content, even if an old editor draft
-            // or a hand-written JSON payload tries to clear their protection flags.
-            updated.isApproved = true
-            updated.approvedAt = current.approvedAt ?? current.createdAt
-            updated.isLocked = true
         }
         updated.updatedAt = contentChanged ? .now : current.updatedAt
         templates[index] = updated
@@ -207,6 +233,7 @@ final class AppStore {
             title: title ?? "\(source.title) copy",
             occasions: source.occasions,
             body: source.body,
+            bodyVariations: source.bodyVariations,
             isFavorite: false,
             iconSemantic: source.iconSemantic,
             iconID: source.iconID,
@@ -216,11 +243,7 @@ final class AppStore {
             channels: source.channels,
             languages: source.languages,
             emailSubject: source.emailSubject,
-            isDefault: false,
-            isBuiltIn: false,
-            isApproved: false,
-            approvedAt: nil,
-            isLocked: false
+            isBuiltIn: false
         )
         copy.updatedAt = copy.createdAt
         templates.append(copy)
@@ -235,15 +258,15 @@ final class AppStore {
 
     @discardableResult
     func deleteTemplate(id: UUID) -> Bool {
-        guard let index = templates.firstIndex(where: { $0.id == id }),
-              !templates[index].isBuiltIn,
-              !templates[index].isLocked else {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else {
             return false
         }
         let previous = mutableState
         templates.remove(at: index)
+        for index in occasionNodes.indices where occasionNodes[index].templateID == id {
+            occasionNodes[index].templateID = nil
+        }
         templateRevisions.removeAll { $0.templateID == id }
-        templateUsage.removeAll { $0.templateID == id }
         guard save() else { restore(previous); return false }
         return true
     }
@@ -274,31 +297,6 @@ final class AppStore {
         return setTemplateFavorite(id: id, isFavorite: !template.isFavorite)
     }
 
-    /// Approves or clears approval for this local library. Approval is not a team/server claim.
-    @discardableResult
-    func setTemplateApproval(id: UUID, approved: Bool, at date: Date = .now) -> Bool {
-        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
-        if templates[index].isBuiltIn && !approved { return false }
-        let previous = mutableState
-        templates[index].isApproved = approved
-        templates[index].approvedAt = approved ? date : nil
-        templates[index].updatedAt = date
-        guard save() else { restore(previous); return false }
-        return true
-    }
-
-    /// Locks or unlocks local editing. Built-in templates remain immutable and locked.
-    @discardableResult
-    func setTemplateLock(id: UUID, locked: Bool) -> Bool {
-        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
-        if templates[index].isBuiltIn && !locked { return false }
-        let previous = mutableState
-        templates[index].isLocked = locked
-        templates[index].updatedAt = .now
-        guard save() else { restore(previous); return false }
-        return true
-    }
-
     func templateRevisions(for templateID: UUID) -> [TemplateRevision] {
         templateRevisions
             .filter { $0.templateID == templateID }
@@ -306,12 +304,6 @@ final class AppStore {
                 if lhs.number != rhs.number { return lhs.number > rhs.number }
                 return lhs.createdAt > rhs.createdAt
             }
-    }
-
-    func usageRecords(for templateID: UUID) -> [TemplateUsageRecord] {
-        templateUsage
-            .filter { $0.templateID == templateID }
-            .sorted { $0.occurredAt > $1.occurredAt }
     }
 
     /// Restoring is additive: it creates a new revision and leaves the old revision intact.
@@ -328,6 +320,7 @@ final class AppStore {
         restored.title = snapshot.title
         restored.occasions = snapshot.occasions
         restored.body = snapshot.body
+        restored.bodyVariations = snapshot.bodyVariations ?? []
         restored.iconSemantic = snapshot.iconSemantic
         restored.iconID = snapshot.iconID
         restored.colorToken = snapshot.colorToken
@@ -339,28 +332,6 @@ final class AppStore {
         restored.languages = snapshot.languages
         restored.emailSubject = snapshot.emailSubject
         return updateTemplateResult(restored)
-    }
-
-    @discardableResult
-    func setTemplateDefault(id: UUID, isDefault: Bool = true) -> Bool {
-        guard let index = templates.firstIndex(where: { $0.id == id }) else { return false }
-        let previous = mutableState
-        let occasions = Set(templates[index].occasions)
-        let relationships = Set(templates[index].relationships)
-        let channels = Set(templates[index].channels)
-        let languages = Set(templates[index].languages.map { $0.lowercased() })
-        for otherIndex in templates.indices where
-            otherIndex != index
-                && !occasions.isDisjoint(with: templates[otherIndex].occasions)
-                && relationships == Set(templates[otherIndex].relationships)
-                && channels == Set(templates[otherIndex].channels)
-                && languages == Set(templates[otherIndex].languages.map { $0.lowercased() }) {
-            templates[otherIndex].isDefault = false
-        }
-        templates[index].isDefault = isDefault
-        templates[index].updatedAt = .now
-        guard save() else { restore(previous); return false }
-        return true
     }
 
     // MARK: Template groups
@@ -475,7 +446,6 @@ final class AppStore {
                 let left = resolutionScore(lhs, relationship: relationship, channel: channel, language: requestedLanguage)
                 let right = resolutionScore(rhs, relationship: relationship, channel: channel, language: requestedLanguage)
                 if left != right { return left > right }
-                if lhs.usageCount != rhs.usageCount { return lhs.usageCount > rhs.usageCount }
                 if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
                 return lhs.id.uuidString < rhs.id.uuidString
             }
@@ -506,7 +476,6 @@ final class AppStore {
         if relationship != nil && !template.relationships.isEmpty { score += 16 }
         if channel != nil && !template.channels.isEmpty { score += 8 }
         if let language, !language.isEmpty, template.languages.contains(where: { $0.lowercased() == language }) { score += 8 }
-        if template.isDefault { score += 4 }
         if template.isFavorite { score += 2 }
         if template.isBuiltIn { score += 1 }
         return score
@@ -518,9 +487,12 @@ final class AppStore {
         occasion: Occasion,
         date: Date? = nil,
         occasionName: String? = nil,
-        senderName: String = AppPreferences.storedSenderName
+        senderName: String = AppPreferences.storedSenderName,
+        variationIndex: Int? = nil
     ) -> String {
-        let source = template?.body
+        let source = template.map {
+            $0.messageBodies[max(0, variationIndex ?? $0.nextVariationIndex) % $0.messageBodies.count]
+        }
             ?? "Wishing you a wonderful \((normalizedCustomName(occasionName) ?? occasion.title).lowercased()), {{first_name}}!"
         return renderTokens(
             source,
@@ -556,7 +528,7 @@ final class AppStore {
     /// partially corrupt it.
     func templateTextReplacingRecipientNames(_ text: String, person: Person) -> String {
         let fullName = person.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let firstName = fullName.split(separator: " ").first.map(String.init) ?? fullName
+        let firstName = person.firstName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !fullName.isEmpty else { return text }
         var result = text.replacingOccurrences(of: fullName, with: "{{name}}")
         if !firstName.isEmpty, firstName != fullName {
@@ -598,11 +570,12 @@ final class AppStore {
         occasionName: String? = nil,
         senderName: String
     ) -> String {
-        let firstName = person.name.split(separator: " ").first.map(String.init) ?? person.name
         let dateText = recipientDateText(date ?? .now, person: person)
         let renderedOccasion = normalizedCustomName(occasionName) ?? occasion.title
         return source
-            .replacingOccurrences(of: "{{first_name}}", with: firstName)
+            .replacingOccurrences(of: "{{first_name}}", with: person.firstName.trimmingCharacters(in: .whitespacesAndNewlines))
+            .replacingOccurrences(of: "{{preferred_name}}", with: person.preferredName.trimmingCharacters(in: .whitespacesAndNewlines))
+            .replacingOccurrences(of: "{{last_name}}", with: person.lastName.trimmingCharacters(in: .whitespacesAndNewlines))
             .replacingOccurrences(of: "{{name}}", with: person.name)
             .replacingOccurrences(of: "{{organization}}", with: person.organization)
             .replacingOccurrences(of: "{{occasion}}", with: renderedOccasion)
@@ -622,71 +595,10 @@ final class AppStore {
         return date.formatted(style)
     }
 
-    @discardableResult
-    func recordTemplateUsage(id: UUID, at date: Date = .now) -> Bool {
-        guard templates.contains(where: { $0.id == id }) else { return false }
-        let previous = mutableState
-        recordUsage(
-            templateID: id,
-            revision: templates.first(where: { $0.id == id })?.revisionNumber,
-            eventID: nil,
-            kind: .scheduled,
-            occasion: nil,
-            channel: nil,
-            at: date,
-            incrementSummary: true
-        )
-        guard save() else { restore(previous); return false }
-        return true
-    }
-
-    /// Records that a composer was opened for a scheduled event. This is intentionally
-    /// separate from completion because opening a composer is not evidence of delivery.
-    @discardableResult
-    func recordComposerOpened(eventID: UUID, at date: Date = .now) -> Bool {
-        guard let event = events.first(where: { $0.id == eventID }),
-              let templateID = event.sourceTemplateID else { return false }
-        let previous = mutableState
-        recordUsage(
-            templateID: templateID,
-            revision: event.sourceTemplateRevision,
-            eventID: eventID,
-            kind: .composerOpened,
-            occasion: event.occasion,
-            channel: event.method,
-            at: date,
-            incrementSummary: false
-        )
-        guard save() else { restore(previous); return false }
-        return true
-    }
-
-    private func recordUsage(
-        templateID: UUID,
-        revision: Int?,
-        eventID: UUID?,
-        kind: TemplateUsageKind,
-        occasion: Occasion?,
-        channel: ContactMethod?,
-        at date: Date,
-        incrementSummary: Bool
-    ) {
-        templateUsage.append(
-            TemplateUsageRecord(
-                templateID: templateID,
-                templateRevision: revision,
-                eventID: eventID,
-                occurredAt: date,
-                kind: kind,
-                occasion: occasion,
-                channel: channel
-            )
-        )
-        if incrementSummary,
-           let index = templates.firstIndex(where: { $0.id == templateID }) {
-            templates[index].usageCount += 1
-            templates[index].lastUsedAt = date
-        }
+    /// Advance message rotation only when a greeting is committed.
+    private func advanceTemplateVariation(id: UUID) {
+        guard let index = templates.firstIndex(where: { $0.id == id }) else { return }
+        templates[index].advanceVariation()
     }
 
     func event(id: UUID) -> GreetingEvent? {
@@ -697,24 +609,12 @@ final class AppStore {
     /// one-time, and annual events created outside the bulk year planner.
     @discardableResult
     func addGreeting(_ event: GreetingEvent) -> Bool {
-        guard people.contains(where: { $0.id == event.personID }) else {
-            persistenceError = "The selected person is no longer available."
-            return false
-        }
+        guard canPlanGreeting(for: event.personID) else { return false }
         let previous = mutableState
         events.append(event)
         if let templateID = event.sourceTemplateID,
            templates.contains(where: { $0.id == templateID }) {
-            recordUsage(
-                templateID: templateID,
-                revision: event.sourceTemplateRevision,
-                eventID: event.id,
-                kind: .scheduled,
-                occasion: event.occasion,
-                channel: event.method,
-                at: .now,
-                incrementSummary: true
-            )
+            advanceTemplateVariation(id: templateID)
         }
         guard save() else { restore(previous); return false }
         return true
@@ -727,18 +627,6 @@ final class AppStore {
         let previous = mutableState
         events[index].status = .completed
         ensureNextAnnualOccurrence(after: events[index])
-        if let templateID = events[index].sourceTemplateID {
-            recordUsage(
-                templateID: templateID,
-                revision: events[index].sourceTemplateRevision,
-                eventID: id,
-                kind: .completed,
-                occasion: events[index].occasion,
-                channel: events[index].method,
-                at: .now,
-                incrementSummary: false
-            )
-        }
         guard save() else { restore(previous); return false }
         return true
     }
@@ -750,18 +638,6 @@ final class AppStore {
         let previous = mutableState
         events[index].status = .skipped
         ensureNextAnnualOccurrence(after: events[index])
-        if let templateID = events[index].sourceTemplateID {
-            recordUsage(
-                templateID: templateID,
-                revision: events[index].sourceTemplateRevision,
-                eventID: id,
-                kind: .skipped,
-                occasion: events[index].occasion,
-                channel: events[index].method,
-                at: .now,
-                incrementSummary: false
-            )
-        }
         guard save() else { restore(previous); return false }
         return true
     }
@@ -770,17 +646,24 @@ final class AppStore {
     /// A matching future occurrence is never duplicated.
     private func ensureNextAnnualOccurrence(after event: GreetingEvent) {
         guard event.recurrence == .annual,
-              let person = people.first(where: { $0.id == event.personID }) else { return }
+              let person = people.first(where: { $0.id == event.personID }),
+              !person.communicationStopped else { return }
         let calendar = calendar(for: person)
         var nextDate = calendar.date(byAdding: .year, value: 1, to: event.date) ?? event.date
         while nextDate <= Date.now {
             guard let advanced = calendar.date(byAdding: .year, value: 1, to: nextDate) else { return }
             nextDate = advanced
         }
+        if let saved = person.importantDates.first(where: { $0.id == event.sourceImportantDateID }),
+           let afterEventDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: event.date)),
+           let resolved = nextImportantDate(saved, for: person, after: max(afterEventDay, .now)) {
+            nextDate = resolved
+        }
         let duplicateExists = events.contains { candidate in
             candidate.id != event.id
                 && candidate.personID == event.personID
                 && candidate.occasion == event.occasion
+                && (candidate.occasionID == nil || event.occasionID == nil || candidate.occasionID == event.occasionID)
                 && candidate.customName == event.customName
                 && calendar.isDate(candidate.date, inSameDayAs: nextDate)
         }
@@ -805,7 +688,7 @@ final class AppStore {
                 occasionName: event.customName
             )
         } ?? event.subject
-        events.append(GreetingEvent(
+        let nextEvent = GreetingEvent(
             personID: event.personID,
             occasion: event.occasion,
             date: nextDate,
@@ -814,15 +697,22 @@ final class AppStore {
             message: message,
             subject: subject,
             sourceTemplateID: event.sourceTemplateID,
-            sourceTemplateRevision: event.sourceTemplateRevision,
+            sourceTemplateRevision: sourceTemplate?.revisionNumber ?? event.sourceTemplateRevision,
             customName: event.customName,
-            recurrence: .annual
-        ))
+            recurrence: .annual,
+            occasionID: event.occasionID,
+            sourceImportantDateID: event.sourceImportantDateID
+        )
+        events.append(nextEvent)
+        if let sourceTemplate {
+            advanceTemplateVariation(id: sourceTemplate.id)
+        }
     }
 
     @discardableResult
     func restoreGreeting(id: UUID) -> Bool {
         guard let index = events.firstIndex(where: { $0.id == id }), events[index].status == .skipped else { return false }
+        guard canPlanGreeting(for: events[index].personID) else { return false }
         let previous = mutableState
         events[index].status = .planned
         guard save() else { restore(previous); return false }
@@ -835,18 +725,6 @@ final class AppStore {
         guard events[index].message != message else { return true }
         let previous = mutableState
         events[index].message = message
-        if let templateID = events[index].sourceTemplateID {
-            recordUsage(
-                templateID: templateID,
-                revision: events[index].sourceTemplateRevision,
-                eventID: id,
-                kind: .messageEdited,
-                occasion: events[index].occasion,
-                channel: events[index].method,
-                at: .now,
-                incrementSummary: false
-            )
-        }
         guard save() else { restore(previous); return false }
         return true
     }
@@ -855,6 +733,7 @@ final class AppStore {
     @discardableResult
     func updateGreeting(_ event: GreetingEvent) -> Bool {
         guard let index = events.firstIndex(where: { $0.id == event.id }) else { return false }
+        guard canPlanGreeting(for: event.personID) else { return false }
         let previous = mutableState
         events[index] = event
         guard save() else { restore(previous); return false }
@@ -866,7 +745,6 @@ final class AppStore {
         guard let index = events.firstIndex(where: { $0.id == id }) else { return false }
         let previous = mutableState
         events.remove(at: index)
-        templateUsage.removeAll { $0.eventID == id }
         guard save() else { restore(previous); return false }
         return true
     }
@@ -874,6 +752,7 @@ final class AppStore {
     @discardableResult
     func rescheduleGreeting(id: UUID, date: Date, method: ContactMethod? = nil) -> Bool {
         guard let index = events.firstIndex(where: { $0.id == id }) else { return false }
+        guard canPlanGreeting(for: events[index].personID) else { return false }
         let previous = mutableState
         let person = people.first { $0.id == events[index].personID }
         if let person {
@@ -945,7 +824,7 @@ final class AppStore {
     ) -> Int {
         let referenceDate = Date.now
         let previous = mutableState
-        let selectedPeople = people.filter { personIDs.contains($0.id) }
+        let selectedPeople = contactablePeople.filter { personIDs.contains($0.id) }
         var created = 0
 
         for person in selectedPeople {
@@ -965,7 +844,8 @@ final class AppStore {
                         occasion: occasion,
                         customName: customName,
                         date: date,
-                        calendar: calendar
+                        calendar: calendar,
+                        occasionID: occurrence.occasionID
                     ) else { continue }
 
                     guard let resolvedMethod = resolvedContactMethod(
@@ -980,7 +860,8 @@ final class AppStore {
                     let occasionTemplate = templateIDsByOccasion[occasion].flatMap { templateID in
                         templates.first { $0.id == templateID && !$0.isArchived && $0.occasions.contains(occasion) }
                     }
-                    let explicitTemplate = recipientTemplate ?? occasionTemplate
+                    let libraryNode = occasionNodes.first { $0.id == occurrence.occasionID }
+                    let explicitTemplate = recipientTemplate ?? occasionTemplate ?? attachedTemplate(for: libraryNode)
                     let template = explicitTemplate ?? resolveTemplate(
                         for: person,
                         occasion: occasion,
@@ -1016,20 +897,13 @@ final class AppStore {
                             },
                             sourceTemplateID: template?.id,
                             sourceTemplateRevision: template?.revisionNumber,
-                            customName: customName
+                            customName: customName,
+                            occasionID: occurrence.occasionID,
+                            sourceImportantDateID: occurrence.importantDateID
                         )
                     )
                     if let template {
-                        recordUsage(
-                            templateID: template.id,
-                            revision: template.revisionNumber,
-                            eventID: eventID,
-                            kind: .scheduled,
-                            occasion: occasion,
-                            channel: resolvedMethod,
-                            at: referenceDate,
-                            incrementSummary: true
-                        )
+                        advanceTemplateVariation(id: template.id)
                     }
                     created += 1
                 }
@@ -1048,7 +922,7 @@ final class AppStore {
     ) -> Int {
         let referenceDate = Date.now
 
-        return people
+        return contactablePeople
             .filter { personIDs.contains($0.id) }
             .reduce(into: 0) { count, person in
                 let calendar = calendar(for: person)
@@ -1064,7 +938,8 @@ final class AppStore {
                             occasion: occasion,
                             customName: occurrence.customName,
                             date: occurrence.date,
-                            calendar: calendar
+                            calendar: calendar,
+                            occasionID: occurrence.occasionID
                         ) else {
                             continue
                         }
@@ -1079,12 +954,16 @@ final class AppStore {
         occasion: Occasion,
         customName: String? = nil,
         date: Date,
-        calendar: Calendar
+        calendar: Calendar,
+        occasionID: String? = nil
     ) -> Bool {
         events.contains {
             $0.personID == personID
                 && $0.occasion == occasion
-                && (occasion != .custom || normalizedCustomName($0.customName) == normalizedCustomName(customName))
+                && ($0.occasionID == nil || occasionID == nil || $0.occasionID == occasionID)
+                && (occasion != .custom
+                    || (occasionID != nil && occasionID != "occasion:custom" && $0.occasionID == occasionID)
+                    || normalizedCustomName($0.customName) == normalizedCustomName(customName))
                 && calendar.isDate($0.date, inSameDayAs: date)
         }
     }
@@ -1094,32 +973,23 @@ final class AppStore {
         person: Person,
         after referenceDate: Date,
         calendar: Calendar
-    ) -> [(date: Date, customName: String?)] {
-        if occasion == .custom {
-            return person.importantDates
-                .filter { $0.occasion == .custom }
-                .compactMap { importantDate in
-                    guard let date = nextDate(
-                        for: occasion,
-                        person: person,
-                        after: referenceDate,
-                        calendar: calendar,
-                        importantDate: importantDate
-                    ) else { return nil }
-                    return (date, normalizedCustomName(importantDate.customName))
-                }
+    ) -> [(date: Date, customName: String?, occasionID: String?, importantDateID: UUID?)] {
+        let savedDates = person.importantDates.filter { $0.occasion == occasion }
+        if !savedDates.isEmpty {
+            return savedDates.compactMap { saved in
+                guard let date = nextImportantDate(saved, for: person, after: referenceDate) else { return nil }
+                return (date, normalizedCustomName(saved.customName), occasionNode(for: saved)?.id, saved.id)
+            }
         }
-
-        guard let date = nextDate(
-            for: occasion,
-            person: person,
-            after: referenceDate,
-            calendar: calendar
-        ) else { return [] }
-        let customName = person.importantDates
-            .first(where: { $0.occasion == occasion })
-            .flatMap { normalizedCustomName($0.customName) }
-        return [(date, customName)]
+        let node = occasionNodes.first { $0.builtInOccasion == occasion }
+        let date: Date?
+        if let node, node.dateRule == .fixedDate {
+            date = nextOccasionDate(node, for: person, after: referenceDate)
+        } else {
+            date = nextDate(for: occasion, person: person, after: referenceDate, calendar: calendar)
+        }
+        guard let date else { return [] }
+        return [(date, node.flatMap { $0.name.isEmpty ? nil : $0.title }, node?.id, nil)]
     }
 
     private func nextDate(
@@ -1381,7 +1251,7 @@ final class AppStore {
                 templates: templates,
                 templateGroups: templateGroups,
                 templateRevisions: templateRevisions,
-                templateUsage: templateUsage
+                occasionNodes: occasionNodes
             )
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
@@ -1404,7 +1274,11 @@ final class AppStore {
     }
 
     @discardableResult
-    private func upgradeTemplateLibraryIfNeeded() -> Bool {
+    private func upgradeTemplateLibraryIfNeeded(fromVersion version: Int = 0) -> Bool {
+        let restoredHomeTemplates = version < 11 ? restoreHomeAnniversaryTemplates() : false
+        // Starter content is seeded/migrated once. Never recreate deleted entries or
+        // overwrite edits when opening a current workspace or syncing its archive.
+        guard version < 8 else { return restoredHomeTemplates }
         let previousTemplates = templates
         let previousGroups = templateGroups
 
@@ -1457,18 +1331,53 @@ final class AppStore {
                 if templates[index].channels.isEmpty { templates[index].channels = builtIn.channels }
                 if templates[index].languages.isEmpty { templates[index].languages = builtIn.languages }
                 if templates[index].emailSubject == nil { templates[index].emailSubject = builtIn.emailSubject }
-                templates[index].isDefault = builtIn.isDefault
             } else {
                 templates.append(builtIn)
             }
         }
-        for index in templates.indices where templates[index].isBuiltIn {
-            templates[index].isApproved = true
-            templates[index].approvedAt = templates[index].approvedAt ?? templates[index].createdAt
-            templates[index].isLocked = true
-        }
         normalizeGroupOrder()
-        return previousTemplates != templates || previousGroups != templateGroups
+        return restoredHomeTemplates || previousTemplates != templates || previousGroups != templateGroups
+    }
+
+    /// Undo only the shipped home-to-wedding replacement, preserving user edits,
+    /// deleted entries, template IDs, and already scheduled greetings.
+    private func restoreHomeAnniversaryTemplates() -> Bool {
+        let replacements = [
+            (title: "Happy wedding anniversary",
+             body: "Happy wedding anniversary, {{first_name}}! Wishing you both many more years of love, happiness, and wonderful memories together.",
+             originalTitle: "A year at home",
+             originalBody: "Happy home anniversary, {{first_name}}! I hope your home is still your favorite place to be.",
+             color: "blue"),
+            (title: "Wedding anniversary wishes",
+             body: "Happy wedding anniversary, {{first_name}}! Warm wishes to you both for a wonderful celebration and many happy years ahead.",
+             originalTitle: "A client home milestone",
+             originalBody: "Happy home anniversary, {{first_name}}! I hope this milestone still brings you plenty of joy.",
+             color: "teal")
+        ]
+        var changed = false
+        for replacement in replacements {
+            for index in templates.indices where templates[index].isBuiltIn
+                && templates[index].title == replacement.title
+                && templates[index].body == replacement.body
+                && templates[index].occasions == [.weddingAnniversary] {
+                let current = templates[index]
+                templateRevisions.append(TemplateRevision(templateID: current.id,
+                    number: current.revisionNumber, snapshot: TemplateContentSnapshot(template: current)))
+                retainTemplateRevisionLimit(for: current.id)
+                templates[index].title = replacement.originalTitle
+                templates[index].body = replacement.originalBody
+                templates[index].occasions = [.homeAnniversary]
+                if current.iconID == "heart" { templates[index].iconID = "house" }
+                if current.colorToken == "rose" { templates[index].colorToken = replacement.color }
+                if current.emailSubject == "Happy wedding anniversary" {
+                    templates[index].emailSubject = "Happy home anniversary"
+                }
+                templates[index].revisionNumber += 1
+                templates[index].updatedAt = .now
+                changed = true
+            }
+        }
+        return changed
     }
 
     private static func builtInTemplates(
@@ -1481,91 +1390,91 @@ final class AppStore {
                 title: "Warm and simple", occasions: [.birthday],
                 body: "Happy birthday, {{first_name}}! Wishing you a wonderful day and a bright year ahead.",
                 isFavorite: true, iconID: "birthday.cake", colorToken: "coral", groupID: personalGroupID,
-                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Birthday note", occasions: [.birthday],
                 body: "Happy birthday, {{first_name}}! I hope the year ahead brings plenty of reasons to celebrate.",
                 iconID: "envelope", colorToken: "coral", groupID: personalGroupID,
                 relationships: [.family, .friend], channels: [.email], languages: ["English"],
-                emailSubject: "Happy birthday, {{first_name}}", isDefault: true, isBuiltIn: true
+                emailSubject: "Happy birthday, {{first_name}}", isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Un cumpleaños especial", occasions: [.birthday],
                 body: "¡Feliz cumpleaños, {{first_name}}! Que tengas un día maravilloso y un año lleno de alegrías.",
                 iconID: "birthday.cake", colorToken: "coral", groupID: personalGroupID,
-                relationships: [.family, .friend], channels: [.sms, .email], languages: ["Spanish"], isDefault: true, isBuiltIn: true
+                relationships: [.family, .friend], channels: [.sms, .email], languages: ["Spanish"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "A year at home", occasions: [.homeAnniversary],
                 body: "Happy home anniversary, {{first_name}}! I hope your home is still your favorite place to be.",
                 isFavorite: true, iconID: "house", colorToken: "blue", groupID: personalGroupID,
-                relationships: [.family, .friend], languages: ["English"], isDefault: true, isBuiltIn: true
+                relationships: [.family, .friend], languages: ["English"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Celebrate together", occasions: [.weddingAnniversary],
                 body: "Happy anniversary! Wishing you both another year full of great memories.",
                 iconID: "heart", colorToken: "rose", groupID: personalGroupID,
-                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Anniversary letter", occasions: [.weddingAnniversary],
                 body: "Warm wishes on your anniversary. May the next chapter bring even more joy to you both.",
                 iconID: "envelope", colorToken: "rose", groupID: personalGroupID,
                 relationships: [.family, .friend], channels: [.email], languages: ["English"],
-                emailSubject: "Warm anniversary wishes", isDefault: true, isBuiltIn: true
+                emailSubject: "Warm anniversary wishes", isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Professional birthday", occasions: [.birthday],
                 body: "Happy birthday, {{first_name}}! Wishing you continued success and a wonderful year ahead.",
                 iconID: "briefcase", colorToken: "teal", groupID: workGroupID,
-                relationships: [.client, .colleague], channels: [.email, .sms], languages: ["English"], isDefault: true, isBuiltIn: true
+                relationships: [.client, .colleague], channels: [.email, .sms], languages: ["English"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Client thank you", occasions: [.clientAppreciation],
                 body: "Thinking of you today, {{first_name}}. Thank you for trusting me to be part of your journey.",
                 iconID: "hands.sparkles", colorToken: "teal", groupID: workGroupID,
                 relationships: [.client], channels: [.email, .sms], languages: ["English"],
-                emailSubject: "Thank you, {{first_name}}", isDefault: true, isBuiltIn: true
+                emailSubject: "Thank you, {{first_name}}", isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "A client home milestone", occasions: [.homeAnniversary],
                 body: "Happy home anniversary, {{first_name}}! I hope this milestone still brings you plenty of joy.",
                 iconID: "house", colorToken: "teal", groupID: workGroupID,
                 relationships: [.client], channels: [.email], languages: ["English"],
-                emailSubject: "Happy home anniversary", isDefault: true, isBuiltIn: true
+                emailSubject: "Happy home anniversary", isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Grateful for you", occasions: [.thanksgiving],
                 body: "Happy Thanksgiving, {{first_name}}! I am grateful to have you in my life.",
                 iconID: "leaf", colorToken: "amber", groupID: seasonalGroupID,
-                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Thanksgiving appreciation", occasions: [.thanksgiving],
                 body: "This Thanksgiving, I wanted to say how much I appreciate our relationship. Warm wishes to you, {{first_name}}.",
                 iconID: "leaf", colorToken: "amber", groupID: seasonalGroupID,
                 relationships: [.client, .colleague], channels: [.email], languages: ["English"],
-                emailSubject: "With appreciation this Thanksgiving", isDefault: true, isBuiltIn: true
+                emailSubject: "With appreciation this Thanksgiving", isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Merry and bright", occasions: [.christmas],
                 body: "Merry Christmas, {{first_name}}! Wishing you a joyful day and a bright holiday season.",
                 iconID: "gift", colorToken: "forest", groupID: seasonalGroupID,
-                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isDefault: true, isBuiltIn: true
+                relationships: [.family, .friend], channels: [.sms], languages: ["English"], isBuiltIn: true
             ),
             GreetingTemplate(
                 title: "Holiday appreciation", occasions: [.christmas],
                 body: "Warm holiday wishes, {{first_name}}. Thank you for being an important part of this year.",
                 iconID: "gift", colorToken: "forest", groupID: seasonalGroupID,
                 relationships: [.client, .colleague], channels: [.email], languages: ["English"],
-                emailSubject: "Warm holiday wishes", isDefault: true, isBuiltIn: true
+                emailSubject: "Warm holiday wishes", isBuiltIn: true
             )
         ]
     }
 
     /// The only data seeded into a fresh workspace is the shared starter library.
-    /// People, greetings, history, and usage must always come from the user.
+    /// People, greetings, and history must always come from the user.
     private static func builtInTemplateLibrary() -> (groups: [TemplateGroup], templates: [GreetingTemplate]) {
         let personalGroup = TemplateGroup(name: "Personal", iconSemantic: "personal", iconID: "heart", colorToken: "rose", sortOrder: 0)
         let workGroup = TemplateGroup(name: "Work", iconSemantic: "work", iconID: "briefcase", colorToken: "teal", sortOrder: 1)
@@ -1630,7 +1539,7 @@ extension AppStore {
                 templates: snapshot.templates,
                 groups: snapshot.templateGroups,
                 revisions: snapshot.templateRevisions,
-                usage: snapshot.templateUsage
+                occasionNodes: snapshot.occasionNodes
             ))
             let store = AppStore(
                 people: snapshot.people,
@@ -1638,12 +1547,12 @@ extension AppStore {
                 templates: snapshot.templates,
                 templateGroups: snapshot.templateGroups,
                 templateRevisions: snapshot.templateRevisions,
-                templateUsage: snapshot.templateUsage,
+                occasionNodes: snapshot.occasionNodes,
                 persistenceURL: url,
                 corruptSnapshotBackupURL: recoverableSnapshotURL(),
                 lastModifiedAt: snapshot.modifiedAt
             )
-            if store.upgradeTemplateLibraryIfNeeded() {
+            if store.upgradeTemplateLibraryIfNeeded(fromVersion: snapshot.version) || snapshot.version < Self.currentPersistenceVersion {
                 store.save()
             }
             return store
@@ -1703,7 +1612,7 @@ private struct StoredAppData: Codable {
     let templates: [GreetingTemplate]
     let templateGroups: [TemplateGroup]
     let templateRevisions: [TemplateRevision]
-    let templateUsage: [TemplateUsageRecord]
+    let occasionNodes: [OccasionNode]
 
     init(
         version: Int,
@@ -1713,7 +1622,7 @@ private struct StoredAppData: Codable {
         templates: [GreetingTemplate],
         templateGroups: [TemplateGroup] = [],
         templateRevisions: [TemplateRevision] = [],
-        templateUsage: [TemplateUsageRecord] = []
+        occasionNodes: [OccasionNode] = OccasionNode.defaults()
     ) {
         self.version = version
         self.modifiedAt = modifiedAt
@@ -1722,7 +1631,7 @@ private struct StoredAppData: Codable {
         self.templates = templates
         self.templateGroups = templateGroups
         self.templateRevisions = templateRevisions
-        self.templateUsage = templateUsage
+        self.occasionNodes = occasionNodes
     }
 
     init(from decoder: Decoder) throws {
@@ -1734,11 +1643,11 @@ private struct StoredAppData: Codable {
         templates = try container.decodeIfPresent([GreetingTemplate].self, forKey: .templates) ?? []
         templateGroups = try container.decodeIfPresent([TemplateGroup].self, forKey: .templateGroups) ?? []
         templateRevisions = try container.decodeIfPresent([TemplateRevision].self, forKey: .templateRevisions) ?? []
-        templateUsage = try container.decodeIfPresent([TemplateUsageRecord].self, forKey: .templateUsage) ?? []
+        occasionNodes = try container.decodeIfPresent([OccasionNode].self, forKey: .occasionNodes) ?? OccasionNode.defaults()
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, modifiedAt, people, events, templates, templateGroups, templateRevisions, templateUsage
+        case version, modifiedAt, people, events, templates, templateGroups, templateRevisions, occasionNodes
     }
 }
 
@@ -1769,26 +1678,26 @@ struct AppDataSnapshot: Codable, Equatable {
     let templates: [GreetingTemplate]
     let groups: [TemplateGroup]
     let revisions: [TemplateRevision]
-    let usage: [TemplateUsageRecord]
+    let occasionNodes: [OccasionNode]
 
     init(version: Int = AppStore.currentPersistenceVersion, modifiedAt: Date = .now,
          people: [Person], events: [GreetingEvent], templates: [GreetingTemplate],
          groups: [TemplateGroup] = [], revisions: [TemplateRevision] = [],
-         usage: [TemplateUsageRecord] = []) {
+         occasionNodes: [OccasionNode] = OccasionNode.defaults()) {
         self.version = version; self.modifiedAt = modifiedAt
         self.people = people; self.events = events; self.templates = templates
-        self.groups = groups; self.revisions = revisions; self.usage = usage
+        self.groups = groups; self.revisions = revisions
+        self.occasionNodes = occasionNodes
     }
 
     /// Compatibility aliases make this payload convenient for services that use the
-    /// local store's naming (`templateGroups`, `templateRevisions`, `templateUsage`).
+    /// local store's naming (`templateGroups`, `templateRevisions`).
     var templateGroups: [TemplateGroup] { groups }
     var templateRevisions: [TemplateRevision] { revisions }
-    var templateUsage: [TemplateUsageRecord] { usage }
 
     private enum CodingKeys: String, CodingKey {
         case version, modifiedAt, people, events, templates, groups, templateGroups
-        case revisions, templateRevisions, usage, templateUsage
+        case revisions, templateRevisions, occasionNodes
     }
 
     init(from decoder: Decoder) throws {
@@ -1800,10 +1709,9 @@ struct AppDataSnapshot: Codable, Equatable {
         templates = try c.decodeIfPresent([GreetingTemplate].self, forKey: .templates) ?? []
         groups = try c.decodeIfPresent([TemplateGroup].self, forKey: .groups)
             ?? (try c.decodeIfPresent([TemplateGroup].self, forKey: .templateGroups)) ?? []
+        occasionNodes = try c.decodeIfPresent([OccasionNode].self, forKey: .occasionNodes) ?? OccasionNode.defaults()
         revisions = try c.decodeIfPresent([TemplateRevision].self, forKey: .revisions)
             ?? (try c.decodeIfPresent([TemplateRevision].self, forKey: .templateRevisions)) ?? []
-        usage = try c.decodeIfPresent([TemplateUsageRecord].self, forKey: .usage)
-            ?? (try c.decodeIfPresent([TemplateUsageRecord].self, forKey: .templateUsage)) ?? []
     }
 
     func encode(to encoder: Encoder) throws {
@@ -1812,12 +1720,11 @@ struct AppDataSnapshot: Codable, Equatable {
         try c.encode(people, forKey: .people)
         try c.encode(events, forKey: .events); try c.encode(templates, forKey: .templates)
         try c.encode(groups, forKey: .groups); try c.encode(revisions, forKey: .revisions)
-        try c.encode(usage, forKey: .usage)
         // Keep the explicit local names in the archive as well; this allows older
         // CloudKit/export clients to consume a complete payload without adapters.
         try c.encode(groups, forKey: .templateGroups)
         try c.encode(revisions, forKey: .templateRevisions)
-        try c.encode(usage, forKey: .templateUsage)
+        try c.encode(occasionNodes, forKey: .occasionNodes)
     }
 }
 
@@ -1827,7 +1734,7 @@ typealias AppArchive = AppDataSnapshot
 extension AppStore {
     var dataSnapshot: AppDataSnapshot {
         AppDataSnapshot(modifiedAt: lastModifiedAt, people: people, events: events, templates: templates,
-                        groups: templateGroups, revisions: templateRevisions, usage: templateUsage)
+                        groups: templateGroups, revisions: templateRevisions, occasionNodes: occasionNodes)
     }
 
     func exportSnapshot() throws -> Data {
@@ -1854,8 +1761,9 @@ extension AppStore {
             try Self.validate(snapshot)
             let previous = mutableState
             people = snapshot.people; events = snapshot.events; templates = snapshot.templates
-            templateGroups = snapshot.groups; templateRevisions = snapshot.revisions; templateUsage = snapshot.usage
-            upgradeTemplateLibraryIfNeeded()
+            templateGroups = snapshot.groups; templateRevisions = snapshot.revisions
+            occasionNodes = snapshot.occasionNodes
+            upgradeTemplateLibraryIfNeeded(fromVersion: snapshot.version)
             lastModifiedAt = snapshot.modifiedAt
             let canPreserveTimestamp = preservingModifiedAt
                 && snapshot.version == Self.currentPersistenceVersion
@@ -1889,8 +1797,8 @@ extension AppStore {
         try requireUnique(snapshot.templates.map(\.id), label: "template")
         try requireUnique(snapshot.groups.map(\.id), label: "collection")
         try requireUnique(snapshot.revisions.map(\.id), label: "revision")
-        try requireUnique(snapshot.usage.map(\.id), label: "usage")
 
+        try validateOccasionTree(snapshot.occasionNodes, templates: snapshot.templates)
         let personIDs = Set(snapshot.people.map(\.id))
         guard snapshot.events.allSatisfy({ personIDs.contains($0.personID) }) else {
             throw AppPersistenceError.invalidArchive("a greeting refers to a missing person")
@@ -1934,9 +1842,6 @@ extension AppStore {
         guard snapshot.revisions.allSatisfy({ templateIDs.contains($0.templateID) }) else {
             throw AppPersistenceError.invalidArchive("a revision refers to a missing template")
         }
-        guard snapshot.usage.allSatisfy({ templateIDs.contains($0.templateID) }) else {
-            throw AppPersistenceError.invalidArchive("usage refers to a missing template")
-        }
     }
 
     /// Reads a recoverable corrupt payload without changing the active store.
@@ -1963,6 +1868,183 @@ private struct MutableState {
     let templates: [GreetingTemplate]
     let groups: [TemplateGroup]
     let revisions: [TemplateRevision]
-    let usage: [TemplateUsageRecord]
+    let occasionNodes: [OccasionNode]
     let lastModifiedAt: Date
+}
+
+extension AppStore {
+    func occasionNode(for date: ImportantDate) -> OccasionNode? {
+        if let id = date.occasionID { return occasionNodes.first { $0.id == id && !$0.isGroup } }
+        return occasionNodes.first { $0.builtInOccasion == date.occasion && !$0.isGroup }
+    }
+
+    func attachedTemplate(for node: OccasionNode?) -> GreetingTemplate? {
+        guard let id = node?.templateID else { return nil }
+        return templates.first { $0.id == id && !$0.isArchived }
+    }
+
+    func nextOccasionPosition(in parentID: String?) -> Int {
+        (occasionNodes.filter { $0.parentID == parentID }.map(\.sortOrder).max() ?? -1) + 1
+    }
+
+    func occasionPath(_ node: OccasionNode) -> String {
+        var names = [node.title]
+        var parentID = node.parentID
+        var visited: Set<String> = [node.id]
+        while let id = parentID, visited.insert(id).inserted,
+              let parent = occasionNodes.first(where: { $0.id == id }) {
+            names.insert(parent.title, at: 0)
+            parentID = parent.parentID
+        }
+        return names.joined(separator: " / ")
+    }
+
+    func occasionDescendants(of id: String) -> Set<String> {
+        var result: Set<String> = [id]
+        var frontier = [id]
+        while let parent = frontier.popLast() {
+            for child in occasionNodes where child.parentID == parent && result.insert(child.id).inserted {
+                frontier.append(child.id)
+            }
+        }
+        return result
+    }
+
+    @discardableResult
+    func saveOccasionNode(_ node: OccasionNode) -> Bool {
+        var updated = node
+        updated.name = node.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        var nodes = occasionNodes
+        if let index = nodes.firstIndex(where: { $0.id == node.id }) { nodes[index] = updated }
+        else { nodes.append(updated) }
+        do { try Self.validateOccasionTree(nodes, templates: templates) }
+        catch { persistenceError = error.localizedDescription; return false }
+        let previous = mutableState
+        occasionNodes = nodes
+        guard save() else { restore(previous); return false }
+        return true
+    }
+
+    /// Children move up one level; saved dates and greetings retain their snapshots.
+    @discardableResult
+    func deleteOccasionNode(id: String) -> Bool {
+        guard let node = occasionNodes.first(where: { $0.id == id }) else { return false }
+        let previous = mutableState
+        occasionNodes.removeAll { $0.id == id }
+        for index in occasionNodes.indices where occasionNodes[index].parentID == id {
+            occasionNodes[index].parentID = node.parentID
+        }
+        for personIndex in people.indices {
+            for index in people[personIndex].importantDates.indices where people[personIndex].importantDates[index].occasionID == id {
+                people[personIndex].importantDates[index].occasionID = nil
+            }
+        }
+        for index in events.indices where events[index].occasionID == id { events[index].occasionID = nil }
+        guard save() else { restore(previous); return false }
+        return true
+    }
+
+    private static func validateOccasionTree(_ nodes: [OccasionNode], templates: [GreetingTemplate]) throws {
+        func invalid(_ reason: String) -> AppPersistenceError { .invalidArchive(reason) }
+        guard Set(nodes.map(\.id)).count == nodes.count else { throw invalid("duplicate occasion identifiers") }
+        let byID = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
+        let templateIDs = Set(templates.map(\.id))
+        for node in nodes {
+            guard !node.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw invalid("an occasion or group needs a name")
+            }
+            if let templateID = node.templateID, !templateIDs.contains(templateID) {
+                throw invalid("an occasion refers to a missing template")
+            }
+            if node.dateRule == .calendar && !node.isGroup && node.builtInOccasion == nil {
+                throw invalid("a custom occasion needs a personal or fixed date")
+            }
+            if node.dateRule == .fixedDate {
+                let days = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+                guard (1...12).contains(node.month), (1...days[node.month - 1]).contains(node.day) else {
+                    throw invalid("an occasion date is invalid")
+                }
+            }
+            var visited: Set<String> = [node.id]
+            var parentID = node.parentID
+            while let id = parentID {
+                guard visited.insert(id).inserted else { throw invalid("occasion groups cannot contain a cycle") }
+                guard let parent = byID[id], parent.isGroup else { throw invalid("an occasion parent must be an existing group") }
+                parentID = parent.parentID
+            }
+        }
+    }
+
+    func nextOccasionDate(_ node: OccasionNode, for person: Person, after referenceDate: Date = .now) -> Date? {
+        let calendar = calendar(for: person)
+        if node.dateRule == .calendar {
+            return nextDate(for: node.occasion, person: person, after: referenceDate, calendar: calendar)
+        }
+        if node.dateRule == .fixedDate {
+            return nextPersonalDate(month: node.month, day: node.day, for: person, after: referenceDate)
+        }
+        return nil
+    }
+
+    func nextImportantDate(_ date: ImportantDate, for person: Person, after referenceDate: Date = .now) -> Date? {
+        if let node = occasionNode(for: date), node.dateRule == .calendar {
+            return nextOccasionDate(node, for: person, after: referenceDate)
+        }
+        return nextPersonalDate(month: date.month, day: date.day, for: person, after: referenceDate)
+    }
+
+    private func nextPersonalDate(month: Int, day: Int, for person: Person, after referenceDate: Date) -> Date? {
+        let calendar = calendar(for: person)
+        let year = calendar.component(.year, from: referenceDate)
+        for year in year...(year + 1) {
+            if let date = fixedOccurrence(month: month, day: day, year: year, calendar: calendar),
+               date >= calendar.startOfDay(for: referenceDate) { return date }
+        }
+        return nil
+    }
+
+    /// Called inside the person transaction, so dates, greetings and variation cursors commit together.
+    private func synchronizeOccasionGreetings(for person: Person, previous: Person?) {
+        guard !person.communicationStopped else { return }
+        let currentIDs = Set(person.importantDates.map(\.id))
+        events.removeAll {
+            $0.personID == person.id && $0.sourceImportantDateID.map { !currentIDs.contains($0) } == true
+                && ![.completed, .skipped].contains($0.status)
+        }
+        let calendar = calendar(for: person)
+        for importantDate in person.importantDates {
+            let old = previous?.importantDates.first { $0.id == importantDate.id }
+            guard old != importantDate else { continue }
+            let node = occasionNode(for: importantDate)
+            guard let date = nextImportantDate(importantDate, for: person) else { continue }
+            let pendingIndices = events.indices.filter {
+                events[$0].personID == person.id && events[$0].sourceImportantDateID == importantDate.id
+                    && ![.completed, .skipped].contains(events[$0].status)
+            }
+            // Date edits keep the existing message; changing the occasion replans its content.
+            if !pendingIndices.isEmpty, old?.occasionID == importantDate.occasionID, old?.occasion == importantDate.occasion {
+                for index in pendingIndices {
+                    events[index].date = date
+                    events[index].customName = importantDate.customName
+                }
+                continue
+            }
+            let pendingIDs = Set(pendingIndices.map { events[$0].id })
+            events.removeAll { pendingIDs.contains($0.id) }
+            guard let template = attachedTemplate(for: node),
+                  let method = resolvedContactMethod(for: person, preferred: person.preferredContactMethod) else { continue }
+            guard !isAlreadyScheduled(personID: person.id, occasion: importantDate.occasion,
+                                      customName: importantDate.customName, date: date, calendar: calendar, occasionID: node?.id) else { continue }
+            events.append(GreetingEvent(
+                personID: person.id, occasion: importantDate.occasion, date: date, method: method, status: .planned,
+                message: renderedBody(for: template, person: person, occasion: importantDate.occasion,
+                                      date: date, occasionName: importantDate.displayName),
+                subject: renderedEmailSubject(for: template, person: person, occasion: importantDate.occasion,
+                                              date: date, occasionName: importantDate.displayName),
+                sourceTemplateID: template.id, sourceTemplateRevision: template.revisionNumber,
+                customName: importantDate.customName, occasionID: node?.id, sourceImportantDateID: importantDate.id
+            ))
+            advanceTemplateVariation(id: template.id)
+        }
+    }
 }

@@ -42,6 +42,9 @@ struct ContentView: View {
             scheduleCloudKitSync()
             scheduleWidgetSnapshot()
         }
+        .onChange(of: store.occasionNodes) {
+            scheduleCloudKitSync()
+        }
         .onChange(of: store.templates) {
             scheduleCloudKitSync()
         }
@@ -49,9 +52,6 @@ struct ContentView: View {
             scheduleCloudKitSync()
         }
         .onChange(of: store.templateRevisions) {
-            scheduleCloudKitSync()
-        }
-        .onChange(of: store.templateUsage) {
             scheduleCloudKitSync()
         }
         .onChange(of: scenePhase) {
@@ -215,6 +215,11 @@ private struct MainAppView: View {
             PeopleView()
                 .tabItem {
                     Label("People", systemImage: "person.2")
+                }
+
+            OccasionsView()
+                .tabItem {
+                    Label("Occasions", systemImage: "list.bullet.indent")
                 }
 
             TemplatesView()

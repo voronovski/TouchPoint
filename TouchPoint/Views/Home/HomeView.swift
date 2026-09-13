@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var horizon: PlanningHorizon = .week
     @State private var showingPlanYear = false
     @State private var showingSettings = false
+    @State private var showingPeopleMissingDates = false
     @State private var selectedEvent: GreetingEvent?
     @State private var refreshTick = Date()
 
@@ -20,7 +21,7 @@ struct HomeView: View {
     private var upcomingEvents: [GreetingEvent] {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: .now)
-        let end = calendar.date(byAdding: .day, value: horizon.days, to: start) ?? start
+        let end = calendar.date(byAdding: horizon.dateComponents, to: start) ?? start
 
         return focusedEvents
             .filter { $0.date >= start && $0.date < end }
@@ -88,6 +89,9 @@ struct HomeView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Touch Point")
             .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(isPresented: $showingPeopleMissingDates) {
+                PeopleMissingDatesView()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -118,48 +122,37 @@ struct HomeView: View {
         }
     }
 
-    private var insights: [(String, String, String)] {
-        let focusedPeople = preferences.focus == .all
-            ? store.people
-            : store.people.filter { preferences.focus.includes($0.relationship) }
-        let missingDates = focusedPeople.filter { person in
-            !person.importantDates.contains { $0.occasion == .birthday }
-        }.count
-        let missingContact = focusedPeople.filter {
-            $0.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                && $0.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }.count
-        let unplanned = store.schedulableGreetingCount(
-            personIDs: Set(focusedPeople.map(\.id)),
-            occasions: Set(Occasion.allCases.filter(preferences.isOccasionEnabled))
-        )
-        var result: [(String, String, String)] = []
-        if missingDates > 0 { result.append(("calendar.badge.exclamationmark", "Missing dates", "Add birthdays for \(missingDates) \(missingDates == 1 ? "person" : "people")")) }
-        if missingContact > 0 { result.append(("person.crop.circle.badge.exclamationmark", "Missing contact info", "Add a phone or email for \(missingContact) \(missingContact == 1 ? "person" : "people")")) }
-        if unplanned > 0 { result.append(("calendar.badge.plus", "Unplanned greetings", "\(unplanned) greeting\(unplanned == 1 ? "" : "s") can be added")) }
-        return result
+    private var missingDatesCount: Int {
+        store.peopleMissingDates(focus: preferences.focus).count
     }
 
     @ViewBuilder
     private var insightsSection: some View {
-        if !insights.isEmpty {
+        if missingDatesCount > 0 {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeading(title: "Keep your circle current")
                 SurfaceCard {
-                    VStack(spacing: 0) {
-                        ForEach(Array(insights.enumerated()), id: \.offset) { index, insight in
-                            HStack(spacing: 12) {
-                                IconTile(systemImage: insight.0, tint: TouchPointColor.amber)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(insight.1).font(.subheadline.weight(.semibold))
-                                    Text(insight.2).font(.caption).foregroundStyle(.secondary)
-                                }
-                                Spacer()
+                    Button {
+                        showingPeopleMissingDates = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconTile(systemImage: "calendar.badge.exclamationmark", tint: TouchPointColor.amber)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Missing dates").font(.subheadline.weight(.semibold))
+                                Text("People without dates: \(missingDatesCount)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                            .padding(TouchPointMetric.cardPadding)
-                            if index < insights.count - 1 { Divider().padding(.leading, 64) }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
                         }
+                        .padding(TouchPointMetric.cardPadding)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -281,7 +274,7 @@ struct HomeView: View {
                 Spacer()
                 Picker("Planning horizon", selection: $horizon) {
                     ForEach(PlanningHorizon.allCases) { horizon in
-                        Text(horizon.rawValue).tag(horizon)
+                        Text(LocalizedStringKey(horizon.rawValue)).tag(horizon)
                     }
                 }
                 .pickerStyle(.menu)

@@ -81,6 +81,7 @@ Use the platform system font and Dynamic Type/font scaling. Do not encode fixed 
 - Row primary value: semibold subheadline.
 - Supporting detail: caption or regular subheadline in secondary color.
 - Section title: semibold subheadline in secondary color.
+- Detail/editor field label: secondary caption above the primary semibold subheadline value. Keep the label visible while editing.
 - Status: semibold caption; never rely on color alone.
 - Dates and numeric counters use tabular/monospaced digits when alignment matters.
 
@@ -90,7 +91,7 @@ Letter spacing stays at the platform default. Long names and translated strings 
 
 ### App shell
 
-The primary destinations are `Home`, `Calendar`, `People`, and `Templates`. Use a native bottom tab bar/navigation bar. Settings and account management are secondary destinations opened from the relevant toolbar entry.
+The primary destinations are `Home`, `Calendar`, `People`, `Occasions`, and `Templates`. Use a native bottom tab bar/navigation bar. Settings and account management are secondary destinations opened from the relevant toolbar entry.
 
 `Home` is the product center, not a marketing screen. Its first viewport must contain:
 
@@ -131,6 +132,22 @@ The first launch offers `Work`, `Personal`, and `All` as starting focuses.
 - Show a concise success result with the number of greetings created.
 - The Apple Intelligence generator follows the same hierarchy: model status, direction, collapsible context, and editable output use surface cards; `Generate message` is the full-width primary action anchored above the sheet safe area, while refinement remains secondary.
 
+### Detail and editor surfaces
+
+Person detail and its shared create/edit screen follow Desk's `ClientDetailView`, `ClientDetailSections`, and `ClientEditorView` layout:
+
+- Use a `ScrollView` on the system grouped background, a leading-aligned stack with `16` points between sections, `16` horizontal insets, and `18` vertical insets.
+- Use `SurfaceSection` for a secondary semibold subheadline heading followed by a grouped card, with `10` points between them. Inset headings `16` points from the card's leading edge.
+- Each card groups related rows without additional nested cards. `SurfaceRowDivider` starts `52` points from the card's leading edge, aligned with row text after the icon.
+- Use `FormIconTile` for neutral field and metadata icons: `28 × 28`, radius `7`, secondary foreground, and tertiary grouped background. Reserve colored `IconTile` surfaces for meaningful occasion identity.
+- `FormFieldRow` puts a caption label above the value or editable control. `FormValueRow` uses the same layout for saved values and selection controls. Both use `12`-point content insets and center icons vertically; only multiline note inputs align at the top.
+- Selection controls use native menus/pickers or sheets and a trailing chevron. Ordinary values have no disclosure indicator. Long values wrap; editable text retains native text-field behavior.
+- Text fields use native prompts in the system placeholder color. Notes use a `TextEditor` with a persistent label, hidden scroll background, and a neutral icon.
+- Supporting explanations sit below the card in secondary footnote text. Empty sections use a compact neutral icon row instead of a full-screen placeholder.
+- Keep native lists for standalone collections. A detail screen may group its associated dates or greetings into card rows without nesting a `List` inside a card.
+
+The reference establishes the visual treatment. TouchPoint keeps its own person fields, manual greeting semantics, centered row alignment, and action placement described below.
+
 ### Collections
 
 People, templates, greetings, and activity use native lists directly. Do not place a list inside a decorative card. Preserve platform row behavior, separators, search, swipe actions, and disclosure indicators.
@@ -152,15 +169,14 @@ Template collections use the shared semantic appearance palette. A saved color t
 - Template creation shows a compact identity preview, uses the shared semantic color-token palette, and opens occasions in a large searchable multi-select sheet grouped into Personal moments, U.S. holidays, Observances, and Latin American dates.
 - The shared occasion sheet uses collapsible category rows and expands matching categories while searching. Use single-select for event/date/filter fields and staged multi-select with `Cancel`/`Done` for templates and yearly planning.
 - Every new template has one explicit language. Preselect the user's `Default language` preference (English on a fresh install); do not offer `Any language` as a template value.
-- Smart collections include Favorites, Recently used, Most used, Ungrouped, Archived, and contexts Missing default.
-- Recommended sorting prefers defaults and favorites; explicit Name, Most used, and Recently updated sorts remain available.
+- Template collections include Favorites, Ungrouped, and Archived.
+- Template sorting defaults to Name; Recently updated is also available.
 - Automatic template resolution uses recipient relationship, preferred channel, and language. A per-recipient exception overrides an occasion-wide choice, which overrides automatic resolution.
-- Content edits create a local template revision. Favorite, default, archive, approval, lock, and usage changes do not create content revisions.
-- Approval and locking are local organization aids, not team permissions or a security boundary. Built-in templates are approved and locked; duplicate one to customize it.
-- In template rows, keep version as written metadata and show approval/lock as separate trailing icons with complete accessibility labels.
-- Usage statistics describe TouchPoint actions such as scheduled, composer opened, completed, skipped, and message edited. Never reinterpret these as delivery or recipient-open analytics.
+- Content edits create a local template revision. Favorite and archive changes do not create content revisions.
+- Every template, including starter templates, can be edited, restored from history, or deleted. Deleted starters must not reappear when the library loads or syncs.
+- Template rows show the title and message preview without default badges or version metadata. Version details belong in the editor's history section.
 
-### Person editor
+### Person detail and editor
 
 `Person` is the shared relationship entity for clients, family, friends, and colleagues. Professional context enriches the entity but does not create a separate client model.
 
@@ -171,6 +187,31 @@ Template collections use the shared semantic appearance palette. A saved color t
 - Show saved important dates separately from generated greeting plans. A source date is not a scheduled action.
 - Search people by name, email, and organization.
 - Do not add SMS consent or provider fields. TouchPoint opens the user's system composer and never acts as the sender.
+- Detail starts with a compact identity card: `44`-point initials avatar, bold title3 name, and caption relationship/organization. Contact, preferences, communication, context, important dates, and planned greetings use the shared detail/editor cards.
+- Keep phone and email selectable for copying. Display notes and tags as wrapping text so long content remains readable.
+- Keep `Stop communication` as a native toggle in its own detail section with the existing confirmation and explanatory footer.
+- The editor's only save entry is the trailing navigation toolbar `Save` / `Add` action. Do not repeat a save button at the bottom of the content.
+- In the editor, important-date rows open the date editor and have an explicit `44 × 44` remove control. Additions, edits, and removals remain staged until the toolbar save succeeds.
+- Place `Delete person` at the very end of the edit screen, below all fields and recoverable errors. It is a separate full-width solid system-red button with a white body label and a smaller white caption-size trash icon at the shared large symbol scale, `50` points high with a continuous `16`-point radius. Do not wrap it in a card or show it during creation.
+- Deletion requires confirmation. After a successful delete, dismiss both the editor and the deleted person's detail. Failed writes retain the draft and show an inline red error; clear the stale error after an edit.
+
+### Occasion library
+
+- `Occasions` sits between `People` and `Templates`. It shows a searchable, expandable tree of groups, subgroups, built-in occasions, and user-created occasions.
+- Keep the library and occasion, parent-group, and template selectors as native inset-grouped lists with search. Use centered rows, a `12`-point icon/text gap, semibold subheadline titles, and secondary captions. Groups use neutral `FormIconTile`; occasions use their semantic `IconTile`; templates retain their saved appearance.
+- Group rows expand through a trailing chevron and offer a separate `44 × 44` edit control. Occasion rows disclose the editor. Selection uses an accent checkmark plus the accessibility selected trait; `None` and `Top level` follow the same pattern.
+- Creation and editing of occasions, groups, and subgroups share the person editor's grouped-background `ScrollView`, `SurfaceSection`, `FormFieldRow`, `FormValueRow`, and inset `SurfaceRowDivider`. Apply `16` horizontal / `18` vertical screen insets, `16` section spacing, and persistent caption field labels.
+- Group related controls under Details, Annual date, and Automatic greeting. Month/day and date-rule controls use native menus; parent group opens a searchable selector that excludes the edited node and its descendants. Supporting explanations sit below cards in secondary footnote text; message previews use a `16`-point inset.
+- Keep `Cancel` and `Add` / `Save` in the navigation toolbar. Use accurate creation titles and no deletion action for unsaved items. New occasion/subgroup actions inside a saved group use the shared tertiary row style.
+- Place `Delete occasion` / `Delete group` at the bottom using `TouchPointDeleteButton`, matching Edit Person. Preserve native confirmation and persistence behavior. Clear a stale write error when the draft changes.
+- Empty libraries offer creation; searches with no matches and template libraries without active templates show explicit empty states. Template and parent selectors retain `None` / `Top level` as reachable choices.
+- Group and occasion editors support names, parent groups, ordering and deletion. Deleting a group promotes its children; deleting a library occasion preserves saved dates and greetings.
+- An occasion can use a date entered for each person, a fixed annual date, or its built-in holiday calendar. Calendar rules preserve moving holidays.
+- Any active template can be attached to an occasion. Adding the occasion to a person schedules an annual greeting with that template at 09:00 in the recipient's time zone when the person is saved. The editor explains this before saving. Without an attached active template, only the date is saved.
+- Person saves atomically commit dates, generated greetings and template variation cursors. Repeated saves and yearly planning must not duplicate greetings. Communication opt-outs prevent automatic planning.
+- Editing a linked personal date moves its pending greeting while retaining its message. Removing a date removes its pending linked greetings; completed and skipped history stays available.
+- Library edits affect subsequent assignments. Existing dates and greeting content retain their saved snapshots. Template deletion detaches library assignments.
+- The catalog and stable date/greeting references are included in local persistence, export/import and CloudKit snapshots; old archives seed the built-in tree.
 
 ### Important dates
 
@@ -213,7 +254,16 @@ Reserve compact pills for actionable planning state: `Planned`, `Ready`, `Comple
 
 ### Primary action
 
-Each surface or step has at most one visually dominant action. Use the shared solid accent button. The label contains an icon plus regular body text and remains visible during loading; replace the icon with a small progress indicator. Destructive and toolbar actions retain native treatment.
+Each surface or step has at most one visually dominant action. Use the shared solid accent button. The label contains an icon plus regular body text and remains visible during loading; replace the icon with a small progress indicator. Toolbar and confirmation-dialog actions retain native treatment. Final entity deletion in person and occasion/group editors uses the shared `TouchPointDeleteButton` described below; saving stays in the toolbar.
+
+### Destructive editor action
+
+- Use `TouchPointDeleteButton` for `Delete person`, `Delete occasion`, and `Delete group` (including subgroups). It wraps `TouchPointPrimaryButtonStyle(tint: .red)` so these screens cannot drift apart.
+- Place it at the very end of the edit screen, below fields, supporting copy, and recoverable errors, outside any card. Hide it during creation.
+- Use solid system red, a centered white regular body label, height `50`, and continuous radius `16`. Keep the trash icon at caption typography with `.imageScale(.large)`, slightly smaller than the label.
+- Every trash symbol uses `TouchPointTrashIcon` and its shared `.large` symbol scale. Preserve native menu and swipe-action layouts; the platform owns their final rendering.
+- Ask for native confirmation before deleting, explain the actual consequence, dismiss only after a successful write, and show a recoverable inline red error on failure.
+- Detaching a template only changes the draft association. It remains a red tertiary row action with a link icon inside the template section.
 
 ### Tertiary action
 

@@ -1,8 +1,75 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Create a template in the Templates tab to attach it to an occasion." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a template in the Templates tab to attach it to an occasion."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создайте шаблон на вкладке «Шаблоны», чтобы прикрепить его к поводу."
+          }
+        }
+      }
+    },
+    "No templates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No templates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет шаблонов"
+          }
+        }
+      }
+    },
+    "Search groups" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search groups"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск групп"
+          }
+        }
+      }
+    },
+    "Position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позиция"
+          }
+        }
+      }
+    },
     "" : {
       "shouldTranslate" : false
+    },
+    ": " : {
+
     },
     "%@ and %lld more" : {
       "localizations" : {
@@ -68,6 +135,23 @@
         }
       }
     },
+    "%lld variations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld variations"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вариантов: %lld"
+          }
+        }
+      }
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -96,6 +180,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 поздравление"
+          }
+        }
+      }
+    },
+    "1 month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 month"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 месяц"
+          }
+        }
+      }
+    },
+    "1 year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 year"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 год"
+          }
+        }
+      }
+    },
+    "2 years" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 years"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 года"
+          }
+        }
+      }
+    },
+    "6 months" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 months"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 месяцев"
+          }
+        }
+      }
+    },
+    "7 days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 days"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 дней"
           }
         }
       }
@@ -180,6 +349,23 @@
         }
       }
     },
+    "Add an occasion or a group to get started." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add an occasion or a group to get started."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте повод или группу, чтобы начать."
+          }
+        }
+      }
+    },
     "Add greeting" : {
       "localizations" : {
         "en" : {
@@ -212,6 +398,23 @@
         }
       }
     },
+    "Add occasion or group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add occasion or group"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить повод или группу"
+          }
+        }
+      }
+    },
     "Add person" : {
       "localizations" : {
         "en" : {
@@ -224,6 +427,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавить человека"
+          }
+        }
+      }
+    },
+    "Add variation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add variation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить вариант"
           }
         }
       }
@@ -260,6 +480,23 @@
         }
       }
     },
+    "All planned greetings for this person, including overdue greetings, will be deleted from the queue. Completed and skipped greetings will remain in history. Deleted greetings cannot be restored." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All planned greetings for this person, including overdue greetings, will be deleted from the queue. Completed and skipped greetings will remain in history. Deleted greetings cannot be restored."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все запланированные поздравления для этого человека, включая просроченные, будут удалены из очереди. Выполненные и пропущенные останутся в истории. Удалённые поздравления нельзя восстановить."
+          }
+        }
+      }
+    },
     "All relationships" : {
       "localizations" : {
         "en" : {
@@ -292,18 +529,18 @@
         }
       }
     },
-    "An archive includes people, dates, greetings, templates, revisions, and usage history. Replacing data is validated before it is saved." : {
+    "An archive includes people, dates, greetings, templates, and revisions. Replacing data is validated before it is saved." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "An archive includes people, dates, greetings, templates, revisions, and usage history. Replacing data is validated before it is saved."
+            "value" : "An archive includes people, dates, greetings, templates, and revisions. Replacing data is validated before it is saved."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Архив включает людей, даты, поздравления, шаблоны, версии и историю использования. Перед сохранением архив проверяется."
+            "value" : "Архив включает людей, даты, поздравления, шаблоны и версии. Перед сохранением архив проверяется."
           }
         }
       }
@@ -436,70 +673,6 @@
         }
       }
     },
-    "Approval" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Approval"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подтверждение"
-          }
-        }
-      }
-    },
-    "Approval and locking are local controls on this device, not team approval." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Approval and locking are local controls on this device, not team approval."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подтверждение и блокировка действуют только на этом устройстве, а не являются командным согласованием."
-          }
-        }
-      }
-    },
-    "Approve" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Approve"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подтвердить"
-          }
-        }
-      }
-    },
-    "Approve on this device" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Approve on this device"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подтвердить на этом устройстве"
-          }
-        }
-      }
-    },
     "Archive" : {
       "localizations" : {
         "en" : {
@@ -548,6 +721,40 @@
         }
       }
     },
+    "Attach a template in Occasions to automatically plan a greeting when adding this date." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach a template in Occasions to automatically plan a greeting when adding this date."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Привяжите шаблон во вкладке «Поводы», чтобы при добавлении этой даты автоматически планировалось поздравление."
+          }
+        }
+      }
+    },
+    "Attach a template to an occasion to automatically plan a greeting when you add that occasion to a person." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attach a template to an occasion to automatically plan a greeting when you add that occasion to a person."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Привяжите шаблон к поводу, чтобы при добавлении этого повода человеку автоматически планировалось поздравление."
+          }
+        }
+      }
+    },
     "Audience" : {
       "localizations" : {
         "en" : {
@@ -560,6 +767,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Аудитория"
+          }
+        }
+      }
+    },
+    "Automatic greeting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic greeting"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматическое поздравление"
           }
         }
       }
@@ -660,38 +884,6 @@
         }
       }
     },
-    "Built-in approval cannot be removed." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Built-in approval cannot be removed."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подтверждение встроенного шаблона нельзя снять."
-          }
-        }
-      }
-    },
-    "Built-in templates cannot be unlocked." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Built-in templates cannot be unlocked."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Встроенные шаблоны нельзя разблокировать."
-          }
-        }
-      }
-    },
     "Calendar" : {
       "localizations" : {
         "en" : {
@@ -740,18 +932,19 @@
         }
       }
     },
-    "Changing this approved template will remove its approval on this device and create a new version." : {
+    "Changes not saved" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Changing this approved template will remove its approval on this device and create a new version."
+            "value" : "Changes not saved"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Изменение этого подтверждённого шаблона снимет подтверждение на устройстве и создаст новую версию."
+            "value" : "Изменения не сохранены"
           }
         }
       }
@@ -880,6 +1073,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбрать диапазон дат"
+          }
+        }
+      }
+    },
+    "Choose occasion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose occasion"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать повод"
           }
         }
       }
@@ -1188,6 +1398,74 @@
         }
       }
     },
+    "Communication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Communication"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коммуникация"
+          }
+        }
+      }
+    },
+    "Communication is stopped for all people. You can change this in a person's profile." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Communication is stopped for all people. You can change this in a person's profile."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коммуникация прекращена со всеми людьми. Вы можете изменить это в карточке человека."
+          }
+        }
+      }
+    },
+    "Communication stopped" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Communication stopped"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коммуникация прекращена"
+          }
+        }
+      }
+    },
+    "Communication with this person is stopped. Turn off Stop communication in their profile before planning greetings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Communication with this person is stopped. Turn off Stop communication in their profile before planning greetings."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коммуникация с этим человеком прекращена. Перед планированием поздравлений выключите «Прекратить коммуникацию» в его карточке."
+          }
+        }
+      }
+    },
     "Completed" : {
       "localizations" : {
         "en" : {
@@ -1280,6 +1558,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Контакты импортированы"
+          }
+        }
+      }
+    },
+    "Contacts without a phone number or email address were skipped." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contacts without a phone number or email address were skipped."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Контакты без номера телефона и email пропущены."
           }
         }
       }
@@ -1524,6 +1818,26 @@
         }
       }
     },
+    "Date" : {
+
+    },
+    "Date and template changes apply the next time this occasion is added to a person. Existing greetings keep their saved content." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date and template changes apply the next time this occasion is added to a person. Existing greetings keep their saved content."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменения даты и шаблона применятся при следующем добавлении повода человеку. Текст существующих поздравлений сохранится."
+          }
+        }
+      }
+    },
     "Date and time" : {
       "localizations" : {
         "en" : {
@@ -1588,6 +1902,23 @@
         }
       }
     },
+    "Date set for each person" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date set for each person"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата для каждого человека"
+          }
+        }
+      }
+    },
     "Dates repeat every year. The year is intentionally not stored." : {
       "localizations" : {
         "en" : {
@@ -1616,38 +1947,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "День"
-          }
-        }
-      }
-    },
-    "DEFAULT" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DEFAULT"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ПО УМОЛЧАНИЮ"
-          }
-        }
-      }
-    },
-    "Default for this context" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Default for this context"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "По умолчанию для этого контекста"
           }
         }
       }
@@ -1764,6 +2063,40 @@
         }
       }
     },
+    "Delete group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete group"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить группу"
+          }
+        }
+      }
+    },
+    "Delete occasion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete occasion"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить повод"
+          }
+        }
+      }
+    },
     "Delete person" : {
       "localizations" : {
         "en" : {
@@ -1828,6 +2161,23 @@
         }
       }
     },
+    "Delete this item?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this item?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить этот элемент?"
+          }
+        }
+      }
+    },
     "Delete this person?" : {
       "localizations" : {
         "en" : {
@@ -1843,6 +2193,43 @@
           }
         }
       }
+    },
+    "Delete variation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete variation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить вариант"
+          }
+        }
+      }
+    },
+    "Detach template" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detach template"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отвязать шаблон"
+          }
+        }
+      }
+    },
+    "Details" : {
+
     },
     "Día de la Raza" : {
       "localizations" : {
@@ -1956,22 +2343,6 @@
         }
       }
     },
-    "Double-tap to view this locked template" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Double-tap to view this locked template"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дважды коснитесь, чтобы просмотреть заблокированный шаблон"
-          }
-        }
-      }
-    },
     "Duplicate" : {
       "localizations" : {
         "en" : {
@@ -1988,18 +2359,35 @@
         }
       }
     },
-    "Duplicate to edit" : {
+    "Each person must have a phone number or email address." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duplicate to edit"
+            "value" : "Each person must have a phone number or email address."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дублировать для изменения"
+            "value" : "Для каждого человека необходимо указать номер телефона или email."
+          }
+        }
+      }
+    },
+    "Each saved greeting uses the next variation in order, then starts again from the first." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each saved greeting uses the next variation in order, then starts again from the first."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При сохранении поздравления выбирается следующий вариант по порядку. После последнего — снова первый."
           }
         }
       }
@@ -2068,6 +2456,23 @@
         }
       }
     },
+    "Edit occasion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit occasion"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактировать повод"
+          }
+        }
+      }
+    },
     "Edit schedule" : {
       "localizations" : {
         "en" : {
@@ -2100,22 +2505,6 @@
         }
       }
     },
-    "Editing" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editing"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Изменение"
-          }
-        }
-      }
-    },
     "Email" : {
       "localizations" : {
         "en" : {
@@ -2133,6 +2522,7 @@
       }
     },
     "Email (optional)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2160,6 +2550,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тема письма (необязательно)"
+          }
+        }
+      }
+    },
+    "Enter a phone number or email address." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a phone number or email address."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Укажите номер телефона или email."
           }
         }
       }
@@ -2196,6 +2602,23 @@
         }
       }
     },
+    "Every variation needs a message." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every variation needs a message."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте текст в каждый вариант."
+          }
+        }
+      }
+    },
     "Every year" : {
       "localizations" : {
         "en" : {
@@ -2212,6 +2635,22 @@
         }
       }
     },
+    "Everyone in this focus has at least one saved date." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everyone in this focus has at least one saved date."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У каждого человека в выбранном фокусе есть хотя бы одна сохранённая дата."
+          }
+        }
+      }
+    },
     "Existing scheduled greetings keep their current message." : {
       "localizations" : {
         "en" : {
@@ -2224,6 +2663,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Уже запланированные поздравления сохранят текущий текст."
+          }
+        }
+      }
+    },
+    "Expand or collapse group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expand or collapse group"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Развернуть или свернуть группу"
           }
         }
       }
@@ -2372,6 +2828,22 @@
         }
       }
     },
+    "First name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First name"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имя"
+          }
+        }
+      }
+    },
     "Focus" : {
       "localizations" : {
         "en" : {
@@ -2485,6 +2957,7 @@
       }
     },
     "Full name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2640,22 +3113,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "День германского единства"
-          }
-        }
-      }
-    },
-    "Governance" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Governance"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Управление"
           }
         }
       }
@@ -2820,6 +3277,23 @@
         }
       }
     },
+    "Holiday calendar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Holiday calendar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Календарь праздников"
+          }
+        }
+      }
+    },
     "Home" : {
       "localizations" : {
         "en" : {
@@ -2900,18 +3374,18 @@
         }
       }
     },
-    "Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history." : {
+    "Import adds templates and collections to the current library. Export saves the template library without people or greetings." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history."
+            "value" : "Import adds templates and collections to the current library. Export saves the template library without people or greetings."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Импорт добавляет шаблоны и коллекции в текущую библиотеку. Экспорт сохраняет библиотеку шаблонов без людей, поздравлений и истории использования."
+            "value" : "Импорт добавляет шаблоны и коллекции в текущую библиотеку. Экспорт сохраняет библиотеку шаблонов без людей и поздравлений."
           }
         }
       }
@@ -3348,6 +3822,22 @@
         }
       }
     },
+    "Last name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last name"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фамилия"
+          }
+        }
+      }
+    },
     "Last synced %@." : {
       "localizations" : {
         "en" : {
@@ -3376,22 +3866,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Последнее изменение"
-          }
-        }
-      }
-    },
-    "Last used" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last used"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Последнее использование"
           }
         }
       }
@@ -3460,22 +3934,6 @@
         }
       }
     },
-    "Lifetime schedules" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lifetime schedules"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Всего запланировано"
-          }
-        }
-      }
-    },
     "Local archive" : {
       "localizations" : {
         "en" : {
@@ -3492,53 +3950,8 @@
         }
       }
     },
-    "Lock" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lock"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заблокировать"
-          }
-        }
-      }
-    },
-    "Lock template" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lock template"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заблокировать шаблон"
-          }
-        }
-      }
-    },
     "Locked" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Locked"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заблокировано"
-          }
-        }
-      }
+
     },
     "Manage collections" : {
       "localizations" : {
@@ -3668,6 +4081,22 @@
         }
       }
     },
+    "Missing dates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missing dates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет дат"
+          }
+        }
+      }
+    },
     "Month" : {
       "localizations" : {
         "en" : {
@@ -3680,22 +4109,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Месяц"
-          }
-        }
-      }
-    },
-    "Most used" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Most used"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Часто используемые"
           }
         }
       }
@@ -3876,6 +4289,57 @@
         }
       }
     },
+    "New group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New group"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая группа"
+          }
+        }
+      }
+    },
+    "New occasion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New occasion"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый повод"
+          }
+        }
+      }
+    },
+    "New subgroup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New subgroup"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая подгруппа"
+          }
+        }
+      }
+    },
     "New template" : {
       "localizations" : {
         "en" : {
@@ -4052,6 +4516,39 @@
         }
       }
     },
+    "No missing dates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No missing dates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет людей без дат"
+          }
+        }
+      }
+    },
+    "No occasions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No occasions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет поводов"
+          }
+        }
+      }
+    },
     "No occasions selected" : {
       "localizations" : {
         "en" : {
@@ -4064,6 +4561,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Поводы не выбраны"
+          }
+        }
+      }
+    },
+    "No template attached" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No template attached"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблон не привязан"
           }
         }
       }
@@ -4132,6 +4646,23 @@
         }
       }
     },
+    "Notifications are off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомления выключены"
+          }
+        }
+      }
+    },
     "Observances" : {
       "localizations" : {
         "en" : {
@@ -4160,6 +4691,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Повод"
+          }
+        }
+      }
+    },
+    "Occasion group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasion group"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Группа поводов"
           }
         }
       }
@@ -4500,6 +5048,23 @@
         }
       }
     },
+    "Parent group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parent group"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Родительская группа"
+          }
+        }
+      }
+    },
     "People" : {
       "localizations" : {
         "en" : {
@@ -4512,6 +5077,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Люди"
+          }
+        }
+      }
+    },
+    "People without dates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People without dates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Люди без дат"
+          }
+        }
+      }
+    },
+    "People without dates: %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People without dates: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Людей без дат: %lld"
           }
         }
       }
@@ -4661,6 +5258,7 @@
       }
     },
     "Phone (optional)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4852,6 +5450,23 @@
         }
       }
     },
+    "Position: %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позиция: %lld"
+          }
+        }
+      }
+    },
     "Preferences" : {
       "localizations" : {
         "en" : {
@@ -4896,6 +5511,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Предпочтительный способ"
+          }
+        }
+      }
+    },
+    "Preferred name (optional)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferred name (optional)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предпочитаемое имя (необязательно)"
           }
         }
       }
@@ -5077,6 +5708,7 @@
       }
     },
     "Recommended" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5204,38 +5836,6 @@
         }
       }
     },
-    "Remove approval" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove approval"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Снять подтверждение"
-          }
-        }
-      }
-    },
-    "Remove local approval?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove local approval?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Снять локальное подтверждение?"
-          }
-        }
-      }
-    },
     "Repeats annually" : {
       "localizations" : {
         "en" : {
@@ -5296,22 +5896,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Восстановить"
-          }
-        }
-      }
-    },
-    "Restore and remove approval" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restore and remove approval"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Восстановить и снять подтверждение"
           }
         }
       }
@@ -5428,22 +6012,6 @@
         }
       }
     },
-    "Restoring this version changes the approved template and removes its approval on this device." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restoring this version changes the approved template and removes its approval on this device."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Восстановление изменит подтверждённый шаблон и снимет подтверждение на этом устройстве."
-          }
-        }
-      }
-    },
     "Rewrite" : {
       "localizations" : {
         "en" : {
@@ -5508,6 +6076,23 @@
         }
       }
     },
+    "Same date every year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same date every year"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна дата каждый год"
+          }
+        }
+      }
+    },
     "Save" : {
       "localizations" : {
         "en" : {
@@ -5520,22 +6105,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранить"
-          }
-        }
-      }
-    },
-    "Save and remove approval" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save and remove approval"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранить и снять подтверждение"
           }
         }
       }
@@ -5556,6 +6125,23 @@
         }
       }
     },
+    "Saved dates and greetings remain. Items inside a deleted group move to its parent group." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved dates and greetings remain. Items inside a deleted group move to its parent group."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранённые даты и поздравления останутся. Элементы удалённой группы переместятся в родительскую группу."
+          }
+        }
+      }
+    },
     "Saved to templates" : {
       "localizations" : {
         "en" : {
@@ -5568,6 +6154,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сохранено в шаблоны"
+          }
+        }
+      }
+    },
+    "Saving this person will automatically plan an annual greeting using this template." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving this person will automatically plan an annual greeting using this template."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При сохранении человека автоматически запланируется ежегодное поздравление по этому шаблону."
           }
         }
       }
@@ -5651,6 +6254,9 @@
           }
         }
       }
+    },
+    "Search templates" : {
+
     },
     "Select all" : {
       "localizations" : {
@@ -5844,22 +6450,6 @@
         }
       }
     },
-    "Smart scopes" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Smart scopes"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Умные области"
-          }
-        }
-      }
-    },
     "Sort templates" : {
       "localizations" : {
         "en" : {
@@ -5888,6 +6478,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Шаг %lld из %lld · %@"
+          }
+        }
+      }
+    },
+    "Stop and delete greetings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop and delete greetings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прекратить и удалить поздравления"
+          }
+        }
+      }
+    },
+    "Stop communication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop communication"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прекратить коммуникацию"
+          }
+        }
+      }
+    },
+    "Stop communication with this person?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop communication with this person?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прекратить коммуникацию с этим человеком?"
           }
         }
       }
@@ -6116,18 +6757,19 @@
         }
       }
     },
-    "The duplicate is an unlocked copy. Approval and locking are local controls on this device." : {
+    "The communication setting could not be saved. Please try again." : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The duplicate is an unlocked copy. Approval and locking are local controls on this device."
+            "value" : "The communication setting could not be saved. Please try again."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дубликат — разблокированная копия. Подтверждение и блокировка действуют только на этом устройстве."
+            "value" : "Не удалось сохранить настройку коммуникации. Попробуйте ещё раз."
           }
         }
       }
@@ -6276,18 +6918,19 @@
         }
       }
     },
-    "This template is locked and read-only." : {
+    "This template is archived. Choose an active template to enable automatic planning." : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This template is locked and read-only."
+            "value" : "This template is archived. Choose an active template to enable automatic planning."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Этот шаблон заблокирован и доступен только для чтения."
+            "value" : "Этот шаблон в архиве. Выберите активный шаблон для автоматического планирования."
           }
         }
       }
@@ -6372,6 +7015,40 @@
         }
       }
     },
+    "To enable notifications, open iPhone Settings → Notifications → Touch Point and turn on Allow Notifications." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To enable notifications, open iPhone Settings → Notifications → Touch Point and turn on Allow Notifications."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы включить уведомления, откройте «Настройки» iPhone → «Уведомления» → Touch Point и включите «Допуск уведомлений»."
+          }
+        }
+      }
+    },
+    "Today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня"
+          }
+        }
+      }
+    },
     "Tone" : {
       "localizations" : {
         "en" : {
@@ -6384,6 +7061,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тон"
+          }
+        }
+      }
+    },
+    "Top level" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top level"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верхний уровень"
           }
         }
       }
@@ -6516,54 +7210,6 @@
         }
       }
     },
-    "Unlock" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разблокировать"
-          }
-        }
-      }
-    },
-    "Unlock the template before restoring a version." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock the template before restoring a version."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разблокируйте шаблон перед восстановлением версии."
-          }
-        }
-      }
-    },
-    "Unlock to edit" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock to edit"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разблокировать для изменения"
-          }
-        }
-      }
-    },
     "Untitled template" : {
       "localizations" : {
         "en" : {
@@ -6592,22 +7238,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Предстоящие"
-          }
-        }
-      }
-    },
-    "Usage" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usage"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Использование"
           }
         }
       }
@@ -6644,6 +7274,23 @@
         }
       }
     },
+    "Use this when the person asks you to stop contacting them. Planned greetings are removed and new greetings cannot be scheduled while this is on. Turning it off does not restore deleted greetings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this when the person asks you to stop contacting them. Planned greetings are removed and new greetings cannot be scheduled while this is on. Turning it off does not restore deleted greetings."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включите, если человек попросил больше с ним не связываться. Запланированные поздравления будут удалены, а создание новых станет недоступно. Выключение переключателя не восстановит удалённые поздравления."
+          }
+        }
+      }
+    },
     "Valentine's Day" : {
       "localizations" : {
         "en" : {
@@ -6672,6 +7319,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вариант"
+          }
+        }
+      }
+    },
+    "Variation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variation"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вариант"
+          }
+        }
+      }
+    },
+    "Variation %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variation %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вариант %lld"
           }
         }
       }
@@ -6757,6 +7438,7 @@
       }
     },
     "View details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6784,6 +7466,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Годовщина свадьбы"
+          }
+        }
+      }
+    },
+    "When you save a person with this occasion, its attached template creates an annual greeting at 9:00 AM in their time zone. Without a template, only the important date is saved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you save a person with this occasion, its attached template creates an annual greeting at 9:00 AM in their time zone. Without a template, only the important date is saved."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При сохранении человека с этим поводом привязанный шаблон создаёт ежегодное поздравление на 9:00 в его часовом поясе. Без шаблона сохраняется только важная дата."
           }
         }
       }
@@ -6864,6 +7563,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Этот контекст можно изменить для генерации текста. Событие, человек и шаблон не изменятся."
+          }
+        }
+      }
+    },
+    "You can keep using Touch Point with notifications off. Your planned greetings stay in your schedule, and you can open and complete them as usual." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can keep using Touch Point with notifications off. Your planned greetings stay in your schedule, and you can open and complete them as usual."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы можете пользоваться Touch Point с выключенными уведомлениями. Запланированные поздравления остаются в расписании — их можно открывать и отмечать выполненными как обычно."
           }
         }
       }

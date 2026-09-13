@@ -23,9 +23,9 @@ struct PlanYearView: View {
 
     private var visiblePeople: [Person] {
         let people = if let relationshipFilter {
-            store.people.filter { $0.relationship == relationshipFilter }
+            store.contactablePeople.filter { $0.relationship == relationshipFilter }
         } else {
-            store.people
+            store.contactablePeople
         }
         return people.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
@@ -86,6 +86,9 @@ struct PlanYearView: View {
                 guard !didSetInitialFilter else { return }
                 relationshipFilter = preferences.focus == .all ? nil : preferences.focus.defaultRelationship
                 didSetInitialFilter = true
+            }
+            .onChange(of: store.people) {
+                selectedPeople.formIntersection(store.contactablePeople.map(\.id))
             }
             .sheet(isPresented: $showingRecipientOverrides) {
                 recipientOverridesSheet
@@ -448,7 +451,7 @@ struct PlanYearView: View {
     }
 
     private var selectedPeopleInOrder: [Person] {
-        store.people
+        store.contactablePeople
             .filter { selectedPeople.contains($0.id) }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
@@ -499,9 +502,6 @@ struct PlanYearView: View {
                     && (usePreferredContactMethods || $0.channels.isEmpty || $0.channels.contains(contactMethod))
             }
             .sorted {
-                if $0.isDefault != $1.isDefault {
-                    return $0.isDefault
-                }
                 if $0.isFavorite != $1.isFavorite {
                     return $0.isFavorite
                 }
@@ -522,7 +522,6 @@ struct PlanYearView: View {
                 return relationshipMatches && channelMatches && languageMatches
             }
             .sorted {
-                if $0.isDefault != $1.isDefault { return $0.isDefault }
                 if $0.isFavorite != $1.isFavorite { return $0.isFavorite }
                 return $0.title.localizedStandardCompare($1.title) == .orderedAscending
             }

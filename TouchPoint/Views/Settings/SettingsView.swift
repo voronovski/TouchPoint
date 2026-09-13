@@ -1,11 +1,14 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(AppStore.self) private var store
     @Environment(AppPreferences.self) private var preferences
     @Environment(CloudKitSnapshotService.self) private var cloudKit
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var notificationAuthorizationStatus: UNAuthorizationStatus?
     @State private var isSynchronizingCloudKit = false
     @State private var exportDocument: TouchPointArchiveDocument?
     @State private var showingArchiveExporter = false
@@ -79,6 +82,12 @@ struct SettingsView: View {
             ) { result in
                 if case .failure(let error) = result { templateTransferError = error.localizedDescription }
             }
+        }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            let status = await LocalNotificationScheduler.authorizationStatus()
+            guard !Task.isCancelled else { return }
+            notificationAuthorizationStatus = status
         }
     }
 
@@ -163,6 +172,18 @@ struct SettingsView: View {
 
     private var remindersSettingsSection: some View {
         Section {
+            if notificationAuthorizationStatus == .denied {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("Notifications are off", systemImage: "bell.slash")
+                        .font(.subheadline.weight(.semibold))
+                    Text("To enable notifications, open iPhone Settings → Notifications → Touch Point and turn on Allow Notifications.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Text("You can keep using Touch Point with notifications off. Your planned greetings stay in your schedule, and you can open and complete them as usual.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
             VStack(alignment: .leading, spacing: 10) {
                 Text("Remind me").font(.subheadline.weight(.semibold))
                 ForEach([0, 1, 3, 7], id: \.self) { days in reminderLeadTimeRow(days) }
@@ -253,7 +274,7 @@ struct SettingsView: View {
         } header: {
             Text("Local archive")
         } footer: {
-            Text("An archive includes people, dates, greetings, templates, revisions, and usage history. Replacing data is validated before it is saved.")
+            Text("An archive includes people, dates, greetings, templates, and revisions. Replacing data is validated before it is saved.")
         }
     }
 
@@ -276,7 +297,7 @@ struct SettingsView: View {
         } header: {
             Text("Template library")
         } footer: {
-            Text("Import adds templates and collections to the current library. Export saves the template library without people, greetings, or usage history.")
+            Text("Import adds templates and collections to the current library. Export saves the template library without people or greetings.")
         }
     }
 
@@ -391,13 +412,9 @@ struct SettingsView: View {
                     relationships: imported.relationships,
                     channels: imported.channels,
                     languages: imported.languages,
-                    emailSubject: imported.emailSubject,
-                    isDefault: imported.isDefault
+                    emailSubject: imported.emailSubject
                 )
                 store.addTemplate(template)
-                if template.isDefault {
-                    _ = store.setTemplateDefault(id: template.id)
-                }
             }
         } catch {
             templateTransferError = "Could not import this library. \(error.localizedDescription)"

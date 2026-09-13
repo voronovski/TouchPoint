@@ -7,6 +7,7 @@ struct NewGreetingView: View {
 
     @State private var personID: UUID?
     @State private var occasion: Occasion = .birthday
+    @State private var occasionID: String?
     @State private var customName = ""
     @State private var date = Calendar.current.date(byAdding: .day, value: 1, to: .now) ?? .now
     @State private var recurrence: EventRecurrence = .oneTime
@@ -16,7 +17,7 @@ struct NewGreetingView: View {
     @State private var showingOccasionPicker = false
 
     private var selectedPerson: Person? {
-        store.people.first { $0.id == personID }
+        store.contactablePeople.first { $0.id == personID }
     }
 
     private var availableMethods: [ContactMethod] {
@@ -36,9 +37,14 @@ struct NewGreetingView: View {
                     Section("Person") {
                         Picker("Person", selection: $personID) {
                             Text("Choose a person").tag(UUID?.none)
-                            ForEach(store.people.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }) { person in
+                            ForEach(store.contactablePeople.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }) { person in
                                 Text(person.name).tag(Optional(person.id))
                             }
+                        }
+                        if store.contactablePeople.isEmpty {
+                            Text("Communication is stopped for all people. You can change this in a person's profile.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
                         }
                     }
 
@@ -50,7 +56,7 @@ struct NewGreetingView: View {
                                     Text("Type")
                                         .font(.subheadline.weight(.semibold))
                                         .foregroundStyle(.primary)
-                                    Text(occasion.title)
+                                    Text(store.occasionNodes.first { $0.id == occasionID }?.title ?? occasion.title)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -69,7 +75,7 @@ struct NewGreetingView: View {
                                 : String(localized: "Custom name (optional)"),
                             text: $customName
                         )
-                        if occasion == .custom {
+                        if occasion == .custom && normalizedCustomName == nil {
                             Text("A custom occasion needs a name.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
@@ -108,7 +114,7 @@ struct NewGreetingView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") { save() }
                         .disabled(
-                            personID == nil
+                            selectedPerson == nil
                                 || store.people.isEmpty
                                 || (occasion == .custom && normalizedCustomName == nil)
                         )
@@ -119,12 +125,11 @@ struct NewGreetingView: View {
                 method = store.resolvedContactMethod(for: person, preferred: person.preferredContactMethod) ?? .reminder
             }
             .sheet(isPresented: $showingOccasionPicker) {
-                OccasionPickerSheet(
-                    selection: [occasion],
-                    options: preferences.focus.occasionPriority,
-                    mode: .single
-                ) { selection in
-                    if let selected = selection.first { occasion = selected }
+                OccasionLibraryPicker(selectionID: occasionID ?? "occasion:" + occasion.rawValue) { selected in
+                    occasion = selected.occasion
+                    occasionID = selected.id
+                    customName = selected.builtInOccasion == .custom ? "" : selected.title
+                    if let person = selectedPerson, let next = store.nextOccasionDate(selected, for: person) { date = next }
                 }
             }
             .alert("Greeting not saved", isPresented: Binding(
@@ -142,7 +147,8 @@ struct NewGreetingView: View {
         guard let person = selectedPerson else { return }
         guard occasion != .custom || normalizedCustomName != nil else { return }
         let resolvedMethod = store.resolvedContactMethod(for: person, preferred: method) ?? .reminder
-        let template = store.resolveTemplate(for: person, occasion: occasion, channel: resolvedMethod)
+        let node = store.occasionNodes.first { $0.id == (occasionID ?? "occasion:" + occasion.rawValue) }
+        let template = store.attachedTemplate(for: node) ?? store.resolveTemplate(for: person, occasion: occasion, channel: resolvedMethod)
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let body = trimmedMessage.isEmpty
             ? store.renderedBody(
@@ -174,7 +180,8 @@ struct NewGreetingView: View {
             sourceTemplateID: template?.id,
             sourceTemplateRevision: template?.revisionNumber,
             customName: normalizedCustomName,
-            recurrence: recurrence
+            recurrence: recurrence,
+            occasionID: occasionID
         )
         guard store.addGreeting(event) else {
             saveError = store.persistenceError ?? "Touch Point could not save this greeting."
