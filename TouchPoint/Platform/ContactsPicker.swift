@@ -15,9 +15,6 @@ struct ContactsPicker: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> CNContactPickerViewController {
         let picker = CNContactPickerViewController()
         picker.delegate = context.coordinator
-        picker.predicateForEnablingContact = NSPredicate(
-            format: "phoneNumbers.@count > 0 OR emailAddresses.@count > 0"
-        )
         picker.displayedPropertyKeys = [
             CNContactGivenNameKey,
             CNContactFamilyNameKey,

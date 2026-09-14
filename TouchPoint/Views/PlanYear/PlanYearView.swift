@@ -5,8 +5,7 @@ struct PlanYearView: View {
     @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPeople: Set<UUID> = []
-    @State private var relationshipFilter: Relationship? = .client
-    @State private var didSetInitialFilter = false
+    @State private var relationshipFilter: Relationship?
     @State private var selectedOccasions: Set<Occasion> = [.birthday]
     @State private var contactMethod: ContactMethod = .sms
     @State private var usePreferredContactMethods = true
@@ -82,11 +81,6 @@ struct PlanYearView: View {
             } message: {
                 Text(schedulingError ?? "")
             }
-            .onAppear {
-                guard !didSetInitialFilter else { return }
-                relationshipFilter = preferences.focus == .all ? nil : preferences.focus.defaultRelationship
-                didSetInitialFilter = true
-            }
             .onChange(of: store.people) {
                 selectedPeople.formIntersection(store.contactablePeople.map(\.id))
             }
@@ -96,7 +90,7 @@ struct PlanYearView: View {
             .sheet(isPresented: $showingOccasionPicker) {
                 OccasionPickerSheet(
                     selection: orderedSelectedOccasions,
-                    options: preferences.focus.occasionPriority,
+                    options: Occasion.allCases,
                     mode: .multiple
                 ) { selection in
                     updateSelectedOccasions(selection)
@@ -430,7 +424,7 @@ struct PlanYearView: View {
     }
 
     private var orderedSelectedOccasions: [Occasion] {
-        preferences.focus.occasionPriority.filter { selectedOccasions.contains($0) }
+        Occasion.allCases.filter { selectedOccasions.contains($0) }
     }
 
     private var selectedOccasionSummary: String {

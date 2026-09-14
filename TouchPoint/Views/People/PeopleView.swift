@@ -2,51 +2,26 @@ import SwiftUI
 
 struct PeopleView: View {
     @Environment(AppStore.self) private var store
-    @Environment(AppPreferences.self) private var preferences
     @State private var query = ""
     @State private var showingNewPerson = false
     @State private var showingContactsPicker = false
     @State private var importMessage: String?
 
     private var filteredPeople: [Person] {
-        let focusMatches = store.people.filter {
-            preferences.focus.includes($0.relationship)
-        }
-        let matches = query.isEmpty ? focusMatches : focusMatches.filter {
+        let matches = query.isEmpty ? store.people : store.people.filter {
             $0.displayName.localizedCaseInsensitiveContains(query)
                 || $0.email.localizedCaseInsensitiveContains(query)
                 || $0.organization.localizedCaseInsensitiveContains(query)
         }
 
         return matches.sorted {
-            if preferences.focus == .all {
-                return $0.name.localizedStandardCompare($1.name) == .orderedAscending
-            }
-            let leftRank = preferences.focus.relationshipRank($0.relationship)
-            let rightRank = preferences.focus.relationshipRank($1.relationship)
-            if leftRank != rightRank {
-                return leftRank < rightRank
-            }
-            return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+            $0.name.localizedStandardCompare($1.name) == .orderedAscending
         }
     }
 
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    Picker("Focus", selection: focusBinding) {
-                        ForEach(Focus.allCases) { focus in
-                            Text(focus.title).tag(focus)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Label("Focus", systemImage: preferences.focus.icon)
-                } footer: {
-                    Text("Showing " + preferences.focus.title.lowercased() + " relationships. Choose All to see everyone.")
-                }
-
                 if let persistenceError = store.persistenceError {
                     Section {
                         Label(persistenceError, systemImage: "exclamationmark.triangle.fill")
@@ -89,10 +64,7 @@ struct PeopleView: View {
                 }
             }
             .sheet(isPresented: $showingNewPerson) {
-                PersonEditorView(
-                    person: nil,
-                    defaultRelationship: preferences.focus.defaultRelationship
-                )
+                PersonEditorView(person: nil)
             }
             .sheet(isPresented: $showingContactsPicker) {
                 ContactsPicker(
@@ -112,21 +84,12 @@ struct PeopleView: View {
         }
     }
 
-    private var focusBinding: Binding<Focus> {
-        Binding(
-            get: { preferences.focus },
-            set: { preferences.focus = $0 }
-        )
-    }
-
     private func importContacts(_ imported: [Person]) {
         showingContactsPicker = false
         let existing = Set(store.people.map { normalizedContactKey(name: $0.name, email: $0.email, phone: $0.phone) })
         var seen = existing
         var uniquePeople: [Person] = []
-        let skippedMissingContact = imported.contains { !$0.hasContactInfo }
         for person in imported {
-            guard person.hasContactInfo else { continue }
             let key = normalizedContactKey(name: person.name, email: person.email, phone: person.phone)
             guard !key.isEmpty, !seen.contains(key) else { continue }
             seen.insert(key)
@@ -140,10 +103,6 @@ struct PeopleView: View {
         importMessage = added == 0
             ? "No new contacts were added. Existing people were left unchanged."
             : "Added " + String(added) + " " + (added == 1 ? "person" : "people") + " from Contacts."
-        if skippedMissingContact {
-            importMessage = (importMessage ?? "") + "\n\n"
-                + String(localized: "Contacts without a phone number or email address were skipped.")
-        }
     }
 
     private func normalizedContactKey(name: String, email: String, phone: String) -> String {
@@ -157,10 +116,9 @@ struct PeopleView: View {
 
 struct PeopleMissingDatesView: View {
     @Environment(AppStore.self) private var store
-    @Environment(AppPreferences.self) private var preferences
 
     private var people: [Person] {
-        store.peopleMissingDates(focus: preferences.focus)
+        store.peopleMissingDates()
     }
 
     var body: some View {
@@ -179,7 +137,7 @@ struct PeopleMissingDatesView: View {
                 ContentUnavailableView(
                     "No missing dates",
                     systemImage: "calendar.badge.checkmark",
-                    description: Text("Everyone in this focus has at least one saved date.")
+                    description: Text("Everyone has at least one saved date.")
                 )
             }
         }
@@ -223,25 +181,20 @@ private struct PersonDetailView: View {
         store.people.first { $0.id == personID }
     }
 
-    private var events: [GreetingEvent] {
-        store.events.filter { $0.personID == personID }.sorted { $0.date < $1.date }
-    }
-
     var body: some View {
         ScrollView {
             if let person {
                 VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
                     summaryCard(person)
                     contactSection(person)
+                    importantDatesSection(person)
+                    greetingsSection(person)
                     preferencesSection(person)
                     communicationSection
 
                     if !person.notes.isEmpty || !person.tags.isEmpty {
                         contextSection(person)
                     }
-
-                    importantDatesSection(person)
-                    greetingsSection(person)
                 }
                 .padding(.horizontal, TouchPointMetric.screenPadding)
                 .padding(.vertical, TouchPointMetric.scrollPadding)
@@ -412,39 +365,7 @@ private struct PersonDetailView: View {
     }
 
     private func greetingsSection(_ person: Person) -> some View {
-        SurfaceSection(title: "Planned greetings") {
-            if events.isEmpty {
-                emptyRow("No greetings planned", systemImage: "calendar.badge.clock")
-            } else {
-                ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
-                    if index > 0 { SurfaceRowDivider() }
-                    NavigationLink {
-                        GreetingDetailView(eventID: event.id)
-                    } label: {
-                        HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
-                            IconTile(systemImage: event.occasion.icon, tint: event.occasion.tint)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(event.displayName)
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                Text(event.date.touchPointDay(in: person.timeZoneIdentifier))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                StatusPill(status: store.status(for: event))
-                            }
-                            Spacer(minLength: 0)
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                                .accessibilityHidden(true)
-                        }
-                        .padding(TouchPointMetric.cardPadding)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
+        PersonGreetingsSection(person: person)
     }
 
     private func emptyRow(_ title: LocalizedStringKey, systemImage: String) -> some View {
@@ -469,9 +390,8 @@ private struct PersonDetailView: View {
     }
 }
 
-private struct PersonEditorView: View {
+struct PersonEditorView: View {
     @Environment(AppStore.self) private var store
-    @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     @State private var draft: Person
     @State private var addingDate = false
@@ -481,10 +401,12 @@ private struct PersonEditorView: View {
     @State private var tagsText: String
     @State private var saveError: String?
 
+    private let onSaved: ((Person) -> Void)?
     private let isEditing: Bool
     private let languageOptions = TouchPointLanguage.supported
 
-    init(person: Person?, defaultRelationship: Relationship = .client) {
+    init(person: Person?, defaultRelationship: Relationship = .friend, onSaved: ((Person) -> Void)? = nil) {
+        self.onSaved = onSaved
         let draft = person ?? Person(name: "", relationship: defaultRelationship)
         _draft = State(initialValue: draft)
         _tagsText = State(initialValue: draft.tags.joined(separator: ", "))
@@ -492,26 +414,18 @@ private struct PersonEditorView: View {
     }
 
     private var canSave: Bool {
-        !draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        draft.hasContactInfo
+        !draft.name.isEmpty
     }
 
-    private var navigationTitle: String {
-        if isEditing {
-            return "Edit person"
-        }
-        return preferences.focus == .work && draft.relationship == .client
-            ? "New client"
-            : "New person"
-    }
+    private var navigationTitle: String { isEditing ? "Edit person" : "New person" }
 
-    private var saveTitle: String {
-        if isEditing {
-            return "Save"
-        }
-        return preferences.focus == .work && draft.relationship == .client
-            ? "Add client"
-            : "Add"
+    private var saveTitle: String { isEditing ? "Save" : "Add" }
+
+    private var preferredMethod: Binding<ContactMethod> {
+        Binding(
+            get: { store.resolvedContactMethod(for: draft, preferred: draft.preferredContactMethod) ?? .reminder },
+            set: { draft.preferredContactMethod = $0 }
+        )
     }
 
     var body: some View {
@@ -520,9 +434,10 @@ private struct PersonEditorView: View {
                 VStack(alignment: .leading, spacing: TouchPointMetric.sectionSpacing) {
                     personSection
                     contactSection
+                    importantDatesSection
+                    if isEditing { PersonGreetingsSection(person: draft) }
                     preferencesSection
                     contextSection
-                    importantDatesSection
 
                     if let saveError {
                         SurfaceCard {
@@ -627,7 +542,7 @@ private struct PersonEditorView: View {
 
     private var contactSection: some View {
         SurfaceSection(title: "Contact") {
-            Text("Enter a phone number or email address.")
+            Text("Phone and email are optional. Without them, we will only remind you.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .padding(TouchPointMetric.cardPadding)
@@ -648,14 +563,14 @@ private struct PersonEditorView: View {
             }
             SurfaceRowDivider()
             Menu {
-                Picker("Preferred method", selection: $draft.preferredContactMethod) {
-                    ForEach(ContactMethod.allCases) { method in
+                Picker("Preferred method", selection: preferredMethod) {
+                    ForEach(store.availableContactMethods(for: draft)) { method in
                         Label(method.title, systemImage: method.icon).tag(method)
                     }
                 }
             } label: {
-                FormValueRow(title: "Preferred method", value: draft.preferredContactMethod.title,
-                             systemImage: draft.preferredContactMethod.icon, showsDisclosure: true)
+                FormValueRow(title: "Preferred method", value: preferredMethod.wrappedValue.title,
+                             systemImage: preferredMethod.wrappedValue.icon, showsDisclosure: true)
             }
             .buttonStyle(.plain)
         }
@@ -755,7 +670,7 @@ private struct PersonEditorView: View {
                 .buttonStyle(TouchPointTertiaryButtonStyle())
                 .padding(TouchPointMetric.cardPadding)
             }
-            Text("Dates repeat every year. The year is intentionally not stored.")
+            Text("Dates repeat every year. Saving this person also creates their reminders.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, TouchPointMetric.cardPadding)
@@ -808,6 +723,7 @@ private struct PersonEditorView: View {
             saveError = store.persistenceError ?? "Touch Point could not save this person."
             return
         }
+        onSaved?(store.people.first { $0.id == personToSave.id } ?? personToSave)
         dismiss()
     }
 
@@ -884,7 +800,7 @@ private struct ImportantDateEditorView: View {
                             editorFootnote("A custom occasion needs a name.")
                         }
                         if store.attachedTemplate(for: node) == nil {
-                            editorFootnote("Attach a template in Occasions to automatically plan a greeting when adding this date.")
+                            editorFootnote("Saving this person will create an annual reminder for this date, even without a message template.")
                         }
                     }
 
@@ -1024,4 +940,52 @@ private struct TimeZonePickerView: View {
         return zone?.localizedName(for: .generic, locale: .current)
             ?? identifier.replacingOccurrences(of: "_", with: " ")
     }
+}
+
+private struct PersonGreetingsSection: View {
+    @Environment(AppStore.self) private var store
+    let person: Person
+
+    private var events: [GreetingEvent] {
+        store.events.filter { $0.personID == person.id }.sorted { $0.date < $1.date }
+    }
+
+    var body: some View {
+        SurfaceSection(title: "Planned greetings") {
+            if events.isEmpty {
+                Label("No greetings planned", systemImage: "calendar.badge.clock")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                    .padding(TouchPointMetric.cardPadding)
+            } else {
+                ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
+                    if index > 0 { SurfaceRowDivider() }
+                    NavigationLink {
+                        GreetingDetailView(eventID: event.id)
+                    } label: {
+                        HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
+                            IconTile(systemImage: event.occasion.icon, tint: event.occasion.tint)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(event.displayName)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(event.date.touchPointDay(in: person.timeZoneIdentifier))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                StatusPill(status: store.status(for: event))
+                            }
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
+                        .padding(TouchPointMetric.cardPadding)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
 }

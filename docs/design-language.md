@@ -12,14 +12,11 @@ This is the living visual and interaction contract for TouchPoint. It borrows th
 
 ## Audience strategy
 
-TouchPoint uses one relationship model and one universal interface. An optional `Focus` changes what is shown first without asking the user to adopt a professional or personal identity.
+TouchPoint uses one relationship model and one universal interface. All people and dates are visible without selecting a work or personal mode.
 
-- `Work` focuses clients and colleagues.
-- `Personal` focuses family and friends.
-- `All` keeps every relationship visible and is the default for new users.
-- Changing focus never migrates or deletes people, dates, templates, or plans.
-- Keep `People` as the universal entity and `Client` as one relationship type. Do not force CRM terminology into shared surfaces.
-- Both experiences retain `Plan the Year`, native Messages/Mail handoff, manual completion, and the same trust contract.
+- Keep `People` as the universal entity and `Client` as one relationship type.
+- Relationship labels remain available for context and explicit annual-plan filtering.
+- Every user retains annual planning, native Messages/Mail handoff, and manual completion.
 
 ## Cross-platform contract
 
@@ -91,36 +88,22 @@ Letter spacing stays at the platform default. Long names and translated strings 
 
 ### App shell
 
-The primary destinations are `Home`, `Calendar`, `People`, `Occasions`, and `Templates`. Use a native bottom tab bar/navigation bar. Settings and account management are secondary destinations opened from the relevant toolbar entry.
+The primary destinations are `Today`, `Calendar`, `People`, `Occasions`, and `Templates`. Use a native bottom tab bar/navigation bar. Settings and account management are secondary destinations opened from the relevant toolbar entry.
 
-`Home` is the product center, not a marketing screen. Its first viewport must contain:
+`Today` is the product center, not a marketing screen. Its first viewport must contain:
 
 1. The TouchPoint navigation title.
 2. The next planned or ready-to-send greeting.
 3. A visible entry to `Plan the Year`.
 4. A hint of the upcoming schedule.
 
-### First-run focus
+### First launch and Today
 
-The first launch offers `Work`, `Personal`, and `All` as starting focuses.
-
-- Preselect `All`; choosing a narrower focus is optional.
-- Explain each option through audience and workflow, not feature checklists or pricing language.
-- State that the focus can be changed later without losing data.
-- Persist `Focus` and onboarding completion in platform preferences. Migrate legacy `professional` and `personal` values without touching relationship data.
-
-### Focus-aware Home
-
-- Home uses one vocabulary and layout for every user.
-- The selected focus scopes the workload summary and upcoming actions; `All` shows the complete schedule.
-- A settings gear in the Home toolbar opens focus settings. Changing focus updates Home immediately.
-
-### Focus-aware defaults
-
-- Focus changes ordering and defaults, never capability. Every relationship and occasion remains reachable.
-- `Work` prioritizes `Client` then `Colleague`; `Personal` prioritizes `Family` then `Friend`; `All` is neutral.
-- Templates and occasion pickers place the current focus's likely moments first while retaining the full shared collection.
-- These defaults are presentation preferences only and must not be persisted into relationship records unless the user saves a draft.
+- Open Today directly, without a Work / Personal / All onboarding step.
+- Show the current date prominently; omit weekly greeting and ready-to-send counters.
+- Today and People include all relationships. People sorts by name and offers search.
+- Settings contains personalization, occasion groups, reminders, and data tools; no Focus preference.
+- New people default to Friend. Occasion lists use a consistent order. Annual planning starts with all relationships visible.
 
 ### Editor and planning flows
 
@@ -128,6 +111,7 @@ The first launch offers `Work`, `Personal`, and `All` as starting focuses.
 - Use inline titles, leading `Cancel` or `Close`, and a precise confirmation verb.
 - Multi-step workflows show compact progress and keep one primary action anchored at the bottom.
 - Back preserves the draft within the flow. Cancel discards it.
+- New greeting includes Add person in its person section, even when the address book is empty. Present the shared person editor, select the successfully saved person, and resume the unchanged greeting draft. Cancelling person creation leaves the greeting draft intact.
 - Disable the primary action only when a visible prerequisite is missing.
 - Show a concise success result with the number of greetings created.
 - The Apple Intelligence generator follows the same hierarchy: model status, direction, collapsible context, and editable output use surface cards; `Generate message` is the full-width primary action anchored above the sheet safe area, while refinement remains secondary.
@@ -181,14 +165,14 @@ Template collections use the shared semantic appearance palette. A saved color t
 
 `Person` is the shared relationship entity for clients, family, friends, and colleagues. Professional context enriches the entity but does not create a separate client model.
 
-- Require a display name and at least one actionable contact value: phone or email.
+- Require a name only. Phone and email are optional, including during import. Without contact details, save the person with Reminder only; do not offer unavailable contact methods.
 - Support optional organization, relationship, preferred contact method, preferred language, and IANA time-zone identifier.
-- Keep create and edit on the same component and draft contract. Focus may change a default title and confirmation verb, not the field hierarchy.
+- Keep create and edit on the same component and draft contract. Use the same fields and labels from every creation entry point.
 - Stage important-date additions, edits, and removals inside the person draft. Persist them only with the main `Add` or `Save` action.
 - Show saved important dates separately from generated greeting plans. A source date is not a scheduled action.
 - Search people by name, email, and organization.
 - Do not add SMS consent or provider fields. TouchPoint opens the user's system composer and never acts as the sender.
-- Detail starts with a compact identity card: `44`-point initials avatar, bold title3 name, and caption relationship/organization. Contact, preferences, communication, context, important dates, and planned greetings use the shared detail/editor cards.
+- Detail starts with a compact identity card: `44`-point initials avatar, bold title3 name, and caption relationship/organization. Place Contact, Important dates, and Planned greetings in that order before preferences and context in both the profile and Edit person.
 - Keep phone and email selectable for copying. Display notes and tags as wrapping text so long content remains readable.
 - Keep `Stop communication` as a native toggle in its own detail section with the existing confirmation and explanatory footer.
 - The editor's only save entry is the trailing navigation toolbar `Save` / `Add` action. Do not repeat a save button at the bottom of the content.
@@ -208,7 +192,7 @@ Template collections use the shared semantic appearance palette. A saved color t
 - Empty libraries offer creation; searches with no matches and template libraries without active templates show explicit empty states. Template and parent selectors retain `None` / `Top level` as reachable choices.
 - Group and occasion editors support names, parent groups, ordering and deletion. Deleting a group promotes its children; deleting a library occasion preserves saved dates and greetings.
 - An occasion can use a date entered for each person, a fixed annual date, or its built-in holiday calendar. Calendar rules preserve moving holidays.
-- Any active template can be attached to an occasion. Adding the occasion to a person schedules an annual greeting with that template at 09:00 in the recipient's time zone when the person is saved. The editor explains this before saving. Without an attached active template, only the date is saved.
+- Saving a newly added important date creates an annual calendar reminder at 09:00 in the recipient's time zone. Use the attached template when available; otherwise create a Reminder only event without requiring a template. Notification delivery follows the user's existing reminder settings and system permission. The person and reminder commit together. Respect Stop communication.
 - Person saves atomically commit dates, generated greetings and template variation cursors. Repeated saves and yearly planning must not duplicate greetings. Communication opt-outs prevent automatic planning.
 - Editing a linked personal date moves its pending greeting while retaining its message. Removing a date removes its pending linked greetings; completed and skipped history stays available.
 - Library edits affect subsequent assignments. Existing dates and greeting content retain their saved snapshots. Template deletion detaches library assignments.
@@ -355,15 +339,15 @@ The current prototype persists a versioned JSON snapshot in the app's Applicatio
 
 - Working product name: `TouchPoint`.
 - Working tagline: `Plan once. Never forget again.` It belongs in store/marketing material, not repeated throughout the app UI.
-- Initial shell: Home, Calendar, People, Templates.
-- Home combines the next action, annual planning entry, and a filterable near-term schedule.
+- Initial shell: Today, Calendar, People, Occasions, Templates.
+- Today combines the date, next action, annual planning entry, and a filterable near-term schedule.
 - Default annual-plan action: text message opened in the system Messages composer.
 - Sending is always manual. No SMS/email provider integration is planned.
 - Optional reminders use local device notifications. Notification permission is requested automatically on the first launch; timing and privacy preferences remain configurable in Settings.
 - Source UI language for the prototype: English; localization architecture remains required.
-- First-run focus offers `Work`, `Personal`, and preselected `All`.
-- Work annual planning defaults to `Client`; Personal defaults to `Family`; All begins with every relationship visible.
-- Focus, onboarding completion, and reminder preferences persist in `UserDefaults` and iCloud KVS; relationship data remains in the separate JSON snapshot.
+- First launch opens Today directly.
+- Annual planning begins with every relationship visible.
+- Reminder preferences persist in `UserDefaults` and iCloud KVS; relationship data remains in the separate JSON snapshot.
 - The prototype saves a `v7` local JSON snapshot between launches and migrates readable `v1`–`v6` data in place. Private iCloud backup stores the complete archive as a CloudKit asset; local operation remains available offline.
 - Apple Intelligence message generation uses the on-device Foundation Models framework on iOS 26+ and never blocks manual editing.
 - Apple Intelligence entry actions are disabled before presentation when the chosen language or local model is unavailable; the parent form footer explains the exact reason. Date/timing, audience, channel, and language are inherited context values, not free-form fields inside the generator.

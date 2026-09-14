@@ -14,13 +14,7 @@ struct ContentView: View {
 
     var body: some View {
         @Bindable var navigation = navigation
-        Group {
-            if preferences.hasCompletedOnboarding {
-                MainAppView()
-            } else {
-                OnboardingView()
-            }
-        }
+        MainAppView()
         .tint(.accentColor)
         .environment(store)
         .environment(preferences)
@@ -204,7 +198,7 @@ private struct MainAppView: View {
         TabView {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "house")
+                    Label("Today", systemImage: "house")
                 }
 
             RelationshipCalendarView()
@@ -219,7 +213,7 @@ private struct MainAppView: View {
 
             OccasionsView()
                 .tabItem {
-                    Label("Occasions", systemImage: "list.bullet.indent")
+                    Label("Occasions", systemImage: "birthday.cake")
                 }
 
             TemplatesView()

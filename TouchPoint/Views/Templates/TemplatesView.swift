@@ -183,7 +183,7 @@ struct TemplatesView: View {
             .sheet(isPresented: $showingNewTemplate) {
                 TemplateEditorView(
                     template: nil,
-                    defaultOccasion: preferences.focus.occasionPriority[0],
+                    defaultOccasion: .birthday,
                     defaultLanguage: preferences.preferredLanguage
                 )
             }
@@ -661,7 +661,7 @@ private struct TemplateEditorView: View {
             .sheet(isPresented: $showingOccasionPicker) {
                 OccasionPickerSheet(
                     selection: draft.occasions,
-                    options: preferences.focus.occasionPriority,
+                    options: Occasion.allCases,
                     mode: .multiple
                 ) { draft.occasions = $0 }
             }

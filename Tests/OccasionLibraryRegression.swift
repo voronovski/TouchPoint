@@ -53,7 +53,7 @@ struct OccasionLibraryRegression {
         let noTemplate = OccasionNode(name: "No automatic greeting")
         expect(store.saveOccasionNode(noTemplate), "Unlinked occasion")
         person.importantDates = [ImportantDate(occasion: .custom, month: 12, day: 8, customName: noTemplate.title, occasionID: noTemplate.id)]
-        expect(store.updatePerson(person) && store.events.count == 1, "Without template only save date")
+        expect(store.updatePerson(person) && store.events.count == 2 && store.events.last?.method == .reminder, "Without a template, save an annual reminder")
         let second = OccasionNode(name: occasion.title, parentID: group.id, templateID: template.id)
         expect(store.saveOccasionNode(second), "Same label, distinct identity")
         person.importantDates = [occasion, second].map { ImportantDate(occasion: .custom, month: 12, day: 8, customName: $0.title, occasionID: $0.id) }

@@ -2,7 +2,6 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppStore.self) private var store
-    @Environment(AppPreferences.self) private var preferences
     @State private var horizon: PlanningHorizon = .week
     @State private var showingPlanYear = false
     @State private var showingSettings = false
@@ -10,26 +9,18 @@ struct HomeView: View {
     @State private var selectedEvent: GreetingEvent?
     @State private var refreshTick = Date()
 
-    private var focusedEvents: [GreetingEvent] {
-        guard preferences.focus != .all else { return store.events }
-        return store.events.filter { event in
-            guard let person = store.person(for: event) else { return false }
-            return preferences.focus.includes(person.relationship)
-        }
-    }
-
     private var upcomingEvents: [GreetingEvent] {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: .now)
         let end = calendar.date(byAdding: horizon.dateComponents, to: start) ?? start
 
-        return focusedEvents
+        return store.events
             .filter { $0.date >= start && $0.date < end }
             .sorted { $0.date < $1.date }
     }
 
     private var nextEvent: GreetingEvent? {
-        focusedEvents
+        store.events
             .filter { ![.completed, .skipped].contains(store.status(for: $0)) }
             .sorted {
                 if store.status(for: $0) == .ready && store.status(for: $1) != .ready { return true }
@@ -37,31 +28,6 @@ struct HomeView: View {
                 return $0.date < $1.date
             }
             .first
-    }
-
-    private var weekEventCount: Int {
-        let calendar = Calendar.current
-        let start = calendar.startOfDay(for: .now)
-        let end = calendar.date(byAdding: .day, value: 7, to: start) ?? start
-        return focusedEvents.filter { $0.date >= start && $0.date < end }.count
-    }
-
-    private var readyCount: Int {
-        focusedEvents.filter { store.status(for: $0) == .ready }.count
-    }
-
-    private var workloadSummary: String {
-        let greetings = weekEventCount == 1 ? "1 greeting" : "\(weekEventCount) greetings"
-        let ready = readyCount == 1 ? "1 ready to send" : "\(readyCount) ready to send"
-        return "\(greetings) this week · \(ready)"
-    }
-
-    private var headerSummary: String {
-        switch preferences.focus {
-        case .all: workloadSummary
-        case .work: "Work focus · " + workloadSummary
-        case .personal: "Personal focus · " + workloadSummary
-        }
     }
 
     private var planTitle: String {
@@ -123,7 +89,7 @@ struct HomeView: View {
     }
 
     private var missingDatesCount: Int {
-        store.peopleMissingDates(focus: preferences.focus).count
+        store.peopleMissingDates().count
     }
 
     @ViewBuilder
@@ -159,26 +125,9 @@ struct HomeView: View {
     }
 
     private var welcomeHeader: some View {
-        HStack(alignment: .center, spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.accentColor.opacity(0.12))
-                Image(systemName: "sparkles")
-                    .font(.headline)
-                    .foregroundStyle(.accent)
-            }
-            .frame(width: 42, height: 42)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(headerSummary)
-                    .font(.subheadline.weight(.semibold))
-            }
-
-            Spacer(minLength: 0)
-        }
+        Text(refreshTick.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+            .font(.title2.bold())
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder

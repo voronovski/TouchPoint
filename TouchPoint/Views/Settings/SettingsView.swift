@@ -25,7 +25,6 @@ struct SettingsView: View {
             List {
                 personalizationSettingsSection
                 occasionGroupsSettingsSection
-                focusSettingsSection
                 remindersSettingsSection
                 cloudSettingsSection
                 templateLibrarySettingsSection
@@ -142,32 +141,6 @@ struct SettingsView: View {
 
     private var configurableOccasionGroups: [OccasionCategory] {
         OccasionCategory.allCases.filter { $0 != .personal }
-    }
-
-    private var focusSettingsSection: some View {
-        Section {
-            ForEach(Focus.allCases) { focus in
-                Button { preferences.focus = focus } label: {
-                    HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
-                        IconTile(systemImage: focus.icon, tint: preferences.focus == focus ? Color.accentColor : Color.secondary)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(focus.title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
-                            Text(focus.subtitle).font(.caption).foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        if preferences.focus == focus {
-                            Image(systemName: "checkmark").font(.subheadline.weight(.bold)).foregroundStyle(.accent)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-        } header: {
-            Text("Focus")
-        } footer: {
-            Text("Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged.")
-        }
     }
 
     private var remindersSettingsSection: some View {

@@ -14,7 +14,6 @@ struct QuickAddPersonView: View {
     private var canSave: Bool {
         (!firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             || !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            && Person.hasContactInfo(phone: phone, email: email)
     }
 
     var body: some View {
@@ -42,7 +41,7 @@ struct QuickAddPersonView: View {
                     }
                 }
                 Section {
-                    Text("Enter a phone number or email address.")
+                    Text("Phone and email are optional. Without them, we will only remind you.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     Text("You can add birthdays and other important dates later from People.")

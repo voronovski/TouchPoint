@@ -71,9 +71,9 @@ final class AppStore {
 
     var contactablePeople: [Person] { people.filter { !$0.communicationStopped } }
 
-    func peopleMissingDates(focus: Focus) -> [Person] {
+    func peopleMissingDates() -> [Person] {
         people
-            .filter { focus.includes($0.relationship) && $0.importantDates.isEmpty }
+            .filter { $0.importantDates.isEmpty }
             .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
     }
 
@@ -107,11 +107,12 @@ final class AppStore {
 
     @discardableResult
     func addPerson(_ person: Person) -> Bool {
-        guard person.hasContactInfo else {
-            persistenceError = String(localized: "Enter a phone number or email address.")
+        guard !person.name.isEmpty else {
+            persistenceError = String(localized: "Enter a name to add this person.")
             return false
         }
         let previous = mutableState
+        let person = normalizedPerson(person)
         people.append(person)
         synchronizeOccasionGreetings(for: person, previous: nil)
         guard save() else { restore(previous); return false }
@@ -123,11 +124,12 @@ final class AppStore {
     @discardableResult
     func addPeople(_ newPeople: [Person]) -> Int {
         guard !newPeople.isEmpty else { return 0 }
-        guard newPeople.allSatisfy(\.hasContactInfo) else {
-            persistenceError = String(localized: "Each person must have a phone number or email address.")
+        guard newPeople.allSatisfy({ !$0.name.isEmpty }) else {
+            persistenceError = String(localized: "Each person must have a name.")
             return 0
         }
         let previous = mutableState
+        let newPeople = newPeople.map(normalizedPerson)
         people.append(contentsOf: newPeople)
         for person in newPeople { synchronizeOccasionGreetings(for: person, previous: nil) }
         guard save() else { restore(previous); return 0 }
@@ -136,6 +138,11 @@ final class AppStore {
 
     @discardableResult
     func updatePerson(_ person: Person) -> Bool {
+        guard !person.name.isEmpty else {
+            persistenceError = String(localized: "Enter a name to add this person.")
+            return false
+        }
+        let person = normalizedPerson(person)
         guard let index = people.firstIndex(where: { $0.id == person.id }) else { return false }
         let state = mutableState
         let previous = people[index]
@@ -145,6 +152,12 @@ final class AppStore {
         synchronizeOccasionGreetings(for: people[index], previous: previous)
         guard save() else { restore(state); return false }
         return true
+    }
+
+    private func normalizedPerson(_ person: Person) -> Person {
+        var person = person
+        if !person.hasContactInfo { person.preferredContactMethod = .reminder }
+        return person
     }
 
     /// Removes a person and all greetings scheduled for them.
@@ -2006,6 +2019,10 @@ extension AppStore {
     /// Called inside the person transaction, so dates, greetings and variation cursors commit together.
     private func synchronizeOccasionGreetings(for person: Person, previous: Person?) {
         guard !person.communicationStopped else { return }
+        for index in events.indices where events[index].personID == person.id
+            && ![.completed, .skipped].contains(events[index].status) {
+            events[index].method = resolvedContactMethod(for: person, preferred: events[index].method) ?? .reminder
+        }
         let currentIDs = Set(person.importantDates.map(\.id))
         events.removeAll {
             $0.personID == person.id && $0.sourceImportantDateID.map { !currentIDs.contains($0) } == true
@@ -2031,20 +2048,23 @@ extension AppStore {
             }
             let pendingIDs = Set(pendingIndices.map { events[$0].id })
             events.removeAll { pendingIDs.contains($0.id) }
-            guard let template = attachedTemplate(for: node),
-                  let method = resolvedContactMethod(for: person, preferred: person.preferredContactMethod) else { continue }
+            let template = attachedTemplate(for: node)
+            let method = template == nil ? ContactMethod.reminder
+                : (resolvedContactMethod(for: person, preferred: person.preferredContactMethod) ?? .reminder)
             guard !isAlreadyScheduled(personID: person.id, occasion: importantDate.occasion,
                                       customName: importantDate.customName, date: date, calendar: calendar, occasionID: node?.id) else { continue }
             events.append(GreetingEvent(
                 personID: person.id, occasion: importantDate.occasion, date: date, method: method, status: .planned,
                 message: renderedBody(for: template, person: person, occasion: importantDate.occasion,
                                       date: date, occasionName: importantDate.displayName),
-                subject: renderedEmailSubject(for: template, person: person, occasion: importantDate.occasion,
-                                              date: date, occasionName: importantDate.displayName),
-                sourceTemplateID: template.id, sourceTemplateRevision: template.revisionNumber,
+                subject: template.flatMap {
+                    renderedEmailSubject(for: $0, person: person, occasion: importantDate.occasion,
+                                         date: date, occasionName: importantDate.displayName)
+                },
+                sourceTemplateID: template?.id, sourceTemplateRevision: template?.revisionNumber,
                 customName: importantDate.customName, occasionID: node?.id, sourceImportantDateID: importantDate.id
             ))
-            advanceTemplateVariation(id: template.id)
+            if let template { advanceTemplateVariation(id: template.id) }
         }
     }
 }

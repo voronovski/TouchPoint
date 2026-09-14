@@ -222,6 +222,7 @@
       }
     },
     "A greeting needs someone to contact. Add them in People, then return here." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -270,6 +271,7 @@
       }
     },
     "Add a person first" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -969,6 +971,7 @@
       }
     },
     "Choose a starting focus" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1210,6 +1213,7 @@
       }
     },
     "Clients and colleagues" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1502,6 +1506,7 @@
       }
     },
     "Contacts without a phone number or email address were skipped." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1874,7 +1879,24 @@
         }
       }
     },
+    "Dates repeat every year. Saving this person also creates their reminders." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dates repeat every year. Saving this person also creates their reminders."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Даты повторяются каждый год. Напоминания появятся после сохранения человека."
+          }
+        }
+      }
+    },
     "Dates repeat every year. The year is intentionally not stored." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2314,7 +2336,24 @@
         }
       }
     },
+    "Each person must have a name." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each person must have a name."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У каждого человека должно быть имя."
+          }
+        }
+      }
+    },
     "Each person must have a phone number or email address." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2509,7 +2548,11 @@
         }
       }
     },
+    "Enter a name to add this person." : {
+
+    },
     "Enter a phone number or email address." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2542,6 +2585,7 @@
       }
     },
     "Every relationship" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2590,7 +2634,24 @@
         }
       }
     },
+    "Everyone has at least one saved date." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everyone has at least one saved date."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У каждого человека есть хотя бы одна сохранённая дата."
+          }
+        }
+      }
+    },
     "Everyone in this focus has at least one saved date." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2688,6 +2749,7 @@
       }
     },
     "Family and friends" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2800,6 +2862,7 @@
       }
     },
     "Focus" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2816,6 +2879,7 @@
       }
     },
     "Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3250,6 +3314,7 @@
       }
     },
     "Home" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3650,6 +3715,7 @@
       }
     },
     "Keep every relationship in view. You can change this focus anytime." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5133,6 +5199,7 @@
       }
     },
     "Personal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5245,7 +5312,24 @@
         }
       }
     },
+    "Phone and email are optional. Without them, we will only remind you." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone and email are optional. Without them, we will only remind you."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Телефон и email необязательны. Без них мы только напомним вам о событии."
+          }
+        }
+      }
+    },
     "Pick what you want to see first, or keep All. This is a focus—not an identity—and you can change it later without losing any people or plans." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5278,6 +5362,7 @@
       }
     },
     "Plan once. Never forget again." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5583,6 +5668,7 @@
       }
     },
     "Prioritize personal relationships when reviewing upcoming greetings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5599,6 +5685,7 @@
       }
     },
     "Prioritize work relationships when reviewing upcoming greetings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6158,6 +6245,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "При сохранении человека автоматически запланируется ежегодное поздравление по этому шаблону."
+          }
+        }
+      }
+    },
+    "Saving this person will create an annual reminder for this date, even without a message template." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving this person will create an annual reminder for this date, even without a message template."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "После сохранения человека для этой даты будет создано ежегодное напоминание, даже без шаблона сообщения."
           }
         }
       }
@@ -7494,6 +7597,7 @@
       }
     },
     "Work" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

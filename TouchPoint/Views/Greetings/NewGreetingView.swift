@@ -15,6 +15,7 @@ struct NewGreetingView: View {
     @State private var message = ""
     @State private var saveError: String?
     @State private var showingOccasionPicker = false
+    @State private var showingNewPerson = false
 
     private var selectedPerson: Person? {
         store.contactablePeople.first { $0.id == personID }
@@ -27,82 +28,77 @@ struct NewGreetingView: View {
     var body: some View {
         NavigationStack {
             Form {
-                if store.people.isEmpty {
-                    ContentUnavailableView(
-                        "Add a person first",
-                        systemImage: "person.badge.plus",
-                        description: Text("A greeting needs someone to contact. Add them in People, then return here.")
-                    )
-                } else {
-                    Section("Person") {
-                        Picker("Person", selection: $personID) {
-                            Text("Choose a person").tag(UUID?.none)
-                            ForEach(store.contactablePeople.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }) { person in
-                                Text(person.name).tag(Optional(person.id))
-                            }
-                        }
-                        if store.contactablePeople.isEmpty {
-                            Text("Communication is stopped for all people. You can change this in a person's profile.")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                Section("Person") {
+                    Picker("Person", selection: $personID) {
+                        Text("Choose a person").tag(UUID?.none)
+                        ForEach(store.contactablePeople.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }) { person in
+                            Text(person.name).tag(Optional(person.id))
                         }
                     }
-
-                    Section("Occasion") {
-                        Button { showingOccasionPicker = true } label: {
-                            HStack(spacing: 12) {
-                                IconTile(systemImage: occasion.icon, tint: occasion.tint)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Type")
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                    Text(store.occasionNodes.first { $0.id == occasionID }?.title ?? occasion.title)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.tertiary)
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityHint("Opens a searchable occasion list")
-                        TextField(
-                            occasion == .custom
-                                ? String(localized: "Custom occasion name")
-                                : String(localized: "Custom name (optional)"),
-                            text: $customName
-                        )
-                        if occasion == .custom && normalizedCustomName == nil {
-                            Text("A custom occasion needs a name.")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
+                    Button { showingNewPerson = true } label: {
+                        Label("Add person", systemImage: "person.badge.plus")
                     }
-
-                    Section("Schedule") {
-                        DatePicker("Date and time", selection: $date)
-                        Picker("Recurrence", selection: $recurrence) {
-                            ForEach(EventRecurrence.allCases) { option in
-                                Text(option.title).tag(option)
-                            }
-                        }
-                        Picker("Contact method", selection: $method) {
-                            ForEach(availableMethods) { option in
-                                Label(option.title, systemImage: option.icon).tag(option)
-                            }
-                        }
-                    }
-
-                    Section("Message") {
-                        TextEditor(text: $message)
-                            .frame(minHeight: 120)
-                        Text("Leave this blank to start with the best matching template. You can edit it later.")
+                    if !store.people.isEmpty && store.contactablePeople.isEmpty {
+                        Text("Communication is stopped for all people. You can change this in a person's profile.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
+                }
+
+                Section("Occasion") {
+                    Button { showingOccasionPicker = true } label: {
+                        HStack(spacing: 12) {
+                            IconTile(systemImage: occasion.icon, tint: occasion.tint)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Type")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(store.occasionNodes.first { $0.id == occasionID }?.title ?? occasion.title)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens a searchable occasion list")
+                    TextField(
+                        occasion == .custom
+                            ? String(localized: "Custom occasion name")
+                            : String(localized: "Custom name (optional)"),
+                        text: $customName
+                    )
+                    if occasion == .custom && normalizedCustomName == nil {
+                        Text("A custom occasion needs a name.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("Schedule") {
+                    DatePicker("Date and time", selection: $date)
+                    Picker("Recurrence", selection: $recurrence) {
+                        ForEach(EventRecurrence.allCases) { option in
+                            Text(option.title).tag(option)
+                        }
+                    }
+                    Picker("Contact method", selection: $method) {
+                        ForEach(availableMethods) { option in
+                            Label(option.title, systemImage: option.icon).tag(option)
+                        }
+                    }
+                }
+
+                Section("Message") {
+                    TextEditor(text: $message)
+                        .frame(minHeight: 120)
+                    Text("Leave this blank to start with the best matching template. You can edit it later.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("New greeting")
@@ -123,6 +119,11 @@ struct NewGreetingView: View {
             .onChange(of: personID) {
                 guard let person = selectedPerson else { return }
                 method = store.resolvedContactMethod(for: person, preferred: person.preferredContactMethod) ?? .reminder
+            }
+            .sheet(isPresented: $showingNewPerson) {
+                PersonEditorView(person: nil) { person in
+                    personID = person.id
+                }
             }
             .sheet(isPresented: $showingOccasionPicker) {
                 OccasionLibraryPicker(selectionID: occasionID ?? "occasion:" + occasion.rawValue) { selected in
