@@ -137,6 +137,14 @@ struct GreetingDetailView: View {
                         }
                         .buttonStyle(TouchPointPrimaryButtonStyle())
 
+                        Button {
+                            showingScheduleEditor = true
+                        } label: {
+                            Label("Reschedule", systemImage: "calendar.badge.clock")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+
                         Button(role: .destructive) {
                             showingSkipConfirmation = true
                         } label: {
@@ -151,6 +159,13 @@ struct GreetingDetailView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
+
+                        Button {
+                            showingScheduleEditor = true
+                        } label: {
+                            Label("Reschedule", systemImage: "calendar.badge.clock")
+                                .frame(maxWidth: .infinity)
+                        }
                     }
                 }
                 .padding(.horizontal, TouchPointMetric.screenPadding)
@@ -170,8 +185,12 @@ struct GreetingDetailView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button("Edit schedule", systemImage: "calendar.badge.clock") {
-                        showingScheduleEditor = true
+                    // Active and skipped greetings surface Reschedule as a primary action below;
+                    // completed greetings have no primary actions, so it stays here for them.
+                    if let event, store.status(for: event) == .completed {
+                        Button("Edit schedule", systemImage: "calendar.badge.clock") {
+                            showingScheduleEditor = true
+                        }
                     }
                     Button(role: .destructive) {
                         showingDeleteConfirmation = true

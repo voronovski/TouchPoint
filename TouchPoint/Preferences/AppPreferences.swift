@@ -16,6 +16,7 @@ final class AppPreferences {
         static let senderName = "TouchPoint.SenderName"
         static let preferredLanguage = "TouchPoint.PreferredLanguage"
         static let disabledOccasionCategories = "TouchPoint.DisabledOccasionCategories"
+        static let hasCompletedOnboarding = "TouchPoint.HasCompletedOnboarding"
     }
 
     private let defaults: UserDefaults
@@ -97,6 +98,14 @@ final class AppPreferences {
         }
     }
 
+    /// Local-only: whether the first-run walkthrough has been shown. Not synced to
+    /// iCloud, since it is a per-device UI nicety rather than user content.
+    var hasCompletedOnboarding: Bool {
+        didSet {
+            defaults.set(hasCompletedOnboarding, forKey: Key.hasCompletedOnboarding)
+        }
+    }
+
     func isOccasionCategoryEnabled(_ category: OccasionCategory) -> Bool {
         category == .personal || !disabledOccasionCategories.contains(category)
     }
@@ -144,6 +153,7 @@ final class AppPreferences {
                 .filter { knownOccasionCategories.contains($0) }
                 .compactMap(OccasionCategory.init(rawValue:))
         ).subtracting([.personal])
+        hasCompletedOnboarding = defaults.bool(forKey: Key.hasCompletedOnboarding)
         notificationSyncError = nil
         defaults.set(senderName, forKey: Key.senderName)
         defaults.set(preferredLanguage, forKey: Key.preferredLanguage)

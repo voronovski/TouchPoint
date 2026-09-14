@@ -9,7 +9,8 @@ struct OccasionsView: View {
         NavigationStack {
             List {
                 Section {
-                    OccasionTreeRows(query: query, showsTemplate: true, onSelect: { editingNode = $0 })
+                    OccasionTreeRows(query: query, showsTemplate: true, allowsReordering: true,
+                                     onSelect: { editingNode = $0 })
                 } footer: {
                     if !store.occasionNodes.isEmpty {
                         Text("Attach a template to an occasion to automatically plan a greeting when you add that occasion to a person.")
@@ -33,6 +34,7 @@ struct OccasionsView: View {
             .navigationTitle("Occasions")
             .searchable(text: $query, prompt: "Search occasions")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) { EditButton() }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button("New occasion", systemImage: "calendar.badge.plus") {
@@ -53,124 +55,199 @@ struct OccasionsView: View {
 }
 
 /// The same expandable hierarchy is used for managing the library and attaching a date.
+/// Reordering (`allowsReordering`) is only meaningful for the management screen; the
+/// picker presents a read-only selection list.
 private struct OccasionTreeRows: View {
     @Environment(AppStore.self) private var store
-    @Environment(AppPreferences.self) private var preferences
     @State private var expanded: Set<String> = ["group:personal"]
     var query: String
     var showsTemplate = false
     var selectionID: String?
+    var allowsReordering = false
     let onSelect: (OccasionNode) -> Void
 
-    private struct Row: Identifiable {
-        var node: OccasionNode
-        var depth: Int
-        var id: String { node.id }
-    }
+    private var needle: String { query.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var isSearching: Bool { !needle.isEmpty }
 
-    private var rows: [Row] {
-        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
+    /// Every node whose path matches the search text, plus its ancestors so the
+    /// matching row stays reachable inside its expanded group chain.
+    private var includedIDs: Set<String> {
+        guard isSearching else { return [] }
         var included = Set<String>()
-        if !needle.isEmpty {
-            for node in store.occasionNodes where store.occasionPath(node).localizedStandardContains(needle) {
-                included.insert(node.id)
-                var parentID = node.parentID
-                while let id = parentID, included.insert(id).inserted {
-                    parentID = store.occasionNodes.first { $0.id == id }?.parentID
-                }
+        for node in store.occasionNodes where store.occasionPath(node).localizedStandardContains(needle) {
+            included.insert(node.id)
+            var parentID = node.parentID
+            while let id = parentID, included.insert(id).inserted {
+                parentID = store.occasionNodes.first { $0.id == id }?.parentID
             }
         }
-        var result: [Row] = []
-        func appendChildren(of parentID: String?, depth: Int) {
-            let children = store.occasionNodes.filter { $0.parentID == parentID }.sorted {
-                if $0.sortOrder != $1.sortOrder { return $0.sortOrder < $1.sortOrder }
-                return $0.title.localizedStandardCompare($1.title) == .orderedAscending
-            }
-            for node in children {
-                if !needle.isEmpty && !included.contains(node.id) { continue }
-                if !showsTemplate, let category = node.builtInCategoryID.flatMap(OccasionCategory.init(rawValue:)),
-                   !preferences.isOccasionCategoryEnabled(category) { continue }
-                result.append(Row(node: node, depth: depth))
-                if node.isGroup && (expanded.contains(node.id) || !needle.isEmpty) {
-                    appendChildren(of: node.id, depth: depth + 1)
-                }
-            }
-        }
-        appendChildren(of: nil, depth: 0)
-        return result
+        return included
     }
 
     var body: some View {
-        ForEach(rows) { row in
-            HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
-                Button {
-                    if row.node.isGroup {
-                        if !expanded.insert(row.id).inserted { expanded.remove(row.id) }
-                    } else { onSelect(row.node) }
-                } label: {
-                    HStack(spacing: 12) {
-                        if row.node.isGroup {
-                            FormIconTile(systemImage: row.node.icon)
-                        } else {
-                            IconTile(systemImage: row.node.icon, tint: row.node.occasion.tint)
-                                .accessibilityHidden(true)
-                        }
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(row.node.title)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.primary)
-                            if showsTemplate && !row.node.isGroup {
-                                Text(store.attachedTemplate(for: row.node)?.title ?? String(localized: "No template attached"))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        Spacer(minLength: 0)
-                        if row.node.isGroup {
-                            Image(systemName: expanded.contains(row.id) || !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "chevron.down" : "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                                .accessibilityHidden(true)
-                        } else if row.id == selectionID {
-                            Image(systemName: "checkmark")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.accent)
-                                .accessibilityHidden(true)
-                        } else if showsTemplate {
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(row.id == selectionID ? .isSelected : [])
-                .accessibilityHint(row.node.isGroup ? String(localized: "Expand or collapse group") :
-                                    (showsTemplate ? String(localized: "Edit occasion") : String(localized: "Choose occasion")))
-                if showsTemplate && row.node.isGroup {
-                    Button { onSelect(row.node) } label: {
-                        Image(systemName: "pencil")
-                            .font(.subheadline)
-                            .frame(width: 44, height: 44)
-                    }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel(Text("Edit") + Text(": ") + Text(row.node.title))
-                }
+        OccasionChildRows(
+            parentID: nil,
+            depth: 0,
+            needle: needle,
+            includedIDs: includedIDs,
+            showsTemplate: showsTemplate,
+            selectionID: selectionID,
+            allowsReordering: allowsReordering,
+            expanded: $expanded,
+            onSelect: onSelect
+        )
+        .onAppear { expandAncestors(of: selectionID) }
+        if isSearching && includedIDs.isEmpty { ContentUnavailableView.search(text: query) }
+    }
+
+    private func expandAncestors(of id: String?) {
+        guard let selected = store.occasionNodes.first(where: { $0.id == id }) else { return }
+        var parentID = selected.parentID
+        while let currentID = parentID, expanded.insert(currentID).inserted {
+            parentID = store.occasionNodes.first { $0.id == currentID }?.parentID
+        }
+    }
+}
+
+/// One level of siblings under `parentID`. Recurses into expanded groups so each
+/// level of the hierarchy owns its own `onMove`, keeping drag-to-reorder scoped
+/// to actual siblings instead of the visually flattened row order.
+private struct OccasionChildRows: View {
+    @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
+    let parentID: String?
+    let depth: Int
+    let needle: String
+    let includedIDs: Set<String>
+    let showsTemplate: Bool
+    let selectionID: String?
+    let allowsReordering: Bool
+    @Binding var expanded: Set<String>
+    let onSelect: (OccasionNode) -> Void
+
+    private var isSearching: Bool { !needle.isEmpty }
+
+    private var children: [OccasionNode] {
+        store.occasionChildren(of: parentID)
+            .filter { !isSearching || includedIDs.contains($0.id) }
+            .filter { node in
+                showsTemplate
+                    || node.builtInCategoryID.flatMap(OccasionCategory.init(rawValue:))
+                        .map(preferences.isOccasionCategoryEnabled) ?? true
             }
-            .padding(.leading, CGFloat(min(row.depth, 6)) * 16)
-            .onAppear {
-                guard row.id == store.occasionNodes.first(where: { $0.parentID == nil })?.id,
-                      let selected = store.occasionNodes.first(where: { $0.id == selectionID }) else { return }
-                var parentID = selected.parentID
-                while let id = parentID, expanded.insert(id).inserted {
-                    parentID = store.occasionNodes.first { $0.id == id }?.parentID
-                }
+    }
+
+    // `.onMove` is only defined on `ForEach` (`DynamicViewContent`), not on `some View`,
+    // so each branch below calls it directly on the `ForEach` rather than through a
+    // shared, type-erased helper.
+    var body: some View {
+        if allowsReordering && !isSearching {
+            ForEach(children) { node in
+                rowView(node)
+                childRows(for: node)
+            }
+            .onMove { offsets, newOffset in
+                store.moveOccasionNodes(parentID: parentID, fromOffsets: offsets, toOffset: newOffset)
+            }
+        } else {
+            ForEach(children) { node in
+                rowView(node)
+                childRows(for: node)
             }
         }
-        if rows.isEmpty && !query.isEmpty { ContentUnavailableView.search(text: query) }
+    }
+
+    @ViewBuilder
+    private func childRows(for node: OccasionNode) -> some View {
+        if node.isGroup && (expanded.contains(node.id) || isSearching) {
+            OccasionChildRows(
+                parentID: node.id,
+                depth: depth + 1,
+                needle: needle,
+                includedIDs: includedIDs,
+                showsTemplate: showsTemplate,
+                selectionID: selectionID,
+                allowsReordering: allowsReordering,
+                expanded: $expanded,
+                onSelect: onSelect
+            )
+        }
+    }
+
+    private func rowView(_ node: OccasionNode) -> some View {
+        HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
+            Button {
+                if node.isGroup {
+                    if !expanded.insert(node.id).inserted { expanded.remove(node.id) }
+                } else { onSelect(node) }
+            } label: {
+                HStack(spacing: 12) {
+                    if node.isGroup {
+                        FormIconTile(systemImage: node.icon)
+                    } else {
+                        IconTile(systemImage: node.icon, tint: node.occasion.tint)
+                            .accessibilityHidden(true)
+                    }
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(node.title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                        if showsTemplate && !node.isGroup {
+                            Text(store.attachedTemplate(for: node)?.title ?? String(localized: "No template attached"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        if showsTemplate, let hiddenLabel = hiddenCategoryLabel(for: node) {
+                            Text(hiddenLabel)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    if node.isGroup {
+                        Image(systemName: expanded.contains(node.id) || isSearching ? "chevron.down" : "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    } else if node.id == selectionID {
+                        Image(systemName: "checkmark")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.accent)
+                            .accessibilityHidden(true)
+                    } else if showsTemplate {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(node.id == selectionID ? .isSelected : [])
+            .accessibilityHint(node.isGroup ? String(localized: "Expand or collapse group") :
+                                (showsTemplate ? String(localized: "Edit occasion") : String(localized: "Choose occasion")))
+            if showsTemplate && node.isGroup {
+                Button { onSelect(node) } label: {
+                    Image(systemName: "pencil")
+                        .font(.subheadline)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(Text("Edit") + Text(": ") + Text(node.title))
+            }
+        }
+        .padding(.leading, CGFloat(min(depth, 6)) * 16)
+    }
+
+    /// Surfaces a built-in category's Settings visibility directly on its row, since
+    /// that toggle now lives in the occasion editor instead of a separate Settings screen.
+    private func hiddenCategoryLabel(for node: OccasionNode) -> String? {
+        guard node.isGroup, let categoryID = node.builtInCategoryID,
+              let category = OccasionCategory(rawValue: categoryID), category != .personal,
+              !preferences.isOccasionCategoryEnabled(category) else { return nil }
+        return String(localized: "Hidden from occasion pickers")
     }
 }
 
@@ -183,7 +260,7 @@ struct OccasionLibraryPicker: View {
     var body: some View {
         NavigationStack {
             List {
-                OccasionTreeRows(query: query, selectionID: selectionID) { node in
+                OccasionTreeRows(query: query, selectionID: selectionID, allowsReordering: false) { node in
                     onSelect(node)
                     dismiss()
                 }
@@ -201,6 +278,7 @@ struct OccasionLibraryPicker: View {
 
 private struct OccasionEditorView: View {
     @Environment(AppStore.self) private var store
+    @Environment(AppPreferences.self) private var preferences
     @Environment(\.dismiss) private var dismiss
     @State private var draft: OccasionNode
     @State private var title: String
@@ -209,6 +287,7 @@ private struct OccasionEditorView: View {
     @State private var choosingTemplate = false
     @State private var choosingParent = false
     @State private var child: OccasionNode?
+    @State private var draftCategoryVisibility: Bool?
     private let initialTitle: String
 
     init(node: OccasionNode) {
@@ -234,6 +313,21 @@ private struct OccasionEditorView: View {
         return exists ? "Edit occasion" : "New occasion"
     }
 
+    private var configurableCategory: OccasionCategory? {
+        guard draft.isGroup, let categoryID = draft.builtInCategoryID,
+              let category = OccasionCategory(rawValue: categoryID), category != .personal else { return nil }
+        return category
+    }
+
+    /// Keep visibility changes in the editor until the occasion is saved successfully.
+    private var categoryVisibilityBinding: Binding<Bool>? {
+        guard let category = configurableCategory else { return nil }
+        return Binding(
+            get: { draftCategoryVisibility ?? preferences.isOccasionCategoryEnabled(category) },
+            set: { draftCategoryVisibility = $0 }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -242,8 +336,9 @@ private struct OccasionEditorView: View {
                     if !draft.isGroup {
                         dateSection
                         templateSection
-                    } else if exists {
-                        childrenSection
+                    } else {
+                        visibilitySection
+                        if exists { childrenSection }
                     }
                     if let error {
                         SurfaceCard {
@@ -310,14 +405,25 @@ private struct OccasionEditorView: View {
                              systemImage: "folder", showsDisclosure: true)
             }
             .buttonStyle(.plain)
-            SurfaceRowDivider()
-            FormFieldRow(title: "Position", systemImage: "arrow.up.arrow.down") {
-                Stepper(value: $draft.sortOrder, in: 0...10_000) {
-                    Text((draft.sortOrder + 1).formatted())
-                        .monospacedDigit()
+        }
+    }
+
+    /// Shown only for a built-in category group; replaces the "Occasion groups"
+    /// section that used to live in Settings, so visibility lives beside the group itself.
+    @ViewBuilder
+    private var visibilitySection: some View {
+        if let categoryVisibilityBinding {
+            VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+                SurfaceSection(title: "Visibility") {
+                    HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
+                        FormIconTile(systemImage: "eye")
+                        Toggle("Show in occasion pickers", isOn: categoryVisibilityBinding)
+                            .font(.subheadline.weight(.semibold))
+                            .tint(.accentColor)
+                    }
+                    .padding(TouchPointMetric.cardPadding)
                 }
-                .accessibilityLabel("Position")
-                .accessibilityValue((draft.sortOrder + 1).formatted())
+                footer("Hidden groups stay here for management but are hidden from occasion pickers throughout the app. Saved dates, templates, and greetings are unaffected.")
             }
         }
     }
@@ -430,8 +536,15 @@ private struct OccasionEditorView: View {
     private func save() {
         var savedDraft = draft
         if title != initialTitle { savedDraft.name = title }
-        if store.saveOccasionNode(savedDraft) { dismiss() }
-        else { error = store.persistenceError }
+        guard store.saveOccasionNode(savedDraft) else {
+            error = store.persistenceError
+            return
+        }
+        if let category = configurableCategory, let isEnabled = draftCategoryVisibility {
+            if isEnabled { preferences.disabledOccasionCategories.remove(category) }
+            else { preferences.disabledOccasionCategories.insert(category) }
+        }
+        dismiss()
     }
 }
 

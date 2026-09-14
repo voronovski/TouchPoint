@@ -6,6 +6,7 @@ struct PeopleView: View {
     @State private var showingNewPerson = false
     @State private var showingContactsPicker = false
     @State private var importMessage: String?
+    @State private var personPendingDeletion: Person?
 
     private var filteredPeople: [Person] {
         let matches = query.isEmpty ? store.people : store.people.filter {
@@ -35,6 +36,13 @@ struct PeopleView: View {
                         PersonDetailView(personID: person.id)
                     } label: {
                         PersonListRow(person: person)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            personPendingDeletion = person
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
                 }
             }
@@ -80,6 +88,22 @@ struct PeopleView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(importMessage ?? "")
+            }
+            .confirmationDialog(
+                "Delete this person?",
+                isPresented: Binding(
+                    get: { personPendingDeletion != nil },
+                    set: { if !$0 { personPendingDeletion = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Delete person and greetings", role: .destructive) {
+                    if let person = personPendingDeletion { store.deletePerson(id: person.id) }
+                    personPendingDeletion = nil
+                }
+                Button("Cancel", role: .cancel) { personPendingDeletion = nil }
+            } message: {
+                Text("This also removes the person's planned greetings and cannot be undone.")
             }
         }
     }
@@ -288,11 +312,18 @@ private struct PersonDetailView: View {
         }
     }
 
+    /// Deliberately styled apart from `SurfaceSection`/`SurfaceCard`: this toggle deletes
+    /// planned greetings when turned on, so it should read as a warning, not a routine setting.
     private var communicationSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SurfaceSection(title: "Communication") {
+        VStack(alignment: .leading, spacing: TouchPointMetric.sectionHeadingSpacing) {
+            Text("Communication")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, TouchPointMetric.screenPadding)
+                .accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: TouchPointMetric.rowContentAlignment, spacing: 12) {
-                    FormIconTile(systemImage: "person.slash")
+                    IconTile(systemImage: "person.slash", tint: .red)
                     Toggle("Stop communication", isOn: Binding(
                         get: { person?.communicationStopped ?? false },
                         set: { stopped in
@@ -304,14 +335,19 @@ private struct PersonDetailView: View {
                         }
                     ))
                     .font(.subheadline.weight(.semibold))
-                    .tint(.accentColor)
+                    .tint(.red)
                 }
-                .padding(TouchPointMetric.cardPadding)
+                Text("Use this when the person asks you to stop contacting them. Planned greetings are removed and new greetings cannot be scheduled while this is on. Turning it off does not restore deleted greetings.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
-            Text("Use this when the person asks you to stop contacting them. Planned greetings are removed and new greetings cannot be scheduled while this is on. Turning it off does not restore deleted greetings.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, TouchPointMetric.cardPadding)
+            .padding(TouchPointMetric.cardPadding)
+            .background(Color.red.opacity(0.08))
+            .clipShape(.rect(cornerRadius: TouchPointMetric.cardRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: TouchPointMetric.cardRadius, style: .continuous)
+                    .strokeBorder(Color.red.opacity(0.25), lineWidth: 1)
+            }
         }
     }
 

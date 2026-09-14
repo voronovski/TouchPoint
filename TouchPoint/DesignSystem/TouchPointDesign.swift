@@ -1,13 +1,24 @@
 import SwiftUI
 
 enum TouchPointColor {
-    static let indigo = Color(red: 88.0 / 255.0, green: 86.0 / 255.0, blue: 214.0 / 255.0)
-    static let blue = Color(red: 0.16, green: 0.45, blue: 0.82)
-    static let coral = Color(red: 0.91, green: 0.33, blue: 0.28)
-    static let rose = Color(red: 0.79, green: 0.27, blue: 0.48)
-    static let amber = Color(red: 0.74, green: 0.48, blue: 0.06)
-    static let forest = Color(red: 0.16, green: 0.48, blue: 0.31)
-    static let teal = Color(red: 0.05, green: 0.49, blue: 0.52)
+    /// Each brand color is tuned for `.secondarySystemGroupedBackground` in its own
+    /// appearance. The light variants below read fine on a near-white card, but the
+    /// same RGB values sit low-contrast against the dark card's near-black gray, so
+    /// dark mode gets its own brighter, more saturated variant per hue.
+    private static func dynamic(light: (Double, Double, Double), dark: (Double, Double, Double)) -> Color {
+        Color(uiColor: UIColor { traits in
+            let (r, g, b) = traits.userInterfaceStyle == .dark ? dark : light
+            return UIColor(red: r, green: g, blue: b, alpha: 1)
+        })
+    }
+
+    static let indigo = dynamic(light: (88.0 / 255.0, 86.0 / 255.0, 214.0 / 255.0), dark: (137.0 / 255.0, 135.0 / 255.0, 255.0 / 255.0))
+    static let blue = dynamic(light: (0.16, 0.45, 0.82), dark: (94.0 / 255.0, 166.0 / 255.0, 1.0))
+    static let coral = dynamic(light: (0.91, 0.33, 0.28), dark: (1.0, 120.0 / 255.0, 105.0 / 255.0))
+    static let rose = dynamic(light: (0.79, 0.27, 0.48), dark: (1.0, 110.0 / 255.0, 170.0 / 255.0))
+    static let amber = dynamic(light: (0.74, 0.48, 0.06), dark: (1.0, 179.0 / 255.0, 64.0 / 255.0))
+    static let forest = dynamic(light: (0.16, 0.48, 0.31), dark: (94.0 / 255.0, 199.0 / 255.0, 140.0 / 255.0))
+    static let teal = dynamic(light: (0.05, 0.49, 0.52), dark: (68.0 / 255.0, 199.0 / 255.0, 209.0 / 255.0))
 }
 
 /// Stable appearance identifiers shared by template and collection persistence.

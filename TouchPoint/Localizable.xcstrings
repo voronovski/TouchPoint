@@ -89,6 +89,7 @@
       }
     },
     "%lld/%lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -365,6 +366,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавить человека"
+          }
+        }
+      }
+    },
+    "Add the people you care about" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add the people you care about"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте тех, кто вам дорог"
           }
         }
       }
@@ -1052,7 +1069,24 @@
         }
       }
     },
+    "Choose the occasions that matter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the occasions that matter"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите важные поводы"
+          }
+        }
+      }
+    },
     "Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1550,6 +1584,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Контекстные фильтры сочетаются с выбранной коллекцией и поиском."
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить"
           }
         }
       }
@@ -3136,6 +3186,22 @@
         }
       }
     },
+    "Get started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get started"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать"
+          }
+        }
+      }
+    },
     "Greeting" : {
       "localizations" : {
         "en" : {
@@ -3248,6 +3314,38 @@
         }
       }
     },
+    "Hidden from occasion pickers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hidden from occasion pickers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыто при выборе повода"
+          }
+        }
+      }
+    },
+    "Hidden groups stay here for management but are hidden from occasion pickers throughout the app. Saved dates, templates, and greetings are unaffected." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hidden groups stay here for management but are hidden from occasion pickers throughout the app. Saved dates, templates, and greetings are unaffected."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрытые группы остаются здесь для редактирования, но не отображаются при выборе повода в приложении. Сохранённые даты, шаблоны и поздравления не меняются."
+          }
+        }
+      }
+    },
     "Hide names in notifications" : {
       "localizations" : {
         "en" : {
@@ -3342,6 +3440,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Годовщина дома"
+          }
+        }
+      }
+    },
+    "No other greetings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No other greetings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Других поздравлений нет"
+          }
+        }
+      }
+    },
+    "The next greeting in this time range is shown above." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The next greeting in this time range is shown above."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ближайшее поздравление за этот период показано выше."
           }
         }
       }
@@ -4750,6 +4880,7 @@
       }
     },
     "Occasion groups" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4793,6 +4924,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Поводы"
+          }
+        }
+      }
+    },
+    "Occasions holds birthdays, holidays, and your own custom moments. Attach a template to one to plan its greetings automatically." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Occasions holds birthdays, holidays, and your own custom moments. Attach a template to one to plan its greetings automatically."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В разделе «Поводы» собраны дни рождения, праздники и ваши собственные события. Прикрепите к поводу шаблон, чтобы поздравления планировались автоматически."
           }
         }
       }
@@ -5248,6 +5395,7 @@
       }
     },
     "Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5374,6 +5522,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Запланируйте один раз. Больше ничего не забывайте."
+          }
+        }
+      }
+    },
+    "Plan the whole year in one pass" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan the whole year in one pass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спланируйте весь год за один раз"
           }
         }
       }
@@ -5507,6 +5671,7 @@
       }
     },
     "Position" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5938,6 +6103,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Заменить архивом…"
+          }
+        }
+      }
+    },
+    "Reschedule" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reschedule"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перенести"
           }
         }
       }
@@ -6476,6 +6657,22 @@
         }
       }
     },
+    "Show in occasion pickers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show in occasion pickers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывать при выборе повода"
+          }
+        }
+      }
+    },
     "Show nearest greeting" : {
       "localizations" : {
         "en" : {
@@ -6488,6 +6685,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показать ближайшее поздравление"
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустить"
           }
         }
       }
@@ -6568,6 +6781,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сортировать шаблоны"
+          }
+        }
+      }
+    },
+    "Start in People. Save a phone number, email, or just a name — Touch Point can remind you even without contact info." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start in People. Save a phone number, email, or just a name — Touch Point can remind you even without contact info."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начните с раздела «Люди». Сохраните номер телефона, электронную почту или просто имя — Touch Point напомнит о событии даже без контактных данных."
           }
         }
       }
@@ -6827,6 +7056,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Шаблоны"
+          }
+        }
+      }
+    },
+    "Templates are reusable messages for an occasion, audience, or channel. Touch Point picks the best match when it plans a greeting." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Templates are reusable messages for an occasion, audience, or channel. Touch Point picks the best match when it plans a greeting."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаблоны — это готовые тексты для разных поводов, получателей и способов связи. При планировании поздравления Touch Point выбирает наиболее подходящий."
           }
         }
       }
@@ -7364,6 +7609,22 @@
         }
       }
     },
+    "Use \"Plan greetings\" on the Today tab to schedule everyone at once, or add a single greeting anytime from Calendar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use \"Plan greetings\" on the Today tab to schedule everyone at once, or add a single greeting anytime from Calendar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите «Запланировать поздравления» на вкладке «Сегодня», чтобы составить расписание для всех, или добавьте отдельное поздравление в разделе «Календарь»."
+          }
+        }
+      }
+    },
     "Use each person's preferred method" : {
       "localizations" : {
         "en" : {
@@ -7563,6 +7824,22 @@
         }
       }
     },
+    "Visibility" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visibility"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видимость"
+          }
+        }
+      }
+    },
     "Wedding anniversary" : {
       "localizations" : {
         "en" : {
@@ -7625,6 +7902,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Годовщина работы"
+          }
+        }
+      }
+    },
+    "Write once, reuse every year" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write once, reuse every year"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Напишите один раз — используйте каждый год"
           }
         }
       }

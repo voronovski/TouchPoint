@@ -1938,6 +1938,41 @@ extension AppStore {
         return true
     }
 
+    /// Shared ordering for both displayed rows and the indices received from drag-to-reorder.
+    func occasionChildren(of parentID: String?) -> [OccasionNode] {
+        occasionNodes.filter { $0.parentID == parentID }.sorted {
+            if $0.sortOrder != $1.sortOrder { return $0.sortOrder < $1.sortOrder }
+            let titleOrder = $0.title.localizedStandardCompare($1.title)
+            if titleOrder != .orderedSame { return titleOrder == .orderedAscending }
+            return $0.id < $1.id
+        }
+    }
+
+    /// Reorders siblings sharing `parentID`. Backs drag-to-reorder in the occasion tree.
+    /// Implemented by hand (rather than SwiftUI's `move(fromOffsets:toOffset:)`) since this
+    /// data layer intentionally does not import SwiftUI.
+    @discardableResult
+    func moveOccasionNodes(parentID: String?, fromOffsets: IndexSet, toOffset: Int) -> Bool {
+        var siblings = occasionChildren(of: parentID)
+        guard (0...siblings.count).contains(toOffset),
+              fromOffsets.allSatisfy({ siblings.indices.contains($0) }) else { return false }
+        guard !fromOffsets.isEmpty else { return true }
+        let moving = fromOffsets.sorted().map { siblings[$0] }
+        for index in fromOffsets.sorted(by: >) { siblings.remove(at: index) }
+        let removedBeforeTarget = fromOffsets.filter { $0 < toOffset }.count
+        let insertionIndex = max(0, min(siblings.count, toOffset - removedBeforeTarget))
+        siblings.insert(contentsOf: moving, at: insertionIndex)
+        var nodes = occasionNodes
+        for (index, sibling) in siblings.enumerated() {
+            guard let nodeIndex = nodes.firstIndex(where: { $0.id == sibling.id }) else { continue }
+            nodes[nodeIndex].sortOrder = index
+        }
+        let previous = mutableState
+        occasionNodes = nodes
+        guard save() else { restore(previous); return false }
+        return true
+    }
+
     /// Children move up one level; saved dates and greetings retain their snapshots.
     @discardableResult
     func deleteOccasionNode(id: String) -> Bool {

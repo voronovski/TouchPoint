@@ -215,7 +215,11 @@ struct HomeView: View {
     }
 
     private var scheduleSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let scheduledEvents = upcomingEvents
+        let featuredEventID = nextEvent?.id
+        let additionalEvents = scheduledEvents.filter { $0.id != featuredEventID }
+
+        return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("Upcoming")
                     .font(.subheadline.weight(.semibold))
@@ -229,11 +233,13 @@ struct HomeView: View {
                 .pickerStyle(.menu)
             }
 
-            if upcomingEvents.isEmpty {
+            if additionalEvents.isEmpty {
                 ContentUnavailableView(
-                    "Nothing scheduled",
+                    scheduledEvents.isEmpty ? "Nothing scheduled" : "No other greetings",
                     systemImage: "calendar.badge.checkmark",
-                    description: Text("This time range is clear.")
+                    description: Text(scheduledEvents.isEmpty
+                        ? "This time range is clear."
+                        : "The next greeting in this time range is shown above.")
                 )
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 28)
@@ -242,14 +248,14 @@ struct HomeView: View {
             } else {
                 SurfaceCard {
                     VStack(spacing: 0) {
-                        ForEach(Array(upcomingEvents.enumerated()), id: \.element.id) { index, event in
+                        ForEach(Array(additionalEvents.enumerated()), id: \.element.id) { index, event in
                             Button {
                                 selectedEvent = event
                             } label: {
                                 EventRow(event: event)
                             }
                             .buttonStyle(.plain)
-                            if index < upcomingEvents.count - 1 {
+                            if index < additionalEvents.count - 1 {
                                 Divider().padding(.leading, 64)
                             }
                         }

@@ -11,20 +11,20 @@ struct ContentView: View {
     @State private var cloudKit = CloudKitSnapshotService.shared
     @State private var cloudKitSyncTask: Task<Void, Never>?
     @State private var widgetSnapshotTask: Task<Void, Never>?
+    @State private var showsOnboarding = false
 
     var body: some View {
         @Bindable var navigation = navigation
         MainAppView()
         .tint(.accentColor)
-        .environment(store)
-        .environment(preferences)
-        .environment(navigation)
-        .environment(cloudKit)
         .task {
             requestNotificationPermissionIfNeeded()
             scheduleNotificationSync()
             scheduleCloudKitSync()
             scheduleWidgetSnapshot()
+            if !preferences.hasCompletedOnboarding {
+                showsOnboarding = true
+            }
         }
         .onChange(of: store.events) {
             scheduleNotificationSync()
@@ -82,6 +82,23 @@ struct ContentView: View {
                 QuickAddPersonView()
             }
         }
+        .fullScreenCover(isPresented: Binding(
+            get: { showsOnboarding },
+            set: { isPresented in
+                if !isPresented {
+                    showsOnboarding = false
+                    preferences.hasCompletedOnboarding = true
+                }
+            }
+        )) {
+            OnboardingView()
+        }
+        // Wrap the presentation modifiers too, so their content inherits the
+        // same shared objects as the main tabs.
+        .environment(store)
+        .environment(preferences)
+        .environment(navigation)
+        .environment(cloudKit)
     }
 
     private func requestNotificationPermissionIfNeeded() {
