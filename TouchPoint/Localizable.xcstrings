@@ -7060,18 +7060,18 @@
         }
       }
     },
-    "Templates are reusable messages for an occasion, audience, or channel. Touch Point picks the best match when it plans a greeting." : {
+    "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Templates are reusable messages for an occasion, audience, or channel. Touch Point picks the best match when it plans a greeting."
+            "value" : "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Шаблоны — это готовые тексты для разных поводов, получателей и способов связи. При планировании поздравления Touch Point выбирает наиболее подходящий."
+            "value" : "Добавьте в шаблоны несколько вариантов текста. Touch Point чередует их при планировании поздравлений, помогая не повторять одни и те же слова."
           }
         }
       }
@@ -7906,18 +7906,18 @@
         }
       }
     },
-    "Write once, reuse every year" : {
+    "Fresh words for every occasion" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Write once, reuse every year"
+            "value" : "Fresh words for every occasion"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Напишите один раз — используйте каждый год"
+            "value" : "Новые слова для каждого повода"
           }
         }
       }

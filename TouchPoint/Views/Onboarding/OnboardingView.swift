@@ -89,8 +89,8 @@ private struct OnboardingStep {
         OnboardingStep(
             icon: "rectangle.stack.fill",
             tint: TouchPointColor.teal,
-            title: String(localized: "Write once, reuse every year"),
-            message: String(localized: "Templates are reusable messages for an occasion, audience, or channel. Touch Point picks the best match when it plans a greeting.")
+            title: String(localized: "Fresh words for every occasion"),
+            message: String(localized: "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time.")
         ),
         OnboardingStep(
             icon: "wand.and.sparkles",
