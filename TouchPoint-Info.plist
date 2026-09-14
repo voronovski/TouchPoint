@@ -26,6 +26,8 @@
 	<true/>
 	<key>NSAccentColorName</key>
 	<string>AccentColor</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Touch Point uses contact access to let you search your phone book and import only the people you select.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Touch Point uses notifications to remind you about upcoming greetings so you can send them on time. It never sends messages automatically.</string>
 	<key>UIApplicationSceneManifest</key>

@@ -79,7 +79,6 @@ struct PeopleView: View {
                     onSelect: importContacts,
                     onCancel: { showingContactsPicker = false }
                 )
-                .ignoresSafeArea()
             }
             .alert("Contacts imported", isPresented: Binding(
                 get: { importMessage != nil },

@@ -5,7 +5,20 @@
       "shouldTranslate" : false
     },
     ": " : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": "
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": "
+          }
+        }
+      }
     },
     "%@ and %lld more" : {
       "localizations" : {
@@ -84,23 +97,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вариантов: %lld"
-          }
-        }
-      }
-    },
-    "%lld/%lld" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld/%lld"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld/%lld"
           }
         }
       }
@@ -222,23 +218,6 @@
         }
       }
     },
-    "A greeting needs someone to contact. Add them in People, then return here." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A greeting needs someone to contact. Add them in People, then return here."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Для поздравления нужен человек. Добавьте его в разделе «Люди» и вернитесь сюда."
-          }
-        }
-      }
-    },
     "Add" : {
       "localizations" : {
         "en" : {
@@ -267,23 +246,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавьте поздравление или запланируйте год, чтобы наполнить календарь."
-          }
-        }
-      }
-    },
-    "Add a person first" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a person first"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сначала добавьте человека"
           }
         }
       }
@@ -333,6 +295,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавить важную дату"
+          }
+        }
+      }
+    },
+    "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте в шаблоны несколько вариантов текста. Touch Point чередует их при планировании поздравлений, помогая не повторять одни и те же слова."
           }
         }
       }
@@ -464,6 +442,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Все отношения"
+          }
+        }
+      }
+    },
+    "Allow contact access in Settings to search your phone book and choose people to import." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow contact access in Settings to search your phone book and choose people to import."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешите доступ к контактам в настройках, чтобы искать людей в телефонной книге и выбирать их для импорта."
           }
         }
       }
@@ -921,7 +915,20 @@
       }
     },
     "Channels" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Channels"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каналы"
+          }
+        }
+      }
     },
     "Checking account and private database status." : {
       "localizations" : {
@@ -983,23 +990,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выберите человека"
-          }
-        }
-      }
-    },
-    "Choose a starting focus" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a starting focus"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите начальный фокус"
           }
         }
       }
@@ -1081,23 +1071,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выберите важные поводы"
-          }
-        }
-      }
-    },
-    "Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose which occasion groups are relevant. Disabled groups are hidden from occasion pickers; saved dates, templates, and greetings stay unchanged."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите подходящие группы поводов. Отключённые группы скрыты в списках выбора поводов; сохранённые даты, шаблоны и поздравления не изменяются."
           }
         }
       }
@@ -1198,6 +1171,22 @@
         }
       }
     },
+    "Clear search" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear search"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистить поиск"
+          }
+        }
+      }
+    },
     "Clear status filter" : {
       "localizations" : {
         "en" : {
@@ -1242,23 +1231,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Благодарность клиенту"
-          }
-        }
-      }
-    },
-    "Clients and colleagues" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clients and colleagues"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Клиенты и коллеги"
           }
         }
       }
@@ -1507,6 +1479,22 @@
         }
       }
     },
+    "Contact access is restricted on this device." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact access is restricted on this device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ к контактам ограничен на этом устройстве."
+          }
+        }
+      }
+    },
     "Contact method" : {
       "localizations" : {
         "en" : {
@@ -1523,6 +1511,22 @@
         }
       }
     },
+    "Contacts access is unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contacts access is unavailable"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет доступа к контактам"
+          }
+        }
+      }
+    },
     "Contacts imported" : {
       "localizations" : {
         "en" : {
@@ -1535,23 +1539,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Контакты импортированы"
-          }
-        }
-      }
-    },
-    "Contacts without a phone number or email address were skipped." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contacts without a phone number or email address were skipped."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Контакты без номера телефона и email пропущены."
           }
         }
       }
@@ -1616,6 +1603,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Коралловый"
+          }
+        }
+      }
+    },
+    "Could not load contacts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not load contacts"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось загрузить контакты"
           }
         }
       }
@@ -1829,7 +1832,20 @@
       }
     },
     "Date" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата"
+          }
+        }
+      }
     },
     "Date and template changes apply the next time this occasion is added to a person. Existing greetings keep their saved content." : {
       "extractionState" : "manual",
@@ -1941,23 +1957,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Даты повторяются каждый год. Напоминания появятся после сохранения человека."
-          }
-        }
-      }
-    },
-    "Dates repeat every year. The year is intentionally not stored." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dates repeat every year. The year is intentionally not stored."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Даты повторяются каждый год. Год намеренно не сохраняется."
           }
         }
       }
@@ -2256,7 +2255,20 @@
       }
     },
     "Details" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Детали"
+          }
+        }
+      }
     },
     "Día de la Raza" : {
       "localizations" : {
@@ -2398,23 +2410,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "У каждого человека должно быть имя."
-          }
-        }
-      }
-    },
-    "Each person must have a phone number or email address." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Each person must have a phone number or email address."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Для каждого человека необходимо указать номер телефона или email."
           }
         }
       }
@@ -2565,23 +2560,6 @@
         }
       }
     },
-    "Email (optional)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Email (optional)"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Email (необязательно)"
-          }
-        }
-      }
-    },
     "Email subject (optional)" : {
       "localizations" : {
         "en" : {
@@ -2599,21 +2577,17 @@
       }
     },
     "Enter a name to add this person." : {
-
-    },
-    "Enter a phone number or email address." : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter a phone number or email address."
+            "value" : "Enter a name to add this person."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Укажите номер телефона или email."
+            "value" : "Введите имя чтобы добавить этого человека."
           }
         }
       }
@@ -2630,23 +2604,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Контекст события"
-          }
-        }
-      }
-    },
-    "Every relationship" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every relationship"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Все отношения"
           }
         }
       }
@@ -2696,23 +2653,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "У каждого человека есть хотя бы одна сохранённая дата."
-          }
-        }
-      }
-    },
-    "Everyone in this focus has at least one saved date." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Everyone in this focus has at least one saved date."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "У каждого человека в выбранном фокусе есть хотя бы одна сохранённая дата."
           }
         }
       }
@@ -2794,23 +2734,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Семья"
-          }
-        }
-      }
-    },
-    "Family and friends" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Family and friends"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Семья и друзья"
           }
         }
       }
@@ -2911,40 +2834,6 @@
         }
       }
     },
-    "Focus" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focus"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Фокус"
-          }
-        }
-      }
-    },
-    "Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focus adjusts which relationships and priorities appear first. Your people, dates, templates, and plans stay unchanged."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Фокус меняет порядок отношений и приоритетов. Люди, даты, шаблоны и планы не изменяются."
-          }
-        }
-      }
-    },
     "Forest" : {
       "localizations" : {
         "en" : {
@@ -2993,6 +2882,22 @@
         }
       }
     },
+    "Fresh words for every occasion" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fresh words for every occasion"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новые слова для каждого повода"
+          }
+        }
+      }
+    },
     "Friend" : {
       "localizations" : {
         "en" : {
@@ -3021,23 +2926,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "От"
-          }
-        }
-      }
-    },
-    "Full name" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full name"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Полное имя"
           }
         }
       }
@@ -3411,23 +3299,6 @@
         }
       }
     },
-    "Home" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Home"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Главная"
-          }
-        }
-      }
-    },
     "Home anniversary" : {
       "localizations" : {
         "en" : {
@@ -3440,38 +3311,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Годовщина дома"
-          }
-        }
-      }
-    },
-    "No other greetings" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No other greetings"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Других поздравлений нет"
-          }
-        }
-      }
-    },
-    "The next greeting in this time range is shown above." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The next greeting in this time range is shown above."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ближайшее поздравление за этот период показано выше."
           }
         }
       }
@@ -3524,6 +3363,22 @@
         }
       }
     },
+    "Import (%lld)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import (%lld)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортировать (%lld)"
+          }
+        }
+      }
+    },
     "Import adds templates and collections to the current library. Export saves the template library without people or greetings." : {
       "localizations" : {
         "en" : {
@@ -3568,6 +3423,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Импортировать библиотеку"
+          }
+        }
+      }
+    },
+    "Import selected contacts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import selected contacts"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортировать выбранные контакты"
           }
         }
       }
@@ -3844,23 +3715,6 @@
         }
       }
     },
-    "Keep every relationship in view. You can change this focus anytime." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep every relationship in view. You can change this focus anytime."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Все отношения остаются в поле зрения. Фокус можно изменить в любое время."
-          }
-        }
-      }
-    },
     "Korean holidays" : {
       "localizations" : {
         "en" : {
@@ -4085,6 +3939,22 @@
         }
       }
     },
+    "Loading contacts…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading contacts…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загрузка контактов…"
+          }
+        }
+      }
+    },
     "Local archive" : {
       "localizations" : {
         "en" : {
@@ -4102,7 +3972,20 @@
       }
     },
     "Locked" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заблокировано"
+          }
+        }
+      }
     },
     "Manage collections" : {
       "localizations" : {
@@ -4116,6 +3999,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Управлять коллекциями"
+          }
+        }
+      }
+    },
+    "Manage contact access" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage contact access"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настроить доступ к контактам"
           }
         }
       }
@@ -4324,6 +4223,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Имя, сообщение, повод, аудитория, канал или язык"
+          }
+        }
+      }
+    },
+    "Name, phone, or email" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, phone, or email"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имя, телефон или email"
           }
         }
       }
@@ -4587,6 +4502,22 @@
         }
       }
     },
+    "No contacts available" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No contacts available"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет доступных контактов"
+          }
+        }
+      }
+    },
     "No earlier versions yet." : {
       "localizations" : {
         "en" : {
@@ -4712,6 +4643,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Поводы не выбраны"
+          }
+        }
+      }
+    },
+    "No other greetings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No other greetings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Других поздравлений нет"
           }
         }
       }
@@ -4875,23 +4822,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Группа поводов"
-          }
-        }
-      }
-    },
-    "Occasion groups" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Occasion groups"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Группы поводов"
           }
         }
       }
@@ -5068,6 +4998,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открыть следующее поздравление"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки"
           }
         }
       }
@@ -5345,23 +5291,6 @@
         }
       }
     },
-    "Personal" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personal"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Личное"
-          }
-        }
-      }
-    },
     "Personal message" : {
       "localizations" : {
         "en" : {
@@ -5390,23 +5319,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Личные даты"
-          }
-        }
-      }
-    },
-    "Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personal moments is always enabled. Disabled groups are hidden from occasion selection and unplanned suggestions."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "«Личные даты» всегда включены. Отключённые группы скрываются из выбора поводов и подсказок о незапланированных поздравлениях."
           }
         }
       }
@@ -5443,23 +5355,6 @@
         }
       }
     },
-    "Phone (optional)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Phone (optional)"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Телефон (необязательно)"
-          }
-        }
-      }
-    },
     "Phone and email are optional. Without them, we will only remind you." : {
       "localizations" : {
         "en" : {
@@ -5476,23 +5371,6 @@
         }
       }
     },
-    "Pick what you want to see first, or keep All. This is a focus—not an identity—and you can change it later without losing any people or plans." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick what you want to see first, or keep All. This is a focus—not an identity—and you can change it later without losing any people or plans."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите, что показывать первым, или оставьте «Все». Это фокус, а не идентичность; его можно изменить позже без потери людей и планов."
-          }
-        }
-      }
-    },
     "Plan greetings" : {
       "localizations" : {
         "en" : {
@@ -5505,23 +5383,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Запланировать поздравления"
-          }
-        }
-      }
-    },
-    "Plan once. Never forget again." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan once. Never forget again."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Запланируйте один раз. Больше ничего не забывайте."
           }
         }
       }
@@ -5606,6 +5467,22 @@
         }
       }
     },
+    "Please try loading your contacts again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try loading your contacts again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте загрузить контакты ещё раз."
+          }
+        }
+      }
+    },
     "Portugal Day" : {
       "localizations" : {
         "en" : {
@@ -5666,23 +5543,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "День Республики Португалии"
-          }
-        }
-      }
-    },
-    "Position" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Position"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Позиция"
           }
         }
       }
@@ -5832,40 +5692,6 @@
         }
       }
     },
-    "Prioritize personal relationships when reviewing upcoming greetings." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prioritize personal relationships when reviewing upcoming greetings."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ставить личные отношения выше при просмотре ближайших поздравлений."
-          }
-        }
-      }
-    },
-    "Prioritize work relationships when reviewing upcoming greetings." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prioritize work relationships when reviewing upcoming greetings."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ставить рабочие отношения выше при просмотре ближайших поздравлений."
-          }
-        }
-      }
-    },
     "Private iCloud backup" : {
       "localizations" : {
         "en" : {
@@ -5942,23 +5768,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Исключения для получателей"
-          }
-        }
-      }
-    },
-    "Recommended" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recommended"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Рекомендуемые"
           }
         }
       }
@@ -6526,6 +6335,22 @@
         }
       }
     },
+    "Search includes only contacts you have shared with Touch Point." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search includes only contacts you have shared with Touch Point."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск доступен только среди контактов, к которым вы разрешили доступ Touch Point."
+          }
+        }
+      }
+    },
     "Search occasions" : {
       "localizations" : {
         "en" : {
@@ -6543,7 +6368,20 @@
       }
     },
     "Search templates" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search templates"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск темплейтов"
+          }
+        }
+      }
     },
     "Select all" : {
       "localizations" : {
@@ -7060,22 +6898,6 @@
         }
       }
     },
-    "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add message variations to your templates. Touch Point alternates between them when planning greetings, helping you avoid the same words every time."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Добавьте в шаблоны несколько вариантов текста. Touch Point чередует их при планировании поздравлений, помогая не повторять одни и те же слова."
-          }
-        }
-      }
-    },
     "Text message" : {
       "localizations" : {
         "en" : {
@@ -7137,6 +6959,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Иконка и цвет помогают узнать этот шаблон во всей библиотеке."
+          }
+        }
+      }
+    },
+    "The next greeting in this time range is shown above." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The next greeting in this time range is shown above."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ближайшее поздравление за этот период показано выше."
           }
         }
       }
@@ -7497,6 +7335,22 @@
         }
       }
     },
+    "Try again" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторить"
+          }
+        }
+      }
+    },
     "Type" : {
       "localizations" : {
         "en" : {
@@ -7557,6 +7411,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Убрать из избранного"
+          }
+        }
+      }
+    },
+    "Unnamed contact" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unnamed contact"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Контакт без имени"
           }
         }
       }
@@ -7675,7 +7545,20 @@
       }
     },
     "Variables" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variables"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Варианты"
+          }
+        }
+      }
     },
     "Variant" : {
       "localizations" : {
@@ -7807,23 +7690,6 @@
         }
       }
     },
-    "View details" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View details"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Просмотреть детали"
-          }
-        }
-      }
-    },
     "Visibility" : {
       "localizations" : {
         "en" : {
@@ -7873,23 +7739,6 @@
         }
       }
     },
-    "Work" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Work"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Работа"
-          }
-        }
-      }
-    },
     "Work anniversary" : {
       "localizations" : {
         "en" : {
@@ -7902,22 +7751,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Годовщина работы"
-          }
-        }
-      }
-    },
-    "Fresh words for every occasion" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fresh words for every occasion"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Новые слова для каждого повода"
           }
         }
       }
